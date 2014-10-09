@@ -14,11 +14,11 @@ month <- function(x, time){
   if (length(dim(x)) == 2){
     xout <- tapply(x, datstr, mean, na.rm=T)
     if (length(xout) != nmon*nyears) stop('Number of months per year not stable')
-    xout <- array(xout[datstr], c(nmon, nyears))
+    xout <- array(xout[unique(datstr)], c(nmon, nyears))
   } else {
     xout <- apply(x, 3, tapply, datstr, mean, na.rm=T)
     if (nrow(xout) != nmon*nyears) stop('Number of months per year not stable')
-    xout <- array(xout[datstr, ], c(nmon, nyears, dim(x)[3]))
+    xout <- array(xout[unique(datstr), ], c(nmon, nyears, dim(x)[3]))
   }
   rownames(xout) <- unique(gsub('.* ', '', datstr))
   return(xout)
