@@ -32,7 +32,7 @@ qqmap <- function(fcst, obs, fcst.out=fcst, span=min(1, 31/nrow(fcst)), ...){
   fcst.sd <- sqrt(rowMeans((fcst - fcst.clim)**2, dims=1, na.rm=T))
   fcst.sdsmooth <- loess(fcst.sd ~ seq(along=fcst.sd), span=span)$fit
   ## compute quantile-quantile mapping
-  fcst.quant <- pnorm(fcst, mean=fcst.clim, sd=fcst.sdsmooth)
+  fcst.quant <- pnorm(fcst.out, mean=fcst.clim, sd=fcst.sdsmooth)
   fcst.debias <- qnorm(fcst.quant, mean=obs.clim, sd=obs.sdsmooth)
   
   
