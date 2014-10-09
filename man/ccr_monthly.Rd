@@ -3,7 +3,8 @@
 \alias{ccr_monthly}
 \title{ccr_monthly}
 \usage{
-ccr_monthly(fcst, obs, fcst.out = fcst, fc.time, fcout.time = fc.time, ...)
+ccr_monthly(fcst, obs, fcst.out = fcst, fc.time, fcout.time = fc.time,
+  span = min(1, 31/nrow(fcst)), ...)
 }
 \arguments{
 \item{fcst}{array of forecast values (nyear, nlead, nens)}
@@ -18,10 +19,22 @@ should be applied (defaults to \code{fcst})}
 \item{fcout.time}{forecast time for array to which bias correction is applied
 for back compatibility with leave-one-out cross-validation in \code{\link{debias}}}
 
+\item{span}{the parameter which controls the degree of smoothing (see \code{\link{loess}})}
+
 \item{...}{additional arguments for compatibility with other bias correction methods}
 }
 \description{
 Computes climate conserving recalibration on smoothed monthly means
+}
+\examples{
+fcst <- array(rnorm(30*215*51, mean=1, sd=rep(seq(0.5,2, length=30), each=215)),
+c(215, 30, 51)) + 0.5*sin(seq(0,4,length=215))
+obs <- array(rnorm(30*215, mean=2), c(215, 30)) + sin(seq(0,4, length=215))
+fc.time <- outer(1:215, 1981:2010, function(x,y) as.Date(paste0(y, '-11-01')) - 1 + x)
+fcst.debias <- ccr_monthly(fcst, obs, fc.time=fc.time, span=0.5)
+fcst.mon <- month(fcst, fc.time)
+obs.mon <- month(obs, fc.time)
+fcst.mondebias <- month(fcst.debias, fc.time)
 }
 \keyword{util}
 

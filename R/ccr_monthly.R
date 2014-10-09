@@ -9,11 +9,22 @@
 #' @param fc.time forecast times as R-dates for monthly aggregation
 #' @param fcout.time forecast time for array to which bias correction is applied
 #' for back compatibility with leave-one-out cross-validation in \code{\link{debias}}
+#' @param span the parameter which controls the degree of smoothing (see \code{\link{loess}})
 #' @param ... additional arguments for compatibility with other bias correction methods
+#' 
+#' @examples
+#' fcst <- array(rnorm(30*215*51, mean=1, sd=rep(seq(0.5,2, length=30), each=215)), 
+#' c(215, 30, 51)) + 0.5*sin(seq(0,4,length=215))
+#' obs <- array(rnorm(30*215, mean=2), c(215, 30)) + sin(seq(0,4, length=215))
+#' fc.time <- outer(1:215, 1981:2010, function(x,y) as.Date(paste0(y, '-11-01')) - 1 + x)
+#' fcst.debias <- ccr_monthly(fcst, obs, fc.time=fc.time, span=0.5)
+#' fcst.mon <- month(fcst, fc.time)
+#' obs.mon <- month(obs, fc.time)
+#' fcst.mondebias <- month(fcst.debias, fc.time)
 #' 
 #' @keywords util
 #' @export
-ccr_monthly <- function(fcst, obs, fcst.out=fcst, fc.time, fcout.time=fc.time, ...){
+ccr_monthly <- function(fcst, obs, fcst.out=fcst, fc.time, fcout.time=fc.time, span=min(1, 31/nrow(fcst)), ...){
   if (length(fcout.time) != length(fcst.out[,,1])) {
     stop('Time (fcout.time) is not of correct dimension/length')
   }
@@ -25,13 +36,23 @@ ccr_monthly <- function(fcst, obs, fcst.out=fcst, fc.time, fcout.time=fc.time, .
   obs.mon <- month(obs, fc.time[seq(obs)])
   
   ## compute climatologies
-  fcst.clim <- rowMeans(fcst.mon, dims=1, na.rm=T)
-  obs.clim <- rowMeans(obs.mon, dims=1, na.rm=T)
+  fcst.ens <- rowMeans(fcst, dims=2)
+  fcst.ens[is.na(obs)] <- NA
+  fcst.mn <- rowMeans(fcst.ens, dims=1, na.rm=T)
+  obs.mn <- rowMeans(obs, dims=1, na.rm=T)
+  fcst.clim <- loess(fcst.mn ~ seq(along=fcst.mn), span=span)$fit
+  obs.clim <- loess(obs.mn ~ seq(along=obs.mn), span=span)$fit  
+  fcst.monclim <- rowMeans(fcst.mon, dims=1, na.rm=T)
+  obs.monclim <- rowMeans(obs.mon, dims=1, na.rm=T)
+  ## additional monthly bias to assure monthly means fit
+  monbias <- rowMeans(month(fcst.ens - obs - (fcst.clim - obs.clim), 
+                            fc.time[seq(along=fcst.ens)]), 
+                      dims=1, na.rm=T)
   
   ## compute ccr_monthly prerequisites (Notation as in Weigel et al. 2009)
-  x <- obs.mon - obs.clim
+  x <- obs.mon - obs.monclim
   sig_x <- sqrt(apply(x**2, 1, mean))
-  fi <- fcst.mon - fcst.clim
+  fi <- fcst.mon - fcst.monclim
   mu_f <- rowMeans(fi, dims=2)
   sig_mu <- sqrt(apply(mu_f**2, 1, mean))
   sig_ens <- sqrt(apply(apply(fi, 1:2, sd)**2, 1, mean))
@@ -41,10 +62,14 @@ ccr_monthly <- function(fcst, obs, fcst.out=fcst, fc.time, fcout.time=fc.time, .
   
   ## put everything back together
   monstr.out <- format(fcout.time, '%m')
-  fi_out <- fcst.out - fcst.clim[monstr.out]
+  fi_out <- fcst.out - fcst.clim
   mu_fout <- rowMeans(fi_out, dims=2)
-  fi_ccr <- as.vector(rr[monstr.out]*mu_fout) + 
+  mu_fout.mon <- month(mu_fout, fcout.time)
+  ## fix to be able to get the correct index out
+  colnames(mu_fout.mon) <- as.character(1:ncol(mu_fout.mon))
+  ind <- cbind(monstr.out, rep(1:ncol(mu_fout.mon), each=nrow(mu_fout)))
+  fi_ccr <- (rr*mu_fout.mon)[ind] + 
     ss[monstr.out]*(fi_out - as.vector(mu_fout)) + 
-    obs.clim[monstr.out]
+    obs.clim - monbias[monstr.out]
   return(fi_ccr)
 }
