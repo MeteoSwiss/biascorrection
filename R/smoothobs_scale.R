@@ -24,9 +24,9 @@ smoothobs_scale <- function(fcst, obs, fcst.out=fcst, span=min(1, 31/nrow(fcst))
   fcst.ens[is.na(obs)] <- NA
   fcst.mn <- rowMeans(fcst.ens, dims=1, na.rm=T)
   obs.mn <- rowMeans(obs, dims=1, na.rm=T)
-  obs.clim <- loess(obs.mn ~ seq(along=obs.mn), span=span)$fit
+  obs.clim <- sloess(obs.mn, span=span)
   obs.sd <- apply(obs, 1, sd, na.rm=T)
-  obs.sdsmooth <- loess(obs.sd ~ seq(along=obs.sd), span=span)$fit
+  obs.sdsmooth <- sloess(obs.sd, span=span)
   fcst.sd <- apply(fcst, 1, sd, na.rm=T)
   fcst.debias <- (fcst.out - fcst.mn) * obs.sdsmooth / fcst.sd + obs.clim
   return(fcst.debias)

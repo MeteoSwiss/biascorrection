@@ -24,13 +24,13 @@ qqmap <- function(fcst, obs, fcst.out=fcst, span=min(1, 31/nrow(fcst)), ...){
   fcst.ens[is.na(obs)] <- NA
   fcst.mn <- rowMeans(fcst.ens, dims=1, na.rm=T)
   obs.mn <- rowMeans(obs, dims=1, na.rm=T)
-  fcst.clim <- loess(fcst.mn ~ seq(along=fcst.mn), span=span)$fit
-  obs.clim <- loess(obs.mn ~ seq(along=obs.mn), span=span)$fit
+  fcst.clim <- sloess(fcst.mn, span=span)
+  obs.clim <- sloess(obs.mn, span=span)
   ## compute standard deviation
   obs.sd <- sqrt(rowMeans((obs - obs.clim)**2, dims=1, na.rm=T))
-  obs.sdsmooth <- loess(obs.sd ~ seq(along=obs.sd), span=span)$fit
+  obs.sdsmooth <- sloess(obs.sd, span=span)
   fcst.sd <- sqrt(rowMeans((fcst - fcst.clim)**2, dims=1, na.rm=T))
-  fcst.sdsmooth <- loess(fcst.sd ~ seq(along=fcst.sd), span=span)$fit
+  fcst.sdsmooth <- sloess(fcst.sd, span=span)
   ## compute quantile-quantile mapping
   fcst.quant <- pnorm(fcst.out, mean=fcst.clim, sd=fcst.sdsmooth)
   fcst.debias <- qnorm(fcst.quant, mean=obs.clim, sd=obs.sdsmooth)

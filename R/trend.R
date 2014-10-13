@@ -42,7 +42,7 @@ trend <- function(fcst, obs, fcst.out=fcst, fc.time, fcout.time=fc.time, span=mi
   fcst.ens[is.na(obs)] <- NA
   fcst.clim <- rowMeans(fcst.ens, dims=1, na.rm=T)
   obs.mn <- rowMeans(obs, dims=1, na.rm=T)
-  obs.clim <- loess(obs.mn ~ seq(along=obs.mn), span=span)$fit
+  obs.clim <- sloess(obs.mn, span=span)
   bias <- fcst.clim - obs.clim
   
   ## compute smoothing for bias in both lead time and fcst year

@@ -40,8 +40,8 @@ ccr_monthly <- function(fcst, obs, fcst.out=fcst, fc.time, fcout.time=fc.time, s
   fcst.ens[is.na(obs)] <- NA
   fcst.mn <- rowMeans(fcst.ens, dims=1, na.rm=T)
   obs.mn <- rowMeans(obs, dims=1, na.rm=T)
-  fcst.clim <- loess(fcst.mn ~ seq(along=fcst.mn), span=span)$fit
-  obs.clim <- loess(obs.mn ~ seq(along=obs.mn), span=span)$fit  
+  fcst.clim <- sloess(fcst.mn, span=span)
+  obs.clim <- sloess(obs.mn, span=span)  
   fcst.monclim <- rowMeans(fcst.mon, dims=1, na.rm=T)
   obs.monclim <- rowMeans(obs.mon, dims=1, na.rm=T)
   ## additional monthly bias to assure monthly means fit

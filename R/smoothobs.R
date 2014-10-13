@@ -16,6 +16,6 @@ smoothobs <- function(fcst, obs, fcst.out=fcst, span=min(1, 31/nrow(fcst)), ...)
   fcst.ens[is.na(obs)] <- NA
   fcst.mn <- rowMeans(fcst.ens, dims=1, na.rm=T)
   obs.mn <- rowMeans(obs, dims=1, na.rm=T)
-  obs.clim <- loess(obs.mn ~ seq(along=obs.mn), span=span)$fit
+  obs.clim <- sloess(obs.mn, span=span)
   return(fcst.out - fcst.mn + obs.clim)
 }

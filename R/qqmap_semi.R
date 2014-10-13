@@ -29,10 +29,10 @@
 qqmap_semi <- function(fcst, obs, fcst.out=fcst, span=min(1, 31/nrow(fcst)), ...){
   ## compute climatology of obs
   obs.mn <- rowMeans(obs, dims=1, na.rm=T)
-  obs.clim <- loess(obs.mn ~ seq(along=obs.mn), span=span)$fit
+  obs.clim <- sloess(obs.mn, span=span)
   ## compute standard deviation
   obs.sd <- sqrt(rowMeans((obs - obs.clim)**2, dims=1, na.rm=T))
-  obs.sdsmooth <- loess(obs.sd ~ seq(along=obs.sd), span=span)$fit
+  obs.sdsmooth <- sloess(obs.sd, span=span)
   ## compute quantile-quantile mapping
   ## fcst.quant <- pnorm(fcst.out, mean=fcst.clim, sd=fcst.sdsmooth)
   fcst.rank <- array(t(apply(fcst.out, 1, rank)), dim(fcst.out))

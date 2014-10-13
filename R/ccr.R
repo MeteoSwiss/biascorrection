@@ -17,8 +17,8 @@ ccr <- function(fcst, obs, fcst.out=fcst, span=min(1, 31/nrow(fcst)), ...){
   ## compute climatology
   fcst.mn <- rowMeans(fcst.ens, dims=1, na.rm=T)
   obs.mn <- rowMeans(obs, dims=1, na.rm=T)
-  fcst.clim <- loess(fcst.mn ~ seq(along=fcst.mn), span=span)$fit
-  obs.clim <- loess(obs.mn ~ seq(alon=obs.mn), span=span)$fit
+  fcst.clim <- sloess(fcst.mn, span=span)
+  obs.clim <- sloess(obs.mn, span=span)
   
   ## compute CCR prerequisites (Notation as in Weigel et al. 2009)
   x <- obs - obs.clim
