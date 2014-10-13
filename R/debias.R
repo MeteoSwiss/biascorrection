@@ -39,11 +39,11 @@ debias <- function(fcst, obs, method='unbias', crossval=FALSE, fcst.out=fcst, fc
   if (crossval){
     fcst.debias <- array(NA, dim(fcst.out))
     for (i in 1:ncol(fcst)){
-      fcst.debias[,i,] <- dfun(fcst=fcst[,-i,], 
-                               obs=obs[,-i], 
-                               fcst.out=fcst.out[,i,,drop=F], 
-                               fc.time=if (is.null(fc.time)) NULL else fc.time[,-i], 
-                               fcout.time=if (is.null(fc.time)) NULL else fc.time[,i,drop=F],
+      fcst.debias[,i,] <- dfun(fcst=fcst[,-i,,drop=FALSE], 
+                               obs=obs[,-i,drop=FALSE], 
+                               fcst.out=fcst.out[,i,,drop=FALSE], 
+                               fc.time=if (is.null(fc.time)) NULL else fc.time[,-i,drop=FALSE], 
+                               fcout.time=if (is.null(fc.time)) NULL else fc.time[,i,drop=FALSE],
                                ...)
     }
     ## compute the bias for the remaining years from full set
@@ -53,8 +53,8 @@ debias <- function(fcst, obs, method='unbias', crossval=FALSE, fcst.out=fcst, fc
       fcst.debias[,ii,] <- dfun(fcst=fcst, 
                                 obs=obs, 
                                 fcst.out=fcst.out[,ii,,drop=F], 
-                                fc.time=if (is.null(fc.time)) NULL else fc.time[,1:ncol(fcst)], 
-                                fcout.time=if (is.null(fc.time)) NULL else fc.time[,ii,drop=F], 
+                                fc.time=if (is.null(fc.time)) NULL else fc.time[,1:ncol(fcst),drop=FALSE], 
+                                fcout.time=if (is.null(fc.time)) NULL else fc.time[,ii,drop=FALSE], 
                                 ...)
     }
   } else {
