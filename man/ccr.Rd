@@ -20,5 +20,15 @@ should be applied (defaults to \code{fcst})}
 \description{
 Computes climate conserving recalibration on smoothed monthly means
 }
+\examples{
+fcst <- array(rnorm(3000*1*51, mean=1, sd=rep(seq(0.5,2, length=3000), each=1)),
+c(1, 3000, 51)) + 0.5*sin(seq(0,4,length=1))
+obs <- array(rnorm(3000, mean=2), c(1, 3000)) + sin(seq(0,4, length=1))
+fcst.debias <- ccr(fcst, obs, span=0.5)
+f.rmse <- sqrt(apply((obs - apply(fcst.debias, 2, mean))**2, 1, mean))
+f.sd <- sqrt(mean(apply(fcst.debias, 2, sd)**2))
+f.sd / f.rmse
+bias <- mean(fcst.debias - obs[1,])
+}
 \keyword{util}
 
