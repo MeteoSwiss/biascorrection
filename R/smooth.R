@@ -10,7 +10,6 @@
 #' @param ... additional arguments for compatibility with other bias correction methods
 #' 
 #' @keywords util
-#' @export
 smooth <- function(fcst, obs, fcst.out=fcst, span=min(1, 31/nrow(fcst)), ...){
   fcst.ens <- rowMeans(fcst, dims=2)
   fcst.ens[is.na(obs)] <- NA

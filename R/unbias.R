@@ -9,7 +9,6 @@
 #' @param ... additional arguments for compatibility with other bias correction methods
 #' 
 #' @keywords util
-#' @export
 unbias <- function(fcst, obs, fcst.out=fcst, ...){
   fcst.ens <- rowMeans(fcst, dims=2)
   fcst.ens[is.na(obs)] <- NA

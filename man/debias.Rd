@@ -3,8 +3,8 @@
 \alias{debias}
 \title{debias}
 \usage{
-debias(fcst, obs, method = "unbias", crossval = FALSE, fcst.out = fcst,
-  fc.time = NULL, ...)
+debias(fcst, obs, method = "unbias", crossval = FALSE, blocklength = 5,
+  fcst.out = fcst, fc.time = NULL, ...)
 }
 \arguments{
 \item{fcst}{array of forecast values (nlead, nyear, nens)}
@@ -13,7 +13,11 @@ debias(fcst, obs, method = "unbias", crossval = FALSE, fcst.out = fcst,
 
 \item{method}{character string with bias correction method name}
 
-\item{crossval}{logical, should leave-one-out crossvalidation be used (see details)?}
+\item{crossval}{logical, should leave-one-out crossvalidation be used
+(see details)?}
+
+\item{blocklength}{block length for moving blocks cross-validation
+(defaults to 5)}
 
 \item{fcst.out}{array of forecast values to which bias correction
 should be applied (defaults to \code{fcst})}

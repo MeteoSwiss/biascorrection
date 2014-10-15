@@ -33,7 +33,7 @@ fcst <- array(runif(215*30*51), c(215, 30, 51)) +
 0.5*sin(seq(0,4,length=215))
 obs <- array(rnorm(215*30, mean=2), c(215, 30)) +
 sin(seq(0,4, length=215))
-fcst.debias <- qqmap_semi(fcst[,1:20,], obs[,1:20], fcst.out=fcst, span=0.5)
+fcst.debias <- biascorrection:::qqmap_semi(fcst[,1:20,], obs[,1:20], fcst.out=fcst, span=0.5)
 }
 \keyword{util}
 

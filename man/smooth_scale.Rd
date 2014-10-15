@@ -26,7 +26,7 @@ fcst <- array(rnorm(215*30*51, mean=3, sd=0.2), c(215, 30, 51)) +
 0.5*sin(seq(0,4,length=215))
 obs <- array(rnorm(215*30, mean=2), c(215, 30)) +
 sin(seq(0,4, length=215))
-fcst.debias <- smooth_scale(fcst[,1:20,], obs[,1:20], fcst.out=fcst, span=0.5)
+fcst.debias <- biascorrection:::smooth_scale(fcst[,1:20,], obs[,1:20], fcst.out=fcst, span=0.5)
 }
 \keyword{util}
 

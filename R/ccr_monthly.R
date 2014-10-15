@@ -17,13 +17,12 @@
 #' c(215, 30, 51)) + 0.5*sin(seq(0,4,length=215))
 #' obs <- array(rnorm(30*215, mean=2), c(215, 30)) + sin(seq(0,4, length=215))
 #' fc.time <- outer(1:215, 1981:2010, function(x,y) as.Date(paste0(y, '-11-01')) - 1 + x)
-#' fcst.debias <- ccr_monthly(fcst, obs, fc.time=fc.time, span=0.5)
+#' fcst.debias <- biascorrection:::ccr_monthly(fcst, obs, fc.time=fc.time, span=0.5)
 #' fcst.mon <- month(fcst, fc.time)
 #' obs.mon <- month(obs, fc.time)
 #' fcst.mondebias <- month(fcst.debias, fc.time)
 #' 
 #' @keywords util
-#' @export
 ccr_monthly <- function(fcst, obs, fcst.out=fcst, fc.time, fcout.time=fc.time, span=min(1, 31/nrow(fcst)), ...){
   if (length(fcout.time) != length(fcst.out[,,1])) {
     stop('Time (fcout.time) is not of correct dimension/length')

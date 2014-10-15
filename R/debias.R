@@ -5,7 +5,10 @@
 #' @param fcst array of forecast values (nlead, nyear, nens)
 #' @param obs array of observations (nlead, nyear)
 #' @param method character string with bias correction method name
-#' @param crossval logical, should leave-one-out crossvalidation be used (see details)?
+#' @param crossval logical, should leave-one-out crossvalidation be used 
+#' (see details)?
+#' @param blocklength block length for moving blocks cross-validation 
+#' (defaults to 5)
 #' @param fcst.out array of forecast values to which bias correction
 #' should be applied (defaults to \code{fcst})
 #' @param fc.time forecast dates of class 'Date' (for monthly correction, 
@@ -30,7 +33,7 @@
 #' 
 #' @keywords util
 #' @export
-debias <- function(fcst, obs, method='unbias', crossval=FALSE, fcst.out=fcst, fc.time=NULL, ...){
+debias <- function(fcst, obs, method='unbias', crossval=FALSE, blocklength=5, fcst.out=fcst, fc.time=NULL, ...){
   ## get name of bias correction function
   dfun <- try(get(method), silent=TRUE)
   if (class(dfun) == 'try-error') stop('Bias correction method has not been implemented yet')
@@ -38,12 +41,14 @@ debias <- function(fcst, obs, method='unbias', crossval=FALSE, fcst.out=fcst, fc
   ## apply bias correction function
   if (crossval){
     fcst.debias <- array(NA, dim(fcst.out))
-    for (i in 1:ncol(fcst)){
-      fcst.debias[,i,] <- dfun(fcst=fcst[,-i,,drop=FALSE], 
-                               obs=obs[,-i,drop=FALSE], 
-                               fcst.out=fcst.out[,i,,drop=FALSE], 
-                               fc.time=if (is.null(fc.time)) NULL else fc.time[,-i,drop=FALSE], 
-                               fcout.time=if (is.null(fc.time)) NULL else fc.time[,i,drop=FALSE],
+    ## figure out number of blocks
+    for (i in seq(1, ncol(fcst), blocklength)){
+      ii <- seq(i, min(i+blocklength - 1, ncol(fcst)))
+      fcst.debias[,ii,] <- dfun(fcst=fcst[,-ii,,drop=FALSE], 
+                               obs=obs[,-ii,drop=FALSE], 
+                               fcst.out=fcst.out[,ii,,drop=FALSE], 
+                               fc.time=if (is.null(fc.time)) NULL else fc.time[,-ii,drop=FALSE], 
+                               fcout.time=if (is.null(fc.time)) NULL else fc.time[,ii,drop=FALSE],
                                ...)
     }
     ## compute the bias for the remaining years from full set

@@ -40,7 +40,8 @@ obs <- array(rnorm(215*30, mean=2), c(215, 30)) +
 sin(seq(0,4, length=215)) +
 rep(seq(0,3,length=30), each=215)
 fc.time <- outer(1:215, 1981:2010, function(x,y) as.Date(paste0(y, '-11-01')) - 1 + x)
-fcst.debias <- trend(fcst[,1:20,], obs[,1:20], fcst.out=fcst, fc.time=fc.time, span=0.5)
+fcst.debias <- biascorrection:::trend(fcst[,1:20,],
+obs[,1:20], fcst.out=fcst, fc.time=fc.time, span=0.5)
 }
 \keyword{util}
 
