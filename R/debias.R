@@ -2,8 +2,8 @@
 #' 
 #' Applies bias correction derived from forecast and observation data to forecast data set
 #' 
-#' @param fcst array of forecast values (nlead, nyear, nens)
-#' @param obs array of observations (nlead, nyear)
+#' @param fcst n x m x k array of n lead times, m forecasts, of k ensemble members
+#' @param obs n x m matrix of veryfing observations
 #' @param method character string with bias correction method name
 #' @param crossval logical, should leave-one-out crossvalidation be used 
 #' (see details)?
@@ -16,11 +16,11 @@
 #' @param ... additional arguments passed to bias correction methods
 #' 
 #' @details
-#' If \code{crossval} is set to \code{TRUE}, the debiasing for year \code{i} is computed
-#' based on the forecast and observation data set excluding year \code{i}. If, in addition,
-#' there are more years in the output set \code{fcst.out} than in the input set \code{fcst},
-#' the bias correction for the remaining years in \code{fcst.out} is computed based on all 
-#' years in \code{fcst}.
+#' If \code{crossval} is set to \code{TRUE}, the debiasing for years in block \code{i} are
+#' computed based on the forecast and observation data set excluding years in block \code{i}. 
+#' If, in addition, there are more years in the output set \code{fcst.out} than in the input 
+#' set \code{fcst}, the bias correction for the remaining years in \code{fcst.out} is computed 
+#' based on all years in \code{fcst}.
 #' 
 #' @examples
 #' ## initialise forcast observation pairs

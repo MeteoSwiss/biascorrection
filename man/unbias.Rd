@@ -6,9 +6,9 @@
 unbias(fcst, obs, fcst.out = fcst, ...)
 }
 \arguments{
-\item{fcst}{array of forecast values (nyear, nlead, nens)}
+\item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble members}
 
-\item{obs}{array of observations (nyear, nlead)}
+\item{obs}{n x m matrix of veryfing observations}
 
 \item{fcst.out}{array of forecast values to which bias correction
 should be applied (defaults to \code{fcst})}
