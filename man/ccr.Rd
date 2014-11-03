@@ -3,28 +3,26 @@
 \alias{ccr}
 \title{ccr}
 \usage{
-ccr(fcst, obs, fcst.out = fcst, span = min(1, 31/nrow(fcst)), ...)
+ccr(fcst, obs, fcst.out = fcst, ...)
 }
 \arguments{
-\item{fcst}{array of forecast values (nyear, nlead, nens)}
+\item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble members}
 
-\item{obs}{array of observations (nyear, nlead)}
+\item{obs}{n x m matrix of veryfing observations}
 
 \item{fcst.out}{array of forecast values to which bias correction
 should be applied (defaults to \code{fcst})}
 
-\item{span}{the parameter which controls the degree of smoothing (see \code{\link{loess}})}
-
 \item{...}{additional arguments for compatibility with other bias correction methods}
 }
 \description{
-Computes climate conserving recalibration on smoothed monthly means
+Computes climate conserving recalibration
 }
 \examples{
 fcst <- array(rnorm(3000*1*51, mean=1, sd=rep(seq(0.5,2, length=3000), each=1)),
 c(1, 3000, 51)) + 0.5*sin(seq(0,4,length=1))
 obs <- array(rnorm(3000, mean=2), c(1, 3000)) + sin(seq(0,4, length=1))
-fcst.debias <- biascorrection:::ccr(fcst, obs, span=0.5)
+fcst.debias <- biascorrection:::ccr(fcst, obs)
 f.rmse <- sqrt(apply((obs - apply(fcst.debias, 2, mean))**2, 1, mean))
 f.sd <- sqrt(mean(apply(fcst.debias, 2, sd)**2))
 f.sd / f.rmse
