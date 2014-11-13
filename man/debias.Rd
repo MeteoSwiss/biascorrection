@@ -4,7 +4,8 @@
 \title{debias}
 \usage{
 debias(fcst, obs, method = "unbias", crossval = FALSE, blocklength = 5,
-  fcst.out = fcst, fc.time = NULL, ...)
+  forward = FALSE, fcst.out = fcst, fc.time = NULL,
+  fcout.time = fc.time, ...)
 }
 \arguments{
 \item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble members}
@@ -19,10 +20,15 @@ debias(fcst, obs, method = "unbias", crossval = FALSE, blocklength = 5,
 \item{blocklength}{block length for moving blocks cross-validation
 (defaults to 5)}
 
+\item{forward}{logical, should only past hindcasts be used for calibration?}
+
 \item{fcst.out}{array of forecast values to which bias correction
 should be applied (defaults to \code{fcst})}
 
 \item{fc.time}{forecast dates of class 'Date' (for monthly correction,
+see \code{\link{monthly}})}
+
+\item{fcout.time}{forecast dates of class 'Date' (for monthly correction,
 see \code{\link{monthly}})}
 
 \item{...}{additional arguments passed to bias correction methods}
