@@ -1,7 +1,7 @@
 Package: biascorrection
 Title: Computes bias corrected seasonal forecasts
-Date: 2014-11-13
-Version: 0.4
+Date: 2014-11-20
+Version: 0.4.1
 Authors@R: "Jonas Bhend <jonas.bhend@gmx.ch> [aut, cre]"
 Description: Collection of functions to de-bias daily ensemble forecasts.
     This package includes a variety of functions with a focus on ease-of-use
