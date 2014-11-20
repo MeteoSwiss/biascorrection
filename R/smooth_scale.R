@@ -2,8 +2,8 @@
 #' 
 #' Computes mean de-biasing with loess smoothing and adjusts variance
 #' 
-#' @param fcst array of forecast values (nyear, nlead, nens)
-#' @param obs array of observations (nyear, nlead)
+#' @param fcst n x m x k array of n lead times, m forecasts, of k ensemble members
+#' @param obs n x m matrix of veryfing observations
 #' @param fcst.out array of forecast values to which bias correction
 #' should be applied (defaults to \code{fcst})
 #' @param span the parameter which controls the degree of smoothing (see \code{\link{loess}})
