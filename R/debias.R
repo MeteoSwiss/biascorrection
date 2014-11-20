@@ -76,8 +76,8 @@ debias <- function(fcst, obs, method='unbias', crossval=FALSE, blocklength=5, fo
     fcst.debias <- array(fcst.out, dim(fcst.out))
     ## loop through n-years of forecasts to debias all the forecast in year i
     ## with all the forecasts before year i. The first forecast is not debiased at all.
-    if (ncol(fcst.out) > 1){
-      for (i in 2:ncol(fcst.out)){
+    if (ncol(fcst.out) > 5){
+      for (i in 5:ncol(fcst.out)){
         fcst.debias[,i,] <- dfun(fcst=fcst[,seq(1,i-1),, drop=FALSE],
                                  obs=obs[,seq(1,i-1),drop=FALSE],
                                  fcst.out=fcst.out[,i,,drop=FALSE],
