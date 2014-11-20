@@ -27,8 +27,8 @@ obs <- array(rnorm(3000, mean=2), c(1, 3000)) + sin(seq(0,4, length=1))
 fcst.debias <- biascorrection:::ccr(fcst, obs, span=0.5)
 f.rmse <- sqrt(apply((obs - apply(fcst.debias, 2, mean))**2, 1, mean))
 f.sd <- sqrt(mean(apply(fcst.debias, 2, sd)**2))
-f.sd / f.rmse
-bias <- mean(fcst.debias - obs[1,])
+f.sd / f.rmse ## should be exactly 1
+mean(fcst.debias - obs[1,]) ## should be 0 (rounding errors)
 }
 \keyword{util}
 
