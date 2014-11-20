@@ -35,7 +35,7 @@ ccr <- function(fcst, obs, fcst.out=fcst, ...){
   sig_ens <- sqrt(apply(apply(fi, 1:2, sd)**2, 1, mean))
   rho <- diag(cor(t(mu_f), t(x)))
   rr <- rho*sig_x / sig_mu
-  ss <- sqrt(1 - rho**2) * sig_x / sig_ens
+  ss <- sqrt(1 - rho**2) * sig_x / pmax(sig_ens, 1e-12)
   ## put everything back together (with de-biasing)
   fi_out <- fcst.out - fcst.clim
   mu_fout <- rowMeans(fi_out, dims=2)
