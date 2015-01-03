@@ -1,4 +1,4 @@
-#' initial
+#' Bias dependent on initial condition
 #' 
 #' Computes mean de-biasing in dependence of initial conditions
 #' 

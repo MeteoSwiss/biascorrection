@@ -1,4 +1,4 @@
-#' unbias
+#' Simple mean de-biasing (no smoothing)
 #' 
 #' Computes simple mean de-biasing
 #' 

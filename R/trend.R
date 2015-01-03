@@ -1,4 +1,4 @@
-#' trend 
+#' Bias with linear time trend
 #' 
 #' Computes mean de-biasing with linear time trend
 #' 
@@ -13,9 +13,9 @@
 #' @param ... additional arguments for compatibility with other bias correction methods
 #' 
 #' @details
-#' This bias correction method assumes that the bias can be decomposed into a stationary
-#' seasonal cycle (as in method \code{\link{smoothobs}}) and a linear time trend estimated
-#' from the residuals.
+#' This bias correction method assumes that the bias can be decomposed 
+#' into a stationary seasonal cycle (as in method \code{\link{smoothobs}}) 
+#' and a linear time trend estimated from the residuals.
 #' 
 #' @examples
 #' ## initialise forcast observation pairs
@@ -40,13 +40,15 @@ trend <- function(fcst, obs, fcst.out=fcst, fc.time, fcout.time=fc.time, span=mi
   }
   fcst.ens <- rowMeans(fcst, dims=2)
   fcst.ens[is.na(obs)] <- NA
-  fcst.clim <- rowMeans(fcst.ens, dims=1, na.rm=T)
+  fcst.mn <- rowMeans(fcst.ens, dims=1, na.rm=T)
+  fcst.clim <- sloess(fcst.mn, span=span)
   obs.mn <- rowMeans(obs, dims=1, na.rm=T)
   obs.clim <- sloess(obs.mn, span=span)
-  bias <- fcst.clim - obs.clim
+  ## bias <- fcst.clim - obs.clim
   
   ## compute smoothing for bias in both lead time and fcst year
-  anom <- fcst.ens - obs - bias
+  ## anom <- fcst.ens - obs - bias
+  anom <- fcst.ens - obs - fcst.clim + obs.clim
   lead <- rep(1:nrow(anom), ncol(anom))
   year <- rep(as.numeric(format(fc.time[1,seq(1,ncol(fcst))], '%Y')), each=nrow(fcst))
   anom.lm <- lm(as.vector(anom) ~ poly(lead, 2)*year)
@@ -54,7 +56,9 @@ trend <- function(fcst, obs, fcst.out=fcst, fc.time, fcout.time=fc.time, span=mi
   ## compute debiased forecast
   leadout <- rep(1:nrow(fcst.out), ncol(fcst.out))
   yearout <- rep(as.numeric(format(fcout.time[1,], '%Y')), each=nrow(fcst.out))
-  fcst.debias <- fcst.out - predict(anom.lm, newdata=list(lead=leadout, year=yearout)) - bias
+  fcst.debias <- fcst.out - 
+    predict(anom.lm, newdata=list(lead=leadout, year=yearout)) +
+    obs.clim - fcst.clim
 
   return(fcst.debias)
 }

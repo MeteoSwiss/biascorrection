@@ -1,14 +1,16 @@
 Package: biascorrection
-Title: Computes bias corrected seasonal forecasts
-Date: 2014-11-20
-Version: 0.4.1
+Title: Bias correct daily ensemble forecasts
+Date: 2015-01-03
+Version: 0.4.2
 Authors@R: "Jonas Bhend <jonas.bhend@gmx.ch> [aut, cre]"
-Description: Collection of functions to de-bias daily ensemble forecasts.
+Description: Collection of functions to bias correct daily ensemble forecasts.
     This package includes a variety of functions with a focus on ease-of-use
-    rather than performance when applied to large datasets. Accordingly,
+    rather than performance when applied to large datasets. Consequently,
     specific functions will have to be implemented separately to be applicable
     in an operational setting.
-Depends:
+Depends: 
     R (>= 3.0.1)
 License: GPL-3
 LazyData: true
+Suggests: knitr
+VignetteBuilder: knitr

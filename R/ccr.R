@@ -1,6 +1,7 @@
-#' ccr
+#' Climate conserving recalibration
 #' 
-#' Computes climate conserving recalibration
+#' Climate conserving recalibration with correction factors for each lead 
+#' time without smoothing (application to daily series not recommended).
 #' 
 #' @param fcst n x m x k array of n lead times, m forecasts, of k ensemble members
 #' @param obs n x m matrix of veryfing observations

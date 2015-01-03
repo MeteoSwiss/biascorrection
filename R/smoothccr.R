@@ -1,6 +1,7 @@
-#' smoothccr
+#' Daily CCR with smoothed parameters
 #' 
-#' Computes climate conserving recalibration on daily data with smoothing for climatology
+#' Computes climate conserving recalibration on daily data with 
+#' smoothing for climatology (experimental)
 #' 
 #' @param fcst n x m x k array of n lead times, m forecasts, of k ensemble members
 #' @param obs n x m matrix of veryfing observations

@@ -1,4 +1,4 @@
-#' smoothobs
+#' Smooth mean (obs. only) de-biasing
 #' 
 #' Computes mean de-biasing with loess smoothing
 #' 

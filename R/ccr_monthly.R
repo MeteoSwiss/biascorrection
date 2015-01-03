@@ -1,4 +1,4 @@
-#' ccr_monthly
+#' Daily CCR with monthly correction factors
 #' 
 #' Computes climate conserving recalibration on smoothed monthly means
 #' 

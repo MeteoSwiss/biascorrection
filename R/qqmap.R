@@ -1,39 +1,58 @@
-#' qqmap
+#' Quantile mapping
 #' 
-#' Computes bias correction with parametric quantile mapping
+#' Computes bias correction with quantile mapping
 #' 
 #' @param fcst n x m x k array of n lead times, m forecasts, of k ensemble members
 #' @param obs n x m matrix of veryfing observations
 #' @param fcst.out array of forecast values to which bias correction
 #' should be applied (defaults to \code{fcst})
-#' @param span the parameter which controls the degree of qqmaping (see \code{\link{loess}})
 #' @param ... additional arguments for compatibility with other bias correction methods
 #' 
 #' @examples
 #' ## initialise forcast observation pairs
-#' fcst <- array(rnorm(215*30*51, mean=3, sd=0.2), c(215, 30, 51)) + 
-#' 0.5*sin(seq(0,4,length=215))
-#' obs <- array(rnorm(215*30, mean=2), c(215, 30)) + 
-#' sin(seq(0,4, length=215))
-#' fcst.debias <- biascorrection:::qqmap(fcst[,1:20,], obs[,1:20], fcst.out=fcst, span=0.5)
+#' nens <- 51
+#' signal <- outer(sin(seq(0,4,length=215)), sort(rnorm(30, sd=0.2)), '+')
+#' fcst <- array(rgamma(length(signal)*nens, shape=3), c(dim(signal), nens)) +
+#'   c(signal)
+#' obs <- array(rnorm(length(signal), mean=2), dim(signal)) + 
+#'   signal
+#' fcst.debias <- biascorrection:::qqmap(fcst[,1:20,], 
+#'   obs[,1:20], fcst.out=fcst[,21:30,])
+#' oprob <- (seq(obs[,21:30]) - 1/3) / (length(obs[,21:30]) + 1/3)
+#' plot(quantile(obs[,21:30], type=8, oprob), 
+#'   quantile(fcst[,21:30,], type=8, oprob),
+#'   type='l', lwd=2, xlab='Observed quantiles',
+#'   ylab='Forecast quantiles',
+#'   main='Out-of-sample validation for qqmap')
+#' abline(c(0,1), lwd=2, lty=2)
+#' lines(quantile(obs[,21:30], type=8, oprob),
+#'   quantile(fcst.debias, type=8, oprob), lwd=2, col=2)
+#' minprob <- min((11 - 1/3) / (length(obs[,1:20]) + 1/3), 0.05)
+#' abline(v=quantile(obs[,1:20], type=8, prob=c(minprob, 1-minprob)), 
+#'   lwd=2, lty=3)
+#' text(quantile(obs[,1:20], type=8, 1-minprob) + 0.1, par('usr')[3] + 0.5, 
+#'   'Extrapolated\ncorrection', adj=c(0,0), cex=0.67)
+#' text(quantile(obs[,1:20], type=8, 1-minprob) - 0.1, par('usr')[3] + 0.5, 
+#'   'Explicit quantile\ncorrection', adj=c(1,0), cex=0.67)
+#' legend('topleft', c('No bias correction', 'qqmap'), lwd=2, col=1:2, inset=0.05)
 #' 
 #' @keywords util
-qqmap <- function(fcst, obs, fcst.out=fcst, span=min(1, 31/nrow(fcst)), ...){
-  fcst.ens <- rowMeans(fcst, dims=2)
-  fcst.ens[is.na(obs)] <- NA
-  fcst.mn <- rowMeans(fcst.ens, dims=1, na.rm=T)
-  obs.mn <- rowMeans(obs, dims=1, na.rm=T)
-  fcst.clim <- sloess(fcst.mn, span=span)
-  obs.clim <- sloess(obs.mn, span=span)
-  ## compute standard deviation
-  obs.sd <- sqrt(rowMeans((obs - obs.clim)**2, dims=1, na.rm=T))
-  obs.sdsmooth <- sloess(obs.sd, span=span)
-  fcst.sd <- sqrt(rowMeans((fcst - fcst.clim)**2, dims=1, na.rm=T))
-  fcst.sdsmooth <- sloess(fcst.sd, span=span)
-  ## compute quantile-quantile mapping
-  fcst.quant <- pnorm(fcst.out, mean=fcst.clim, sd=fcst.sdsmooth)
-  fcst.debias <- qnorm(fcst.quant, mean=obs.clim, sd=obs.sdsmooth)
+qqmap <- function(fcst, obs, fcst.out=fcst, ...){
+  ## only estimate the quantile correction from 5 to 95th percentile
+  ## or excluding the 10 smallest and largest values
+  minprob <- min((11 - 1/3) / (length(obs) + 1/3), 0.05)
+  prob <- seq(minprob, 1 - minprob, length=max(100, length(obs)/10))
+  ## fq <- quantile(fcst, type=8, prob=prob)
+  fq <- rowMeans(apply(fcst, 3, quantile, type=8, prob=prob))
+  oq <- quantile(obs, type=8, prob=prob)
   
+  ## assume a constant correction outside the fitted area
+  qcorr <- (fq - oq)[c(1, seq(fq), length(fq))]
   
+  ## get the probability of the output fcst given the forecast
+  ## i.e. the reverse quantile function
+  fout.qi <- findInterval(fcst.out, fq) + 1
+  fcst.debias <- fcst.out - qcorr[fout.qi]
+
   return(fcst.debias)
 }

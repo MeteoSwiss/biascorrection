@@ -1,4 +1,4 @@
-#' smooth_scale
+#' Smoothed mean de-biasing with scaling
 #' 
 #' Computes mean de-biasing with loess smoothing and adjusts variance
 #' 

@@ -1,0 +1,122 @@
+---
+title: "Calibration of daily forecast time series"
+author: "Jonas Bhend"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Calibration of daily forecast time series}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+## Introduction
+This package contains functionality to bias correct (calibrate) daily time series of weather forecasts. In the following two sections we introduce the package and provide instructions to download, install and use the functionality provided in the package. The reminder of the vignette is used to compare the different calibration strategy on synthetic forecast data. 
+
+## Installation
+The latest version of the package along with the accompanying vignette can be installed from github using
+
+```{r, eval=FALSE}
+devtools::install_github("jonasbhend/biascorrection", build_vignettes=TRUE)
+```
+
+In case the `devtools` package is not installed yet, this can be downloaded and installed directly from CRAN.
+
+```{r, eval=FALSE}
+install.packages('devtools', repos='http://cran.rstudio.com', dependencies=TRUE)
+library(devtools)
+```
+
+## Getting started
+
+The following example illustrates how to use the functionality provided in the `biascorrection` package.
+
+```{r, echo=TRUE}
+## load the package
+library(biascorrection)
+```
+
+Calibration functions are called using the `debias` function. The actual functions providing the functionality to bias correct the daily forecast series, however, are hidden from the user as these have common names that may be in use in the global environment. To find out about the visible and invisible functions in the package and thus the functionality provided in the package, you can use the following commands.
+
+```{r, echo=TRUE}
+## list the visible functions in the package
+ls(pos='package:biascorrection')
+
+## list the calibration methods available in the package
+list_methods()
+```
+
+To get started please run the examples provided with the functions (e.g. `example(ccr)`) and check out the corresponding help pages.
+
+## Comparison of calibration methods
+
+In order to compare the advantages and limitations of the various calibration methods, we compare the calibration methods on forecast observation pairs with set properties. For example, contrast the calibration with a linear time dependency of the bias (i.e. the `trend` function) with other calibration methods using synthetic forecasts with a linear trend. That is, we set up a hierarchy of synthetic forecast observation pairs, with increasingly complex error structures. We use forecast and observation pairs for 215 lead times, 30 forecast instances (years) and 15 ensemble members. We start with the most simple forecast observation pairs, where the forecast is unbiased and well calibrated.
+
+```{r, echo=TRUE}
+nlead <- 215
+nfcst <- 30
+nens <- 15
+
+## seasonal cycle plus an additive signal
+signal <- outer(sin(seq(0,4,length=nlead)), rnorm(nfcst), '+')
+obs <- signal + rnorm(length(signal))
+f <- list()
+f[['unbiased']] <- array(rnorm(nlead*nfcst*nens), c(nlead, nfcst, nens)) + c(signal)
+```
+
+Next we add a constant error.
+
+```{r, echo=TRUE}
+f[['constant']] <- f[['unbiased']] + 2
+```
+
+Furthermore, we add a constant error with a smooth seasonal cycle.
+
+```{r, echo=TRUE}
+f[['seasonal']] <- f[['unbiased']] -2 - sin(seq(0,5, length=nlead)*0.3)
+```
+
+We continue by adding a linear time trend in the seasonally varying error.
+
+```{r, echo=TRUE}
+f[['trend']] <- f[['unbiased']] + 
+  c(outer(cos(seq(0,4,length=nlead)), seq(0,2,length=nfcst), '+'))
+```
+
+Finally, we construct a forecast for which the bias depends on the forecasted signal.
+
+```{r, echo=TRUE}
+f[['conditional']] <- f[['unbiased']] + c(1.2*(signal + 2))
+```
+
+Next we compute the calibrated forecast from the synthetic forecasts using various methods.
+
+```{r, echo=TRUE}
+
+## array with forecast times
+fc.time <- array(as.Date(paste0(1980+rep(1:nfcst, each=nlead), '-11-01')) - 
+                   as.Date('1981-11-01') +  
+                   rep(1:nlead, nfcst), c(nlead, nfcst)) + 
+  as.Date('1981-11-01')
+
+methods <- c('unbias', 'smoothobs', 'smooth', 'trend', 'conditional')
+fcal <- lapply(f, function(fcst){
+  out <- list(raw=fcst)
+  for (m in methods) out[[m]] <- debias(fcst, obs, method=m, fc.time=fc.time)
+  return(out)
+})
+```
+
+We first look at the mean bias and the root mean squared error to find out what calibration method works best in what circumstances.
+
+```{r, echo=TRUE, fig.width=6, fig.height=5}
+bias <- lapply(fcal, lapply, function(fcst) mean(fcst - c(obs)))
+rmse <- lapply(fcal, lapply, function(fcst) sqrt(mean((fcst - c(obs))**2)))
+
+par(mar=c(3,5,1,1))
+barplot(sapply(rmse, sapply, function(x) x), 
+        beside=TRUE, 
+        legend=TRUE, 
+        args.legend=list(x='topleft', inset=0.05, ncol=2, bg='white'), 
+        ylab='Root mean squared error')
+```
+
