@@ -8,7 +8,8 @@ Description: Collection of functions to de-bias daily ensemble forecasts.
     rather than performance when applied to large datasets. Accordingly,
     specific functions will have to be implemented separately to be applicable
     in an operational setting.
-Depends:
+Depends: 
     R (>= 3.0.1)
 License: GPL-3
 LazyData: true
+Suggests: testthat

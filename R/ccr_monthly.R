@@ -23,7 +23,8 @@
 #' fcst.mondebias <- month(fcst.debias, fc.time)
 #' 
 #' @keywords util
-ccr_monthly <- function(fcst, obs, fcst.out=fcst, fc.time, fcout.time=fc.time, span=min(1, 31/nrow(fcst)), ...){
+ccr_monthly <- function(fcst, obs, fcst.out=fcst, fc.time, fcout.time=fc.time, 
+                        span=min(1, 31/nrow(fcst)), ...){
   if (length(fcout.time) != length(fcst.out[,,1])) {
     stop('Time (fcout.time) is not of correct dimension/length')
   }
