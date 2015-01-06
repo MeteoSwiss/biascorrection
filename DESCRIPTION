@@ -8,10 +8,11 @@ Description: Collection of functions to bias correct daily ensemble forecasts.
     rather than performance when applied to large datasets. Consequently,
     specific functions will have to be implemented separately to be applicable
     in an operational setting.
-Depends: 
+Depends:
     R (>= 3.0.1)
 License: GPL-3
 LazyData: true
-Suggests: testthat,
-          knitr
+Suggests:
+    testthat,
+    knitr
 VignetteBuilder: knitr
