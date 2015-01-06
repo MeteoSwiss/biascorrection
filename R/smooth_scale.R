@@ -9,6 +9,12 @@
 #' @param span the parameter which controls the degree of smoothing (see \code{\link{loess}})
 #' @param ... additional arguments for compatibility with other bias correction methods
 #' 
+#' @details
+#' The standard deviation of the observations and simulations is computed against
+#' the smoothed climatology (1/n definition) in order to get consistent results
+#' should the forecast ensemble collapse on the observations. The disadvantage of this
+#' approach is the dependence of the scaling on the climatological fit.
+#' 
 #' @examples
 #' ## initialise forcast observation pairs
 #' fcst <- array(rnorm(215*30*51, mean=3, sd=0.2), c(215, 30, 51)) + 
@@ -25,9 +31,9 @@ smooth_scale <- function(fcst, obs, fcst.out=fcst, span=min(1, 31/nrow(fcst)), .
   obs.mn <- rowMeans(obs, dims=1, na.rm=T)
   fcst.clim <- sloess(fcst.mn, span=span)
   obs.clim <- sloess(obs.mn, span=span)
-  obs.sd <- apply(obs, 1, sd, na.rm=T)
+  obs.sd <- sqrt(apply((obs - obs.clim)**2, 1, mean, na.rm=T))
   obs.sdsmooth <- sloess(obs.sd, span=span)
-  fcst.sd <- apply(fcst, 1, sd, na.rm=T)
+  fcst.sd <- sqrt(apply((fcst - fcst.clim)**2, 1, mean, na.rm=T))
   fcst.sdsmooth <- sloess(fcst.sd, span=span)
   fcst.debias <- (fcst.out - fcst.clim) * obs.sdsmooth / fcst.sdsmooth + obs.clim
   return(fcst.debias)
