@@ -7,8 +7,8 @@
 #' @param method character string with bias correction method name
 #' @param crossval logical, should leave-one-out crossvalidation be used 
 #' (see details)?
-#' @param blocklength block length for moving blocks cross-validation 
-#' (defaults to 5)
+#' @param blocklength block length for moving blocks crossvalidation 
+#' (defaults to 1 for leave-one-out crossvalidation)
 #' @param forward logical, should only past hindcasts be used for calibration?
 #' @param fcst.out array of forecast values to which bias correction
 #' should be applied (defaults to \code{fcst})
@@ -36,17 +36,25 @@
 #' 
 #' @keywords util
 #' @export
-debias <- function(fcst, obs, method='unbias', crossval=FALSE, blocklength=5, forward=FALSE, fcst.out=fcst, fc.time=NULL, fcout.time=fc.time, ...){
+debias <- function(fcst, obs, method='unbias', crossval=FALSE, blocklength=1, forward=FALSE, fcst.out=fcst, fc.time=NULL, fcout.time=fc.time, ...){
   ## get name of bias correction function
   dfun <- try(get(method), silent=TRUE)
   if (class(dfun) == 'try-error') stop('Bias correction method has not been implemented yet')
   if (crossval & forward) stop('Chose only one of forward or cross-validation')
-  if (forward & !all(fcst == fcst.out)){
-    stop('Forward only works with default fcst.out as of yet')
+  if (forward){
+    flen <- max(length(fcst), length(fcst.out))
+    if (!all(rep(fcst, length=flen) == rep(fcst.out, length=flen))){
+      stop('Forward only works with default fcst.out as of yet')      
+    }
   }
-  if (!all(dim(fcout.time) == dim(fcst.out)[1:2])){
+  if (!is.null(fc.time) & !all(dim(fcout.time) == dim(fcst.out)[1:2])){
     warning('Time for fcst.out not know -- inferred from time for fcst (fc.time)')
   }
+
+  ## missing values are not tolerated in forecast
+  stopifnot(!is.na(fcst), !is.na(fcst.out))
+  stopifnot(!is.na(obs))
+  if (!is.null(fc.time)) stopifnot(!is.na(fc.time), !is.na(fcout.time))
   
   ## apply bias correction function
   if (crossval){
