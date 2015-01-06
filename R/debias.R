@@ -1,4 +1,4 @@
-#' debias
+#' Calibration of daily time series
 #' 
 #' Applies bias correction derived from forecast and observation data to forecast data set
 #' 
