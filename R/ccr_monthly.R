@@ -25,12 +25,9 @@
 #' @keywords util
 ccr_monthly <- function(fcst, obs, fcst.out=fcst, fc.time, fcout.time=fc.time, 
                         span=min(1, 31/nrow(fcst)), ...){
-  if (length(fcout.time) != length(fcst.out[,,1])) {
-    stop('Time (fcout.time) is not of correct dimension/length')
-  }
-  if (length(fc.time) < length(fcst[,,1])){
-    stop('Not enough forecast time steps (fc.time) supplied')
-  }
+  stopifnot(length(fcout.time) == length(fcst.out[,,1]))
+  stopifnot(length(fc.time) >= length(fcst[,,1]))
+  
   ## compute monthly forecasts and observations
   fcst.mon <- month(fcst, fc.time[seq(along=fcst[,,1])])
   obs.mon <- month(obs, fc.time[seq(obs)])

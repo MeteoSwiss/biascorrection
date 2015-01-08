@@ -52,9 +52,11 @@ debias <- function(fcst, obs, method='unbias', crossval=FALSE, blocklength=1, fo
   }
 
   ## missing values are not tolerated in forecast
-  stopifnot(!is.na(fcst), !is.na(fcst.out))
-  stopifnot(!is.na(obs))
-  if (!is.null(fc.time)) stopifnot(!is.na(fc.time), !is.na(fcout.time))
+  if (method != 'ccr'){
+    stopifnot(!is.na(fcst), !is.na(fcst.out))
+    stopifnot(!is.na(obs))
+    if (!is.null(fc.time)) stopifnot(!is.na(fc.time), !is.na(fcout.time))
+  }  
   
   ## apply bias correction function
   if (crossval){
