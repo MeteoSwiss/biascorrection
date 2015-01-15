@@ -6,25 +6,47 @@
 conditional(fcst, obs, fcst.out = fcst, span = min(1, 31/nrow(fcst)), ...)
 }
 \arguments{
-\item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble members}
+\item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble
+members}
 
 \item{obs}{n x m matrix of veryfing observations}
 
-\item{fcst.out}{array of forecast values to which bias correction
-should be applied (defaults to \code{fcst})}
+\item{fcst.out}{array of forecast values to which bias correction should be
+applied (defaults to \code{fcst})}
 
-\item{span}{the parameter which controls the degree of smoothing (see \code{\link{loess}})}
+\item{span}{the parameter which controls the degree of smoothing (see
+\code{\link{loess}})}
 
-\item{...}{additional arguments for compatibility with other bias correction methods}
+\item{...}{additional arguments for compatibility with other bias correction
+  methods}
 }
 \description{
 Compute calibration for biases that are conditional on signal
 }
 \details{
-This bias correction method assumes that the bias can be decomposed into
-a stationary component and a component linearly related to the ensemble-
-average prediction (i.e. the bias is larger in magnitude for forecasts
-that are farther from the mean)
+This bias correction method assumes that the bias can be decomposed
+  into a stationary component and a component linearly related to the
+  ensemble- average prediction (i.e. the magnitude of the bias for forecasts
+  that are farther from the mean). Let \eqn{X_{i,k}}{Xik} be forecast member
+  \eqn{k} at forecast instance \eqn{i}, and \eqn{\bar{X_i}}{mn.Xi} the
+  ensemble mean for instance \eqn{i}, and \eqn{\bar{X}}{mn.X} the mean
+  forecast averaged over all forecast instances. Given verifying observations
+  \eqn{y_i}{yi}, the bias corrected forecast \eqn{Z_{i,k}}{Zik} is
+
+  \deqn{Z_{i,k} = X_{i,k} - b{i}}{Zik = Xik - bi}
+
+  with the bias \eqn{b_{i}}{bi} estimated from the forecast anomalies
+  \eqn{X'_i = \bar{X_i} - \bar{X}}{X'i = mn.Xi - mn.X} and observed anomalies
+  \eqn{y'_i = y_i - \bar{y}}{y'i = yi - mn.y}
+
+  \deqn{b_{i} = E[X'_i - y'_i | X'_i] + \bar{X} - \bar{y}}{bi = E[X'i - y'i |
+  X'i] + mn.X - mn.y}
+
+  In the above, the index for different forecast lead times are dropped. In
+  practice, the mean forecast \eqn{\bar{X}}{mn.X} and observations
+  \eqn{\bar{y}}{mn.y} may be vectors with entries for different lead times.
+  The averaged quantities are smoothed to result in a smooth climatology for
+  different lead times.
 }
 \examples{
 ## initialise forcast observation pairs
