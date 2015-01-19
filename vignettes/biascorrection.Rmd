@@ -2,7 +2,8 @@
 title: "Calibration of daily forecast time series"
 author: "Jonas Bhend"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Calibration of daily forecast time series}
   %\VignetteEngine{knitr::rmarkdown}
@@ -47,9 +48,9 @@ list_methods()
 
 To get started please run the examples provided with the functions (e.g. `example(ccr)`) and check out the corresponding help pages.
 
-## Comparison of calibration methods
+## Forecasts and observations
 
-In order to compare the advantages and limitations of the various calibration methods, we compare the calibration methods on forecast observation pairs with set properties. For example, contrast the calibration with a linear time dependency of the bias (i.e. the `trend` function) with other calibration methods using synthetic forecasts with a linear trend. That is, we set up a hierarchy of synthetic forecast observation pairs, with increasingly complex error structures. We use forecast and observation pairs for 215 lead times, 30 forecast instances (years) and 15 ensemble members. We start with the most simple forecast observation pairs, where the forecast is unbiased and well calibrated.
+In order to compare the advantages and limitations of the various calibration methods, we compare the calibration methods on forecast observation pairs with set properties. For example, we contrast the calibration with a linear time dependency of the bias (i.e. the `trend` function) with other calibration methods using synthetic forecasts with a linear trend. That is, we set up a hierarchy of synthetic forecast observation pairs, with increasingly complex error structures. We use forecast and observation pairs for 215 lead times, 30 forecast instances (years) and 15 ensemble members. We start with the most simple forecast observation pairs, where the forecast is unbiased and well calibrated.
 
 ```{r, echo=TRUE}
 nlead <- 215
@@ -88,6 +89,8 @@ Finally, we construct a forecast for which the bias depends on the forecasted si
 f[['conditional']] <- f[['unbiased']] + c(1.2*(signal + 2))
 ```
 
+## Calibration (bias correction)
+
 Next we compute the calibrated forecast from the synthetic forecasts using various methods.
 
 ```{r, echo=TRUE}
@@ -106,9 +109,13 @@ fcal <- lapply(f, function(fcst){
 })
 ```
 
-We first look at the mean bias and the root mean squared error to find out what calibration method works best in what circumstances.
+## Skill of the calibrated forecasts
 
-```{r, echo=TRUE, fig.width=6, fig.height=5}
+### Mean bias
+
+We first analyze the mean bias and the root mean squared error to find out what calibration method works best in what circumstances.
+
+```{r, echo=TRUE, fig.width=6, fig.height=3}
 bias <- lapply(fcal, lapply, function(fcst) mean(fcst - c(obs)))
 rmse <- lapply(fcal, lapply, function(fcst) sqrt(mean((fcst - c(obs))**2)))
 
@@ -116,7 +123,49 @@ par(mar=c(3,5,1,1))
 barplot(sapply(rmse, sapply, function(x) x), 
         beside=TRUE, 
         legend=TRUE, 
-        args.legend=list(x='topleft', inset=0.05, ncol=2, bg='white'), 
+        args.legend=list(x='topleft', inset=0.05, ncol=2, bg='white', title="Calibration methods"), 
         ylab='Root mean squared error')
 ```
 
+
+### Correlation
+
+Next we analyse the correlation of the verifying observations with the ensemble mean of the forecasts as a measure of forecast skill.
+```{r, echo=TRUE,fig.width=6,fig.height=3}
+corr <- lapply(fcal, lapply, function(fcst) diag(cor(t(obs), t(rowMeans(fcst, dims=2)))))
+corr.mn <- lapply(corr, lapply, function(x) tanh(mean(atanh(x))))
+
+par(mar=c(3,5,1,1))
+barplot(sapply(corr.mn, sapply, function(x) x), 
+        beside=TRUE, 
+        legend=TRUE, 
+        args.legend=list(x='topleft', inset=0.05, ncol=2, bg='white', title="Calibration methods"), 
+        ylab='Lead-time averaged correlation')
+```
+
+### Continuous ranked probability score
+
+Finally, lets look at a more integrated measure of forecast skill, the continuous ranked probability score (CRPS). CRPS is a generalisation of the mean absolute error for probabilistic forecasts and thus the lower the CRPS, the higher the skill of the forecast.
+
+```{r, echo=TRUE, fig.width=6, fig.height=3}
+crpsfun <- function(fcst, obs){
+  nlead <- nrow(obs)
+  nfcst <- ncol(obs)
+  nens <- dim(fcst)[3]
+  crps.out <- array(NA, dim(obs))
+  for (i in 1:nlead){
+    crps.out[i,] <- sapply(1:nfcst, function(n) mean(abs(fcst[i,n,] - obs[i,n])) - 
+                             sum(dist(fcst[i,n,]))/nens/nens)
+  }
+  return(crps.out)
+}
+crps <- lapply(fcal, lapply, crpsfun, obs=obs)
+crps.mn <- lapply(crps, lapply, mean)
+
+par(mar=c(3,5,1,1))
+barplot(sapply(crps.mn, sapply, function(x) x), 
+        beside=TRUE, 
+        legend=TRUE, 
+        args.legend=list(x='topleft', inset=0.05, ncol=2, bg='white', title="Calibration methods"), 
+        ylab='mean CRPS')
+```
