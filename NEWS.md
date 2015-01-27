@@ -1,3 +1,7 @@
+## biascorrection 0.4.3
+
+* added multiplicative debiasing (e.g. for rainfall or indices measuring variability)
+
 ## biascorrection 0.4.2.1
 
 * `debias` exclude missing value requirement for `ccr` as a fix to avoid problems in processing
