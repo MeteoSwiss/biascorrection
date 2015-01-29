@@ -3,20 +3,45 @@
 \alias{qqmap}
 \title{Quantile mapping}
 \usage{
-qqmap(fcst, obs, fcst.out = fcst, ...)
+qqmap(fcst, obs, fcst.out = fcst, multiplicative = FALSE, ...)
 }
 \arguments{
-\item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble members}
+\item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble
+members}
 
 \item{obs}{n x m matrix of veryfing observations}
 
-\item{fcst.out}{array of forecast values to which bias correction
-should be applied (defaults to \code{fcst})}
+\item{fcst.out}{array of forecast values to which bias correction should be
+applied (defaults to \code{fcst})}
 
-\item{...}{additional arguments for compatibility with other bias correction methods}
+\item{multiplicative}{logical, is quantile correction to be applied
+multiplicatively?}
+
+\item{...}{additional arguments for compatibility with other bias correction
+  methods}
 }
 \description{
 Computes bias correction with quantile mapping
+}
+\details{
+The quantile mapping algorithm estimates quantile correction factors
+  for \code{n} quantiles. For each forecast value in \code{fcst.out}, the
+  percentile within which the value falls in the distribution of input
+  forecasts \code{fcst} is determined and the corresponding quanile
+  correction applied. For multiplicative quantile mapping
+  (\code{multiplicative = TRUE}), the bias corrected forecast
+  (\code{fcst.out}) is divided by the ratio of forecast to observed
+  quantiles, whereas for additive quantile mapping \code{multiplicative =
+  FALSE}, the difference between the forecast and observed quantiles are
+  subtracted from \code{fcst.out}. The quantiles are estimated for at least
+  100 discrete values from the 5th to 95th percentile, or, if there are
+  enough observations for \code{n = n_obs / 10} discrete quantiles excluding
+  the 10 smallest and largest values.
+}
+\note{
+The quantile mapping provided here does not take into account lead-time
+  dependent quantile-quantile relationships. Instead, all lead times are
+  lumped together.
 }
 \examples{
 ## initialise forcast observation pairs

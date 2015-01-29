@@ -2,12 +2,34 @@
 #' 
 #' Computes bias correction with quantile mapping
 #' 
-#' @param fcst n x m x k array of n lead times, m forecasts, of k ensemble members
+#' @param fcst n x m x k array of n lead times, m forecasts, of k ensemble 
+#'   members
 #' @param obs n x m matrix of veryfing observations
-#' @param fcst.out array of forecast values to which bias correction
-#' should be applied (defaults to \code{fcst})
-#' @param ... additional arguments for compatibility with other bias correction methods
-#' 
+#' @param fcst.out array of forecast values to which bias correction should be 
+#'   applied (defaults to \code{fcst})
+#' @param multiplicative logical, is quantile correction to be applied 
+#'   multiplicatively?
+#' @param ... additional arguments for compatibility with other bias correction 
+#'   methods
+#'   
+#' @details The quantile mapping algorithm estimates quantile correction factors
+#'   for \code{n} quantiles. For each forecast value in \code{fcst.out}, the 
+#'   percentile within which the value falls in the distribution of input 
+#'   forecasts \code{fcst} is determined and the corresponding quanile 
+#'   correction applied. For multiplicative quantile mapping 
+#'   (\code{multiplicative = TRUE}), the bias corrected forecast 
+#'   (\code{fcst.out}) is divided by the ratio of forecast to observed 
+#'   quantiles, whereas for additive quantile mapping \code{multiplicative = 
+#'   FALSE}, the difference between the forecast and observed quantiles are 
+#'   subtracted from \code{fcst.out}. The quantiles are estimated for at least
+#'   100 discrete values from the 5th to 95th percentile, or, if there are
+#'   enough observations for \code{n = n_obs / 10} discrete quantiles excluding
+#'   the 10 smallest and largest values.
+#'   
+#' @note The quantile mapping provided here does not take into account lead-time
+#'   dependent quantile-quantile relationships. Instead, all lead times are 
+#'   lumped together.
+#'   
 #' @examples
 #' ## initialise forcast observation pairs
 #' nens <- 51
@@ -37,7 +59,7 @@
 #' legend('topleft', c('No bias correction', 'qqmap'), lwd=2, col=1:2, inset=0.05)
 #' 
 #' @keywords util
-qqmap <- function(fcst, obs, fcst.out=fcst, ...){
+qqmap <- function(fcst, obs, fcst.out=fcst, multiplicative=FALSE, ...){
   ## only estimate the quantile correction from 5 to 95th percentile
   ## or excluding the 10 smallest and largest values
   minprob <- min((11 - 1/3) / (length(obs) + 1/3), 0.05)
@@ -46,13 +68,18 @@ qqmap <- function(fcst, obs, fcst.out=fcst, ...){
   fq <- rowMeans(apply(fcst, 3, quantile, type=8, prob=prob))
   oq <- quantile(obs, type=8, prob=prob)
   
-  ## assume a constant correction outside the fitted area
-  qcorr <- (fq - oq)[c(1, seq(fq), length(fq))]
+  ## find boundaries in between quantiles
+  fqbnds <- fq[-length(fq)] + 0.5*diff(fq)
   
   ## get the probability of the output fcst given the forecast
   ## i.e. the reverse quantile function
-  fout.qi <- findInterval(fcst.out, fq) + 1
-  fcst.debias <- fcst.out - qcorr[fout.qi]
-
+  ## assume constant correction by discrete quantiles
+  fout.qi <- findInterval(fcst.out, fqbnds) + 1
+  if (multiplicative){
+    fcst.debias <- fcst.out / (fq/oq)[fout.qi]
+  } else {
+    fcst.debias <- fcst.out - (fq - oq)[fout.qi]    
+  }
+  
   return(fcst.debias)
 }

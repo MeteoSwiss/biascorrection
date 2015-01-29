@@ -1,7 +1,7 @@
 Package: biascorrection
 Title: Bias correct daily ensemble forecasts
-Date: 2015-01-08
-Version: 0.4.3
+Date: 2015-01-29
+Version: 0.4.4
 Authors@R: "Jonas Bhend <jonas.bhend@gmx.ch> [aut, cre]"
 Description: Collection of functions to bias correct daily ensemble forecasts.
     This package includes a variety of functions with a focus on ease-of-use
@@ -9,7 +9,8 @@ Description: Collection of functions to bias correct daily ensemble forecasts.
     specific functions will have to be implemented separately to be applicable
     in an operational setting.
 Depends:
-    R (>= 3.0.1)
+    R (>= 3.0.1),
+    qmap
 License: GPL-3
 LazyData: true
 Suggests:

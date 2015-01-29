@@ -1,3 +1,9 @@
+## biascorrectino 0.4.4
+
+* Support for quantile mapping using the `qmap` package
+
+* Added optional multiplicative quantile mapping to custom-built quantile mapping function (`qqmap`)
+
 ## biascorrection 0.4.3
 
 * added multiplicative debiasing (e.g. for rainfall or indices measuring variability)
