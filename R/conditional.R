@@ -72,8 +72,9 @@ conditional <- function(fcst, obs, fcst.out=fcst, span=min(1, 31/nrow(fcst)), ..
                                             fcst=c(fcst.ens - fcst.clim)))
 
   ## compute debiased forecast
+  fcst.out.ens <- rowMeans(fcst.out, dims=2)
   fcst.debias <- fcst.out - 
-    predict(anom.lm, newdata=data.frame(fcst=c(fcst.out - fcst.clim))) +
+    predict(anom.lm, newdata=data.frame(fcst=c(fcst.out.ens - fcst.clim))) +
     obs.clim - fcst.clim
   
   return(fcst.debias)
