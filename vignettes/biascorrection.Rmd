@@ -11,7 +11,7 @@ vignette: >
 ---
 
 ## Introduction
-This package contains functionality to bias correct (calibrate) daily time series of weather forecasts. In the following two sections we introduce the package and provide instructions to download, install and use the functionality provided in the package. The reminder of the vignette is used to compare the different calibration strategy on synthetic forecast data. 
+This package contains functionality to bias correct (calibrate) daily time series of weather forecasts. In the following two sections we introduce the package and provide instructions to download, install and use the functionality provided in the package. The reminder of the vignette is used to compare the different calibration strategies on synthetic forecast data. 
 
 ## Installation
 The latest version of the package along with the accompanying vignette can be installed from github using
@@ -50,7 +50,7 @@ To get started please run the examples provided with the functions (e.g. `exampl
 
 ## Forecasts and observations
 
-In order to compare the advantages and limitations of the various calibration methods, we compare the calibration methods on forecast observation pairs with set properties. For example, we contrast the calibration with a linear time dependency of the bias (i.e. the `trend` function) with other calibration methods using synthetic forecasts with a linear trend. That is, we set up a hierarchy of synthetic forecast observation pairs, with increasingly complex error structures. We use forecast and observation pairs for 215 lead times, 30 forecast instances (years) and 15 ensemble members. We start with the most simple forecast observation pairs, where the forecast is unbiased and well calibrated.
+In order to compare the advantages and limitations of the various calibration methods, we compare the calibration methods on forecast observation pairs with set properties. For example, we contrast the calibration with a linear time dependency of the bias (i.e. the `trend` function) with other calibration methods using synthetic forecasts with a linear trend in the bias. That is, we set up a hierarchy of synthetic forecast observation pairs, with increasingly complex error structures. We use forecast and observation pairs for 215 lead times, 30 forecast instances (years) and 15 ensemble members. We start with the most simple forecast observation pairs, where the forecast is unbiased and well calibrated.
 
 ```{r, echo=TRUE}
 nlead <- 215
@@ -123,7 +123,8 @@ par(mar=c(3,5,1,1))
 barplot(sapply(rmse, sapply, function(x) x), 
         beside=TRUE, 
         legend=TRUE, 
-        args.legend=list(x='topleft', inset=0.05, ncol=2, bg='white', title="Calibration methods"), 
+        args.legend=list(x='topleft', inset=0.05, ncol=2, cex=0.83,
+                         bg='white', title="Calibration methods"), 
         ylab='Root mean squared error')
 ```
 
@@ -139,13 +140,14 @@ par(mar=c(3,5,1,1))
 barplot(sapply(corr.mn, sapply, function(x) x), 
         beside=TRUE, 
         legend=TRUE, 
-        args.legend=list(x='topleft', inset=0.05, ncol=2, bg='white', title="Calibration methods"), 
+        args.legend=list(x='bottomleft', inset=0.05, ncol=2, cex=0.83,
+                         bg='white', title="Calibration methods"), 
         ylab='Lead-time averaged correlation')
 ```
 
 ### Continuous ranked probability score
 
-Finally, lets look at a more integrated measure of forecast skill, the continuous ranked probability score (CRPS). CRPS is a generalisation of the mean absolute error for probabilistic forecasts and thus the lower the CRPS, the higher the skill of the forecast.
+We continue by analyzing a more integrated measure of forecast skill, the continuous ranked probability score (CRPS). CRPS is a generalisation of the mean absolute error for probabilistic forecasts and thus the lower the CRPS, the higher the skill of the forecast.
 
 ```{r, echo=TRUE, fig.width=6, fig.height=3}
 crpsfun <- function(fcst, obs){
@@ -166,6 +168,127 @@ par(mar=c(3,5,1,1))
 barplot(sapply(crps.mn, sapply, function(x) x), 
         beside=TRUE, 
         legend=TRUE, 
-        args.legend=list(x='topleft', inset=0.05, ncol=2, bg='white', title="Calibration methods"), 
+        args.legend=list(x='topleft', inset=0.05, ncol=2, cex=0.83,
+                         bg='white', title="Calibration methods"), 
         ylab='mean CRPS')
 ```
+
+### Spread to error ratio
+
+Finally, lets compute the spread to error ratio as a measure of whether the forecasts are reliable, that is, whether forecast probabilities are equal to observed frequencies on average. A spread to error ratio of about 1 is a necessary (but not sufficient) condition for  the forecasts to be reliable. Forecasts with a spread to error ratio of less than 1 are called overconfident, meaning that the verifying observations lie more often oustide the envelope of forecasts than expected. As none of the calibration methods analysed here affects the intra ensemble spread of the forecasts, the spread to error ratio basically is a function of the mean squared error (with respect to the ensemble mean) of the forecasts. Therefore, the spread to error ratio indicates how well the calibration methods are able to remove systematic biases.
+
+```{r, echo=TRUE, fig.width=6, fig.height=3}
+sprerrfun <- function(fcst, obs){
+  nlead <- nrow(obs)
+  nfcst <- ncol(obs)
+  nens <- dim(fcst)[3]
+  spr <- apply(apply(fcst, 1:2, sd)**2, 1, mean)
+  err <- apply((rowMeans(fcst, dims=2) - obs)**2, 1, mean)
+  return(sqrt((nens + 1)/nens * spr / err))
+}
+
+sprerr <- lapply(fcal, lapply, sprerrfun, obs=obs)
+sprerr.mn <- lapply(sprerr, lapply, mean)
+
+par(mar=c(3,5,1,1))
+barplot(sapply(sprerr.mn, sapply, function(x) x), 
+        beside=TRUE, 
+        legend=TRUE, 
+        args.legend=list(x='bottomleft', inset=0.05, ncol=2, cex=0.83,
+                         bg='white', title="Calibration methods"), 
+        ylab='mean spread to error ratio')
+abline(h=1, lwd=2, lty=2)
+```
+
+Here we find that calibrated forecasts with simple additive biases (e.g. the `unbiased`, `constant` and `seasonal` cases) are rendered reliable using all calibration methods. Forecasts with a trend in the bias or a bias dependent on the signal are only reliable when calibrated with the corresponding calibration method. With all other calibration methods, biases remain and thus the mean squared error is much larger than the average spread of the forecasts.
+
+## Non-parametric calibration (quantile mapping)
+
+So far, we have only calibrated biases in the mean, assuming the higher moments of the forecast distribution are unbiased with respect to the verifying observations. Using quantile mapping, calibration can be extended to the full forecast distribution in a non-parametric way. As the name implies, forecasts are mapped to observed quantiles according to the forecast quantiles in which they fall. To compare quantile mapping with other calibration methods, we set up a new set of synthetic forecasts with daily variability that is markedly different from the observed daily variability. 
+
+```{r, echo=TRUE, fig.width=4, fig.height=4}
+
+## set up forecast with uniformly distributed daily values
+fcal[['unif']][['raw']] <- array(runif(nlead*nfcst*nens, min=-0.5, max=0.5), 
+                                 c(nlead, nfcst, nens)) + c(signal)
+
+## calibrate forecast using different methods
+methods <- c('unbias', 'smoothobs', 'smooth', 'trend', 'conditional')
+for (m in c(methods, 'qqmap')){
+  fcal$unif[[m]] <- debias(fcal[['unif']][['raw']], obs, 
+                           method=m, fc.time=fc.time, anomalies=TRUE)
+}
+
+par(mar=c(4.5,4.5,0.5,0.5))
+plot(sort(obs), sort(fcal$unif$raw[,,1]), lwd=2, asp=1, type='l', 
+     xlab='Observed quantiles', ylab='Forecast quantiles (member 1)', las=1)
+abline(c(0,1), lwd=2, lty=2)
+lines(sort(obs), sort(fcal$unif$qqmap[,,1]), lwd=2, col=2)
+legend('bottomright', c("Raw forecast", "Calibrated forecast (qqmap)"), 
+       lwd=2, col=1:2, bty='n')
+
+```
+
+We do not repeat all verification metrics shown above but directly summarize and compare the quantile mapping with other calibration methods using the mean CRPS and spread to error ratio.
+
+```{r, fig.width=5,fig.height=3}
+funifscore <- list()
+funifscore[['mean CRPS']] <- lapply(fcal$unif, function(x) mean(crpsfun(x, obs)))
+funifscore[['mean spread to error']] <- lapply(fcal$unif, function(x) mean(sprerrfun(x, obs)))  
+
+par(mar=c(3,5,1,1))
+tmp <- barplot(sapply(funifscore, unlist), 
+        beside=TRUE, las=1, legend=TRUE, ylim=c(0,1.6),
+        args.legend=list(x='topleft', inset=0.05, ncol=4, cex=0.83,
+                         bg='white', title="Calibration methods"),
+        ylab='CRPS / spread to error ratio')
+lines(range(tmp[,2]) + c(-0.5,0.5)*median(diff(tmp[,2])), 
+      rep(1,2), lwd=2, lty=2)
+
+```
+
+While the CRPS is only slightly lower using quantile mapping compared to other calibration methods that do not affect intra-ensemble spread, the spread to error ratio indicates that quantile mapping is the only one of these calibration methods that produces reliable forecasts.
+
+## Climate conserving recalibration
+
+Instead of adjusting the properties of the daily variability in forecasts and thereby achieving reliable forecasts in an ad hoc way, we can also use a more targeted calibration framework to render forecasts reliable. This climate conserving recalibration (@Weigel2008) adjusts the ensemble mean (the predictable signal) and the intra-ensemble spread simultaneously to  render reliable forecasts. To test the climate conserving recalibration we set up an over- and under-confident forecast and calibrate and verify these as in the examples in the previous sections.
+
+```{r, fig.width=8,fig.height=3,fig.align='center'}
+
+## set up under- and over-confident forecasts (no bias)
+fcal[['over']][['raw']] <- array(rnorm(nlead*nfcst*nens, sd=sqrt(0.5)), 
+                                 c(nlead, nfcst, nens)) + c(signal)
+fcal[['under']][['raw']] <- array(rnorm(nlead*nfcst*nens, sd=sqrt(2)), 
+                                  c(nlead, nfcst, nens)) + c(signal)
+
+## calibrate forecast using different methods
+for (m in c(methods, 'qqmap', 'ccr', 'smoothccr')){
+  for (conf in c('over', 'under')){
+    fcal[[conf]][[m]] <- debias(fcal[[conf]][['raw']], obs, 
+                                method=m, fc.time=fc.time, anomalies=TRUE)
+    }
+  }
+
+fconfscore <- list()
+for (conf in c('over', 'under')){
+  fconfscore[[conf]][['mean CRPS']] <- 
+    lapply(fcal[[conf]], function(x) mean(crpsfun(x, obs)))
+  fconfscore[[conf]][['mean spread to error']] <- 
+    lapply(fcal[[conf]], function(x) mean(sprerrfun(x, obs)))    
+  }
+
+par(mfrow=c(1,1), mar=c(3,5,1,1))
+tmp <- barplot(cbind(sapply(fconfscore$over, unlist),
+                     sapply(fconfscore$under, unlist)),
+               beside=TRUE, , las=1, legend=TRUE, ylim=c(0,2),
+               args.legend=list(x='top', inset=0.05, ncol=3, cex=0.67,
+                                bg='white', title="Calibration methods"), 
+               ylab='CRPS / spread to error ratio')
+lines(range(tmp[,2]) + c(-0.5,0.5)*median(diff(tmp[,2])), 
+      rep(1,2), lwd=2, lty=2)
+lines(range(tmp[,4]) + c(-0.5,0.5)*median(diff(tmp[,4])), 
+      rep(1,2), lwd=2, lty=2)
+
+
+```
+

@@ -1,4 +1,10 @@
-## biascorrectino 0.4.4
+## biascorrection 0.4.5
+
+* Added a switch for excluding the signal (forecast ensemble mean) from quantile mapping in `qqmap`
+
+* Debug `conditional`: prediction of bias consistently based on ensemble mean
+
+## biascorrection 0.4.4
 
 * Support for quantile mapping using the `qmap` package
 
