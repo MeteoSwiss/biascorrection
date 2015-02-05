@@ -4,7 +4,7 @@
 \alias{qqmap}
 \title{Quantile mapping}
 \usage{
-qqmap(fcst, obs, fcst.out = fcst, anomalies = TRUE,
+qqmap(fcst, obs, fcst.out = fcst, anomalies = FALSE,
   multiplicative = FALSE, ...)
 }
 \arguments{

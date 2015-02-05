@@ -9,22 +9,27 @@
 #'   applied (defaults to \code{fcst})
 #' @param multiplicative logical, is quantile correction to be applied 
 #'   multiplicatively?
+#' @param anomalies logical, should quantile mapping be applied to forecast and 
+#'   observed anomalies (from forecast ensemble mean) only?
 #' @param ... additional arguments for compatibility with other bias correction 
 #'   methods
 #'   
 #' @details The quantile mapping algorithm estimates quantile correction factors
 #'   for \code{n} quantiles. For each forecast value in \code{fcst.out}, the 
 #'   percentile within which the value falls in the distribution of input 
-#'   forecasts \code{fcst} is determined and the corresponding quanile 
+#'   forecasts \code{fcst} is determined and the corresponding quantile 
 #'   correction applied. For multiplicative quantile mapping 
 #'   (\code{multiplicative = TRUE}), the bias corrected forecast 
 #'   (\code{fcst.out}) is divided by the ratio of forecast to observed 
 #'   quantiles, whereas for additive quantile mapping \code{multiplicative = 
 #'   FALSE}, the difference between the forecast and observed quantiles are 
-#'   subtracted from \code{fcst.out}. The quantiles are estimated for at least
-#'   100 discrete values from the 5th to 95th percentile, or, if there are
-#'   enough observations for \code{n = n_obs / 10} discrete quantiles excluding
-#'   the 10 smallest and largest values.
+#'   subtracted from \code{fcst.out}. The quantiles are estimated for at least 
+#'   100 discrete values from the 5th to 95th percentile, or, if there are 
+#'   enough observations for \code{n = n_obs / 10} discrete quantiles excluding 
+#'   the 10 smallest and largest values. If \code{anomalies} is set, forecast 
+#'   and observed anomalies are computed with reference to the forecast ensemble
+#'   mean (the signal) and the quantile mapping is only applied to the anomalies
+#'   with the signal being left uncorrected.
 #'   
 #' @note The quantile mapping provided here does not take into account lead-time
 #'   dependent quantile-quantile relationships. Instead, all lead times are 
@@ -59,14 +64,31 @@
 #' legend('topleft', c('No bias correction', 'qqmap'), lwd=2, col=1:2, inset=0.05)
 #' 
 #' @keywords util
-qqmap <- function(fcst, obs, fcst.out=fcst, multiplicative=FALSE, ...){
+qqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=FALSE, ...){
   ## only estimate the quantile correction from 5 to 95th percentile
   ## or excluding the 10 smallest and largest values
   minprob <- min((11 - 1/3) / (length(obs) + 1/3), 0.05)
   prob <- seq(minprob, 1 - minprob, length=max(100, length(obs)/10))
   ## fq <- quantile(fcst, type=8, prob=prob)
-  fq <- rowMeans(apply(fcst, 3, quantile, type=8, prob=prob))
-  oq <- quantile(obs, type=8, prob=prob)
+  if (anomalies){
+    fcst.ens <- rowMeans(fcst, dims=2)
+    fcst.out.ens <- rowMeans(fcst.out, dims=2)
+    if (multiplicative){
+      fcst.anom <- fcst / c(fcst.ens)
+      obs.anom <- obs/fcst.ens
+      fcst.out.anom <- fcst.out / c(fcst.out.ens)
+    } else {
+      fcst.anom <- fcst - c(fcst.ens)
+      obs.anom <- obs - fcst.ens
+      fcst.out.anom <- fcst.out - c(fcst.out.ens)
+    }    
+  } else {
+    fcst.anom <- fcst
+    obs.anom <- obs
+    fcst.out.anom <- fcst.out
+  }
+  fq <- rowMeans(apply(fcst.anom, 3, quantile, type=8, prob=prob))
+  oq <- quantile(obs.anom, type=8, prob=prob)
   
   ## find boundaries in between quantiles
   fqbnds <- fq[-length(fq)] + 0.5*diff(fq)
@@ -74,7 +96,7 @@ qqmap <- function(fcst, obs, fcst.out=fcst, multiplicative=FALSE, ...){
   ## get the probability of the output fcst given the forecast
   ## i.e. the reverse quantile function
   ## assume constant correction by discrete quantiles
-  fout.qi <- findInterval(fcst.out, fqbnds) + 1
+  fout.qi <- findInterval(fcst.out.anom, fqbnds) + 1
   if (multiplicative){
     fcst.debias <- fcst.out / (fq/oq)[fout.qi]
   } else {
