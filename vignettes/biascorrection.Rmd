@@ -115,7 +115,7 @@ fcal <- lapply(f, function(fcst){
 
 We first analyze the mean bias and the root mean squared error to find out what calibration method works best in what circumstances.
 
-```{r, echo=TRUE, fig.width=6, fig.height=3}
+```{r, echo=TRUE, fig.width=6, fig.height=3,fig.align='center'}
 bias <- lapply(fcal, lapply, function(fcst) mean(fcst - c(obs)))
 rmse <- lapply(fcal, lapply, function(fcst) sqrt(mean((fcst - c(obs))**2)))
 
@@ -132,7 +132,7 @@ barplot(sapply(rmse, sapply, function(x) x),
 ### Correlation
 
 Next we analyse the correlation of the verifying observations with the ensemble mean of the forecasts as a measure of forecast skill.
-```{r, echo=TRUE,fig.width=6,fig.height=3}
+```{r, echo=TRUE,fig.width=6,fig.height=3,fig.align='center'}
 corr <- lapply(fcal, lapply, function(fcst) diag(cor(t(obs), t(rowMeans(fcst, dims=2)))))
 corr.mn <- lapply(corr, lapply, function(x) tanh(mean(atanh(x))))
 
@@ -149,7 +149,7 @@ barplot(sapply(corr.mn, sapply, function(x) x),
 
 We continue by analyzing a more integrated measure of forecast skill, the continuous ranked probability score (CRPS). CRPS is a generalisation of the mean absolute error for probabilistic forecasts and thus the lower the CRPS, the higher the skill of the forecast.
 
-```{r, echo=TRUE, fig.width=6, fig.height=3}
+```{r, echo=TRUE, fig.width=6, fig.height=3,fig.align='center'}
 crpsfun <- function(fcst, obs){
   nlead <- nrow(obs)
   nfcst <- ncol(obs)
@@ -177,7 +177,7 @@ barplot(sapply(crps.mn, sapply, function(x) x),
 
 Finally, lets compute the spread to error ratio as a measure of whether the forecasts are reliable, that is, whether forecast probabilities are equal to observed frequencies on average. A spread to error ratio of about 1 is a necessary (but not sufficient) condition for  the forecasts to be reliable. Forecasts with a spread to error ratio of less than 1 are called overconfident, meaning that the verifying observations lie more often oustide the envelope of forecasts than expected. As none of the calibration methods analysed here affects the intra ensemble spread of the forecasts, the spread to error ratio basically is a function of the mean squared error (with respect to the ensemble mean) of the forecasts. Therefore, the spread to error ratio indicates how well the calibration methods are able to remove systematic biases.
 
-```{r, echo=TRUE, fig.width=6, fig.height=3}
+```{r, echo=TRUE, fig.width=6, fig.height=3,fig.align='center'}
 sprerrfun <- function(fcst, obs){
   nlead <- nrow(obs)
   nfcst <- ncol(obs)
@@ -206,7 +206,7 @@ Here we find that calibrated forecasts with simple additive biases (e.g. the `un
 
 So far, we have only calibrated biases in the mean, assuming the higher moments of the forecast distribution are unbiased with respect to the verifying observations. Using quantile mapping, calibration can be extended to the full forecast distribution in a non-parametric way. As the name implies, forecasts are mapped to observed quantiles according to the forecast quantiles in which they fall. To compare quantile mapping with other calibration methods, we set up a new set of synthetic forecasts with daily variability that is markedly different from the observed daily variability. 
 
-```{r, echo=TRUE, fig.width=4, fig.height=4}
+```{r, echo=TRUE,fig.width=4,fig.height=4,fig.align='center'}
 
 ## set up forecast with uniformly distributed daily values
 fcal[['unif']][['raw']] <- array(runif(nlead*nfcst*nens, min=-0.5, max=0.5), 
@@ -231,7 +231,7 @@ legend('bottomright', c("Raw forecast", "Calibrated forecast (qqmap)"),
 
 We do not repeat all verification metrics shown above but directly summarize and compare the quantile mapping with other calibration methods using the mean CRPS and spread to error ratio.
 
-```{r, fig.width=5,fig.height=3}
+```{r, fig.width=6,fig.height=3,fig.align='center'}
 funifscore <- list()
 funifscore[['mean CRPS']] <- lapply(fcal$unif, function(x) mean(crpsfun(x, obs)))
 funifscore[['mean spread to error']] <- lapply(fcal$unif, function(x) mean(sprerrfun(x, obs)))  
@@ -251,14 +251,14 @@ While the CRPS is only slightly lower using quantile mapping compared to other c
 
 ## Climate conserving recalibration
 
-Instead of adjusting the properties of the daily variability in forecasts and thereby achieving reliable forecasts in an ad hoc way, we can also use a more targeted calibration framework to render forecasts reliable. This climate conserving recalibration (@Weigel2008) adjusts the ensemble mean (the predictable signal) and the intra-ensemble spread simultaneously to  render reliable forecasts. To test the climate conserving recalibration we set up an over- and under-confident forecast and calibrate and verify these as in the examples in the previous sections.
+Instead of adjusting the properties of the daily variability in forecasts and thereby achieving reliable forecasts in an ad hoc way, we can also use a more targeted calibration framework to render forecasts reliable. This climate conserving recalibration (@Weigel2008) adjusts the ensemble mean (the predictable signal) and the intra-ensemble spread simultaneously to  render reliable forecasts. To test the climate conserving recalibration we set up an over- and under-confident forecast and calibrate and verify these forecasts as in the examples in the previous sections.
 
-```{r, fig.width=8,fig.height=3,fig.align='center'}
+```{r, fig.width=5,fig.height=5,fig.align='center'}
 
 ## set up under- and over-confident forecasts (no bias)
-fcal[['over']][['raw']] <- array(rnorm(nlead*nfcst*nens, sd=sqrt(0.5)), 
+fcal[['over']][['raw']] <- array(rnorm(nlead*nfcst*nens, sd=0.5), 
                                  c(nlead, nfcst, nens)) + c(signal)
-fcal[['under']][['raw']] <- array(rnorm(nlead*nfcst*nens, sd=sqrt(2)), 
+fcal[['under']][['raw']] <- array(rnorm(nlead*nfcst*nens, sd=2), 
                                   c(nlead, nfcst, nens)) + c(signal)
 
 ## calibrate forecast using different methods
@@ -277,18 +277,67 @@ for (conf in c('over', 'under')){
     lapply(fcal[[conf]], function(x) mean(sprerrfun(x, obs)))    
   }
 
-par(mfrow=c(1,1), mar=c(3,5,1,1))
-tmp <- barplot(cbind(sapply(fconfscore$over, unlist),
-                     sapply(fconfscore$under, unlist)),
-               beside=TRUE, , las=1, legend=TRUE, ylim=c(0,2),
-               args.legend=list(x='top', inset=0.05, ncol=3, cex=0.67,
-                                bg='white', title="Calibration methods"), 
-               ylab='CRPS / spread to error ratio')
-lines(range(tmp[,2]) + c(-0.5,0.5)*median(diff(tmp[,2])), 
-      rep(1,2), lwd=2, lty=2)
-lines(range(tmp[,4]) + c(-0.5,0.5)*median(diff(tmp[,4])), 
-      rep(1,2), lwd=2, lty=2)
+par(mfrow=c(2,1), mar=c(3,5,1,1), oma=c(0,0,0,0))
+for (nm in names(fconfscore$over)){
+  barplot(cbind(`over-confident ensemble`=unlist(fconfscore$over[[nm]]), 
+                `under-confident ensemble`=unlist(fconfscore$under[[nm]])),
+          beside=TRUE, , las=1, legend=(nm == names(fconfscore$over)[1]), 
+          args.legend=list(x='bottomleft', inset=0.05, ncol=3, cex=1,
+                           bg='white', title="Calibration methods"), 
+          ylab=nm)
+  if (nm == 'mean spread to error') abline(h=1, lwd=2, lty=2)
+  
+  }
+```
 
+We find that the CRPS is slightly reduced using the recalibration method compared to other calibration methods that do not affect the intra-ensemble spread. The spread to erro ratio, on the other hand is significantly modified with the CCR methods with and without smoothing (`ccr` and `smoothccr` respectively). The spread to error ratio of these recalibration methods is very close to one indicating that the recalibrated forecasts may in fact be reliable (note that unity of the spread error ratio is only a necessary but not sufficient condition for reliability). Reliability of daily series, however, does not necessarily imply that forecasts of derived or aggregated quantities such as seasonal averages are reliable after recalibration on the daily series as well. This is illustrated in the following Figure.
+
+
+```{r, echo=TRUE,fig.width=8,fig.height=3,fig.align='center'}
+
+## aggregate the calibrated (and raw) series to monthly and seasonal
+## assuming 30-day months
+fmon <- lapply(fcal, lapply, function(x) colMeans(array(x[1:210,,], c(30,7,dim(x)[-1])), dims=1))
+fseas <- lapply(fmon, lapply, function(x) apply(x, 2:3, filter, rep(1/3, 3))[-c(1,7),,])
+omon <- colMeans(array(obs[1:210,], c(30,7,ncol(obs))), dims=1)
+oseas <- apply(omon, 2, filter, rep(1/3,3))[-c(1,7),]
+
+## compute crps and spread to error
+fseasscore <- fmonscore <- list()
+for (score in c("mean CRPS", 'mean spread to error')){
+  if (score == 'mean CRPS'){
+    sfun <- crpsfun
+  } else {
+    sfun <- sprerrfun
+  }
+  fseasscore[[score]] <- lapply(fseas, lapply, function(x) mean(sfun(x, oseas)))  
+  fmonscore[[score]] <- lapply(fmon, lapply, function(x) mean(sfun(x, omon)))
+  }
+
+dd <- list()
+for (nm in c('over', 'under')){
+  dd[[nm]] <- cbind(daily=unlist(fconfscore[[nm]][['mean spread to error']]),
+                    monthly=unlist(fmonscore[['mean spread to error']][[nm]]),
+                    seasonal=unlist(fseasscore[['mean spread to error']][[nm]]))  
+  }
+
+
+par(mfrow=c(1,2), mar=c(0.5, 3, 0.5, 0.5), oma=c(2.5,2,2,0.5))
+for (nm in names(dd)){
+  barplot(t(dd[[nm]][-c(2:3,5:6),]), beside=TRUE, legend=(nm == 'over'), ylim=range(0, dd), las=1,
+          args.legend=list(x='bottomleft', inset=0.05, ncol=3, cex=0.83,
+                           bg='white', title="Temporal averaging"))
+  abline(h=1, lwd=2, lty=2)  
+  axis(3, at=par('usr')[1], paste0(letters[match(nm, names(dd))], 
+                                   ') ', nm, '-confident ensemble'), 
+       hadj=0, tick=FALSE, line=-0.5)
+  if (nm == names(dd)[1]) axis(2, at=mean(par('usr')[3:4]), 
+                               'mean spread to error ratio',
+                               tick=FALSE, line=2)
+}
 
 ```
+
+Here we find that the recalibration of daily series from an over-confident ensemble results in a spread to error ratio very close to unity for the daily, monthly and seasonal forecasts. In contrast, recalibration of an uncer-confident ensemble results in decidedly over-confident monthly and seasonal forecasts derived from the recalibrated daily series. This is an effect of the limited ensemble and forecast size and the thus resulting sampling uncertainty of the mean signal and its correlation with the observations. Due to the sampling uncertainty of correlation, the daily recalibration affects both the intra-ensemble variability and the mean signal, even though the mean signal is unbiased and should not be affected. Sampling uncertainty is less of a problem with over-confident forecasts, as the samping uncertainty in the ensemble mean of an over-confident forecast is smaller due to the lack of intra-ensemble variance. Real forecasts, however, do not follow the simple model of over- and under-confidence as used here, and thus the conclusions drawn from our analysis of synthetic forecast observation pairs may only hold to the extent that recalibration of daily series does not necessarily lead to well calibrated (reliable) forecasts of aggregated or derived indices from the recalibrated daily series.
+
 
