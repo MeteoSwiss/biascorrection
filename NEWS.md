@@ -1,3 +1,9 @@
+## biascorrection 0.4.6
+
+* Changed default behaviour of `debias` to allow forward calibration with new forecasts (i.e. extending past verifying observations)
+
+* Added new CCR method based on linear regression - still under development: calibrated forecasts tend to be under-confident (in-sample)
+
 ## biascorrection 0.4.5
 
 * Added a switch for excluding the signal (forecast ensemble mean) from quantile mapping in `qqmap`

@@ -42,9 +42,12 @@ debias <- function(fcst, obs, method='unbias', crossval=FALSE, blocklength=1, fo
   if (class(dfun) == 'try-error') stop('Bias correction method has not been implemented yet')
   if (crossval & forward) stop('Chose only one of forward or cross-validation')
   if (forward){
-    flen <- max(length(fcst), length(fcst.out))
-    if (!all(rep(fcst, length=flen) == rep(fcst.out, length=flen))){
+    ## check on forecasts    
+    flen <- min(ncol(fcst), ncol(fcst.out))
+    if (!all(fcst[,1:flen,] == fcst.out[,1:flen,])){
       stop('Forward only works with default fcst.out as of yet')      
+    } else if (!all(dim(fcst) == dim(fcst.out))) {
+      warning("fcst.out is assumed to start at same time as fcst")
     }
   }
   if (!is.null(fc.time) & !all(dim(fcout.time) == dim(fcst.out)[1:2])){
@@ -87,11 +90,12 @@ debias <- function(fcst, obs, method='unbias', crossval=FALSE, blocklength=1, fo
     ## loop through n-years of forecasts to debias all the forecast in year i
     ## with all the forecasts before year i. The first forecast is not debiased at all.
     if (ncol(fcst.out) > 5){
+      nfcst <- ncol(fcst)
       for (i in 5:ncol(fcst.out)){
-        fcst.debias[,i,] <- dfun(fcst=fcst[,seq(1,i-1),, drop=FALSE],
-                                 obs=obs[,seq(1,i-1),drop=FALSE],
+        fcst.debias[,i,] <- dfun(fcst=fcst[,seq(1,min(i-1, nfcst)),, drop=FALSE],
+                                 obs=obs[,seq(1,min(i-1, nfcst)),drop=FALSE],
                                  fcst.out=fcst.out[,i,,drop=FALSE],
-                                 fc.time=if(is.null(fc.time)) NULL else fc.time[,1:i,drop=FALSE], 
+                                 fc.time=if(is.null(fc.time)) NULL else fc.time[,seq(1,min(i-1, nfcst)),drop=FALSE], 
                                  fcout.time=if (is.null(fcout.time)) NULL else fcout.time[,i,drop=FALSE], 
                                  ...)
       }      
