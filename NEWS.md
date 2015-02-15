@@ -1,3 +1,7 @@
+## biascorrection 0.4.7
+
+* added lead time dependent quantile corrections in `qqmap`
+
 ## biascorrection 0.4.6
 
 * Changed default behaviour of `debias` to allow forward calibration with new forecasts (i.e. extending past verifying observations)

@@ -4,7 +4,7 @@
 \title{Quantile mapping}
 \usage{
 qqmap(fcst, obs, fcst.out = fcst, anomalies = FALSE,
-  multiplicative = FALSE, ...)
+  multiplicative = FALSE, nn = 15, ...)
 }
 \arguments{
 \item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble
@@ -21,34 +21,37 @@ observed anomalies (from forecast ensemble mean) only?}
 \item{multiplicative}{logical, is quantile correction to be applied
 multiplicatively?}
 
+\item{nn}{number of lead times to be included on either side of the lead time
+to be calibrated (i.e. the total sample is \code{2*nn + 1})}
+
 \item{...}{additional arguments for compatibility with other bias correction
-  methods}
+ methods}
 }
 \description{
 Computes bias correction with quantile mapping
 }
 \details{
 The quantile mapping algorithm estimates quantile correction factors
-  for \code{n} quantiles. For each forecast value in \code{fcst.out}, the
-  percentile within which the value falls in the distribution of input
-  forecasts \code{fcst} is determined and the corresponding quantile
-  correction applied. For multiplicative quantile mapping
-  (\code{multiplicative = TRUE}), the bias corrected forecast
-  (\code{fcst.out}) is divided by the ratio of forecast to observed
-  quantiles, whereas for additive quantile mapping \code{multiplicative =
-  FALSE}, the difference between the forecast and observed quantiles are
-  subtracted from \code{fcst.out}. The quantiles are estimated for at least
-  100 discrete values from the 5th to 95th percentile, or, if there are
-  enough observations for \code{n = n_obs / 10} discrete quantiles excluding
-  the 10 smallest and largest values. If \code{anomalies} is set, forecast
-  and observed anomalies are computed with reference to the forecast ensemble
-  mean (the signal) and the quantile mapping is only applied to the anomalies
-  with the signal being left uncorrected.
+ for \code{n} quantiles. For each forecast value in \code{fcst.out}, the
+ percentile within which the value falls in the distribution of input
+ forecasts \code{fcst} is determined and the corresponding quantile
+ correction applied. For multiplicative quantile mapping
+ (\code{multiplicative = TRUE}), the bias corrected forecast
+ (\code{fcst.out}) is divided by the ratio of forecast to observed quantiles,
+ whereas for additive quantile mapping \code{multiplicative = FALSE}, the
+ difference between the forecast and observed quantiles are subtracted from
+ \code{fcst.out}. The quantiles are estimated for at least 50 discrete
+ values from the 5th to 95th percentile, or, if there are enough observations
+ for \code{n = n_obs / 10} discrete quantiles excluding the 5 smallest and
+ largest values. If \code{anomalies} is set, forecast and observed anomalies
+ are computed with reference to the forecast ensemble mean (the signal) and
+ the quantile mapping is only applied to the anomalies with the signal being
+ left uncorrected.
 }
 \note{
 The quantile mapping provided here does not take into account lead-time
-  dependent quantile-quantile relationships. Instead, all lead times are
-  lumped together.
+ dependent quantile-quantile relationships. Instead, all lead times are
+ lumped together.
 }
 \examples{
 ## initialise forcast observation pairs
@@ -69,12 +72,13 @@ plot(quantile(obs[,21:30], type=8, oprob),
 abline(c(0,1), lwd=2, lty=2)
 lines(quantile(obs[,21:30], type=8, oprob),
   quantile(fcst.debias, type=8, oprob), lwd=2, col=2)
-minprob <- min((11 - 1/3) / (length(obs[,1:20]) + 1/3), 0.05)
-abline(v=quantile(obs[,1:20], type=8, prob=c(minprob, 1-minprob)),
-  lwd=2, lty=3)
-text(quantile(obs[,1:20], type=8, 1-minprob) + 0.1, par('usr')[3] + 0.5,
+minprob <- min((6 - 1/3) / (length(obs[1:15,1:20]) + 1/3), 0.05)
+## oqlim <- apply(apply(obs[,1:20], 1, quantile, type=8, prob=c(minprob, 1- minprob)), 1, median)
+oqlim <- quantile(obs[,1:20], type=8, prob=c(minprob, 1-minprob))
+abline(v=oqlim, lwd=2, lty=3)
+text(oqlim[2] + 0.1, par('usr')[3] + 0.5,
   'Extrapolated\\ncorrection', adj=c(0,0), cex=0.67)
-text(quantile(obs[,1:20], type=8, 1-minprob) - 0.1, par('usr')[3] + 0.5,
+text(oqlim[2] - 0.1, par('usr')[3] + 0.5,
   'Explicit quantile\\ncorrection', adj=c(1,0), cex=0.67)
 legend('topleft', c('No bias correction', 'qqmap'), lwd=2, col=1:2, inset=0.05)
 }
