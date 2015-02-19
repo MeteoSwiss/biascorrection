@@ -1,3 +1,7 @@
+## biascorrection 0.4.8
+
+* profiled `qqmap` and improved speed (less accuracy)
+
 ## biascorrection 0.4.7
 
 * added lead time dependent quantile corrections in `qqmap`
