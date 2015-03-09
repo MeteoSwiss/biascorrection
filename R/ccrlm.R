@@ -6,12 +6,12 @@
 #' @param fcst n x m x k array of n lead times, m forecasts, of k ensemble 
 #'   members
 #' @param obs n x m matrix of veryfing observations
-#' @param pred m vector, n x m matrix, or list of m vectors or n x m matrizes
-#'   with additional predictors
+#' @param pred m vector, n x m matrix, or list of m vectors or n x m matrices
+#'   with additional predictors
 #' @param fcst.out array of forecast values to which bias correction should be 
 #'   applied (defaults to \code{fcst})
-#' @param pred.out n vector, n x m matrix, or list of n vectors or n x m matrizes
-#'   with additional predictors
+#' @param pred.out \code{n} vector, \code{n} x \code{m} matrix, or list of n
+#'   vectors or n x m matrices with additional predictors
 #' @param ... additional arguments for compatibility with other bias correction 
 #'   methods
 #'   
@@ -24,7 +24,8 @@
 #' nens <- 15
 #' signal <- rnorm(nn, sd=5)
 #' sdfrac <- 2
-#' fcst <- array(rnorm(nn*nens, sd=sdfrac), c(1, nn, nens)) + 0.6 * signal + seq(-3,3,length=nn) 
+#' fcst <- array(rnorm(nn*nens, sd=sdfrac), c(1, nn, nens)) + 
+#'   0.6 * signal + seq(-3,3,length=nn) 
 #' obs <- array(rnorm(nn, sd=1), c(1, nn)) + signal
 #' fcst.deb <- biascorrection:::ccrlm(fcst[,ical,,drop=FALSE], 
 #'                                    obs[,ical,drop=FALSE],
@@ -53,7 +54,8 @@
 #' f.sd2 / f.rmse2 ## can be close to one
 #' 
 #' @keywords util
-ccrlm <- function(fcst, obs, pred=NULL, fcst.out=fcst, pred.out=pred, ...){
+ccrlm <- function(fcst, obs, pred=NULL, 
+                  fcst.out=fcst, pred.out=pred, ...){
   warning("ccrlm is still under development, use with care")
   fcst.ens <- rowMeans(fcst, dims=2)
   fcst.ens[is.na(obs)] <- NA
@@ -119,5 +121,4 @@ ccrlm <- function(fcst, obs, pred=NULL, fcst.out=fcst, pred.out=pred, ...){
   }
   
   return(fcst.debias)
-  return(fi_ccrlm)
 }
