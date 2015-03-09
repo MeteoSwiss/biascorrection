@@ -7,7 +7,7 @@ output:
 vignette: >
   %\VignetteIndexEntry{Calibration of daily forecast time series}
   %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ## Introduction
