@@ -11,8 +11,12 @@
 #'  multiplicatively?
 #'@param anomalies logical, should quantile mapping be applied to forecast and 
 #'  observed anomalies (from forecast ensemble mean) only?
-#'@param nn number of lead times to be included on either side of the lead time 
-#'  to be calibrated (i.e. the total sample is \code{2*nn + 1})
+#'@param nn number of lead times to be included around the lead time to be 
+#'  calibrated (i.e. \code{ceiling((nn - 1)/2)} before and \code{floor((nn - 
+#'  1)/2)} after). The interval to estimate quantile corrections is held
+#'  constant, that is, the first \code{nn} lead times are used to estimate the
+#'  quantile correction for lead time one. The default is to lump all lead times
+#'  together \code{nn = nrow(fcst)}.
 #'@param exact logical, should surrounding lead-times be used for quantiles of 
 #'  forecast as well?
 #'@param ... additional arguments for compatibility with other bias correction 
@@ -38,12 +42,12 @@
 #'  The quantile mapping is lead time dependent, parameter \code{nn} is used to 
 #'  select the number of lead times on either side of the lead time that is to 
 #'  be corrected to be included in the quantile estimation. For the beginning 
-#'  and end of the series,left- and right-bound intervals are used so that for 
-#'  the first and last lead time, only \code{nn + 1} lead times are used in the 
-#'  quantile estimation. If \code{exact = FALSE}, the lead time dependent
-#'  quantiles for the forecast are directly estimated from single lead times
-#'  without the surrounding \code{2*nn} lead times. This is a quick and dirty
-#'  fix to speed up processing.
+#'  and end of the series, the lead-time interval is kept constant, so that to 
+#'  estimate the quantile correction for the first lead time, the first 
+#'  \code{nn} lead times are used. If \code{exact = FALSE}, the lead time 
+#'  dependent quantiles for the forecast are directly estimated from single lead
+#'  times without the surrounding \code{2*nn} lead times. This is a quick and 
+#'  dirty fix to speed up processing.
 #'  
 #'  
 #' @examples
@@ -65,7 +69,7 @@
 #' abline(c(0,1), lwd=2, lty=2)
 #' lines(quantile(obs[,21:30], type=8, oprob),
 #'   quantile(fcst.debias, type=8, oprob), lwd=2, col=2)
-#' minprob <- min((6 - 1/3) / (length(obs[1:15,1:20]) + 1/3), 0.05)
+#' minprob <- min((6 - 1/3) / (nrow(obs)*20 + 1/3), 0.05)
 #' ## oqlim <- apply(apply(obs[,1:20], 1, quantile, type=8, prob=c(minprob, 1- minprob)), 1, median)
 #' oqlim <- quantile(obs[,1:20], type=8, prob=c(minprob, 1-minprob))
 #' abline(v=oqlim, lwd=2, lty=3)
@@ -76,10 +80,10 @@
 #' legend('topleft', c('No bias correction', 'qqmap'), lwd=2, col=1:2, inset=0.05)
 #' 
 #'@keywords util
-qqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=FALSE, nn=15, exact=FALSE, ...){
+qqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=FALSE, nn=nrow(fcst), exact=FALSE, ...){
   ## only estimate the quantile correction from 5 to 95th percentile
-  ## or excluding the 10 smallest and largest values
-  minprob <- min((6 - 1/3) / (ncol(obs)*(2*nn + 1) + 1/3), 0.05)
+  ## or excluding the 5 smallest and largest values
+  minprob <- min((6 - 1/3) / (ncol(obs)* nn + 1/3), 0.05)
   prob <- seq(minprob, 1 - minprob, length=max(50, ncol(obs)*(2*nn + 1)/10))
   ## fq <- quantile(fcst, type=8, prob=prob)
   if (anomalies){
@@ -99,20 +103,31 @@ qqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=FALS
     obs.anom <- obs
     fcst.out.anom <- fcst.out
   }
-  if (exact){
-    ## do everything along the lead times
+  nlead <- nrow(fcst)
+  if (nn >= nlead){
     fq <- rowMeans(apply(fcst.anom, 3, quantile, type=8, prob=prob))
     oq <- quantile(obs.anom, type=8, prob=prob)
-    nlead <- nrow(obs.anom)
+    ## find boundaries in between quantiles
+    fqbnds <- fq[-length(fq)] + 0.5*diff(fq)
+    fout.qi <- findInterval(fcst.out.anom, fqbnds) + 1
+    if (multiplicative){
+      fcst.debias <- fcst.out * (oq / fq)[fout.qi]
+    } else {
+      fcst.debias <- fcst.out + (oq - fq)[fout.qi]
+    }
+  } else if (exact){
+    ## do everything along the lead times
     fcst.debias <- NA*fcst.out.anom
+    indold <- rep(1, nn)
     for (i in 1:nrow(obs.anom)){
-      ind <- seq(max(1,i-nn), min(i + nn, nlead))
-      oq <- quantile(obs.anom[ind,], prob=prob, type=8)
-      ##fq <- rowMeans(apply(fcst.anom[ind,,], 3, quantile, type=8, prob=prob))
-      fq <- quantile(fcst.anom[ind,,], type=8, prob=prob)
-      
-      ## find boundaries in between quantiles
-      fqbnds <- fq[-length(fq)] + 0.5*diff(fq)
+      ind <- seq(0, nn - 1) + min(max(i - ceiling((nn - 1)/2), 1), nlead - nn + 1)
+      if (! all(ind == indold)){
+        oq <- quantile(obs.anom[ind,], prob=prob, type=8)
+        fq <- rowMeans(apply(fcst.anom[ind,,], 3, quantile, type=8, prob=prob))
+        ## find boundaries in between quantiles
+        fqbnds <- fq[-length(fq)] + 0.5*diff(fq)
+      } 
+      indold <- ind
       
       ## get the probability of the output fcst given the forecast
       ## i.e. the reverse quantile function
@@ -125,8 +140,7 @@ qqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=FALS
       }
     }
   } else {
-    ind <- outer(seq(1,nrow(obs.anom)), -nn:nn, '+')
-    ind[ind < 1 | ind > nrow(obs.anom)] <- NA
+    ind <- outer(pmin(pmax(seq(1,nlead) - ceiling((nn - 1)/2), 1), nlead - nn + 1), seq(0, nn - 1), '+')
     oq <- apply(matrix(obs.anom[ind,], nrow(ind)), 1, quantile, type=8, prob=prob, na.rm=T)
     fq <- apply(fcst, 1, quantile, type=8, prob=prob, na.rm=T)
     fqbnds <- apply(fq[-nrow(fq),] + 0.5*apply(fq, 2, diff), 2, list)
