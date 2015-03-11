@@ -41,7 +41,7 @@
 #' seasonal <- sin(seq(0,4,length=215))
 #' signal <- outer(seasonal, rnorm(30), '+')
 #' fcst <- array(rnorm(215*30*51), c(215, 30, 15)) + 
-#'   1.5*c(signal)
+#'   2*c(signal)
 #' obs <- array(rnorm(215*30, mean=2), c(215, 30)) +
 #'   signal
 #' fcst.debias <- biascorrection:::conditional(fcst[,1:20,], 
@@ -64,18 +64,29 @@ conditional <- function(fcst, obs, fcst.out=fcst, span=min(1, 31/nrow(fcst)), ..
   obs.mn <- rowMeans(obs, dims=1, na.rm=T)
   obs.clim <- sloess(obs.mn, span=span)
   
+  fcst.out.ens <- rowMeans(fcst.out, dims=2)
+  
+  in.df <- data.frame(fcst=c(fcst.ens - fcst.clim),
+                      obs=c(obs - obs.clim))
+  out.df <- data.frame(fcst=c(fcst.out.ens - fcst.clim))
+  
+  f.lm <- lm(obs ~ fcst - 1, in.df)
+  fcst.debias <- fcst.out - c(fcst.out.ens) + 
+    predict(f.lm, newdata=out.df) + obs.clim
+  
+  ## old approach 
   ## residual anomalies independent of climatology
-  anom <- fcst.ens - fcst.clim - (obs - obs.clim)
+  ## anom <- fcst.ens - fcst.clim - (obs - obs.clim)
   
   ## compute conditional bias (subtracting constant term)
-  anom.lm <- lm(anom ~ fcst - 1, data.frame(anom=c(anom), 
-                                            fcst=c(fcst.ens - fcst.clim)))
+  ## anom.lm <- lm(anom ~ fcst - 1, data.frame(anom=c(anom), 
+  ##                                           fcst=c(fcst.ens - fcst.clim)))
 
   ## compute debiased forecast
-  fcst.out.ens <- rowMeans(fcst.out, dims=2)
-  fcst.debias <- fcst.out - 
-    predict(anom.lm, newdata=data.frame(fcst=c(fcst.out.ens - fcst.clim))) +
-    obs.clim - fcst.clim
+  ## fcst.out.ens <- rowMeans(fcst.out, dims=2)
+  ## fcst.debias <- fcst.out - 
+  ##   predict(anom.lm, newdata=data.frame(fcst=c(fcst.out.ens - fcst.clim))) +
+  ##   obs.clim - fcst.clim
   
   return(fcst.debias)
 }

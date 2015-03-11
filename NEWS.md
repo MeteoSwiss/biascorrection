@@ -1,3 +1,7 @@
+## biascorrection 0.4.9.1
+
+* simplified notation in `conditional`, still not lead-time dependent
+
 ## biascorrection 0.4.9
 
 * lead-time dependency of bias correction for both `qqmap` and `useqmap`
