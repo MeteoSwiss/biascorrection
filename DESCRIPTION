@@ -1,7 +1,7 @@
 Package: biascorrection
 Title: Bias correct daily ensemble forecasts
 Date: "`r Sys.Date()`"
-Version: 0.4.9.1
+Version: 0.4.10
 Authors@R: "Jonas Bhend <jonas.bhend@gmx.ch> [aut, cre]"
 Description: Collection of functions to bias correct daily ensemble forecasts.
     This package includes a variety of functions with a focus on ease-of-use

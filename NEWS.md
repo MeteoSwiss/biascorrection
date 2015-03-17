@@ -1,3 +1,7 @@
+## biascorrection 0.4.10
+
+* changed treatment of first forecast in forward mode. First `nforward` forecasts are calibrated normally. Default is `nforward = 10`.
+
 ## biascorrection 0.4.9.1
 
 * simplified notation in `conditional`, still not lead-time dependent

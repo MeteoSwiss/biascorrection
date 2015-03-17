@@ -1,29 +1,38 @@
 #' Calibration of daily time series
 #' 
-#' Applies bias correction derived from forecast and observation data to forecast data set
+#' Applies bias correction derived from forecast and observation data to
+#' forecast data set
 #' 
-#' @param fcst n x m x k array of n lead times, m forecasts, of k ensemble members
+#' @param fcst n x m x k array of n lead times, m forecasts, of k ensemble
+#'   members
 #' @param obs n x m matrix of veryfing observations
 #' @param method character string with bias correction method name
-#' @param crossval logical, should leave-one-out crossvalidation be used 
-#' (see details)?
-#' @param blocklength block length for moving blocks crossvalidation 
-#' (defaults to 1 for leave-one-out crossvalidation)
+#' @param crossval logical, should leave-one-out crossvalidation be used (see
+#'   details)?
+#' @param blocklength block length for moving blocks crossvalidation (defaults
+#'   to 1 for leave-one-out crossvalidation)
 #' @param forward logical, should only past hindcasts be used for calibration?
-#' @param fcst.out array of forecast values to which bias correction
-#' should be applied (defaults to \code{fcst})
-#' @param fc.time forecast dates of class 'Date' (for monthly correction, 
-#' see \code{\link{monthly}})
-#' @param fcout.time forecast dates of class 'Date' (for monthly correction, 
-#' see \code{\link{monthly}})
+#' @param fcst.out array of forecast values to which bias correction should be
+#'   applied (defaults to \code{fcst})
+#' @param fc.time forecast dates of class 'Date' (for monthly correction, see
+#'   \code{\link{monthly}})
+#' @param fcout.time forecast dates of class 'Date' (for monthly correction, see
+#'   \code{\link{monthly}})
+#' @param nforward number of forecasts to debias normally in forward mode (see
+#'   details).
 #' @param ... additional arguments passed to bias correction methods
+#'   
+#' @details If \code{crossval} is set to \code{TRUE}, the debiasing for years in
+#' block \code{i} are computed based on the forecast and observation data set
+#' excluding years in block \code{i}. If, in addition, there are more years in
+#' the output set \code{fcst.out} than in the input set \code{fcst}, the bias
+#' correction for the remaining years in \code{fcst.out} is computed based on
+#' all years in \code{fcst}.
 #' 
-#' @details
-#' If \code{crossval} is set to \code{TRUE}, the debiasing for years in block \code{i} are
-#' computed based on the forecast and observation data set excluding years in block \code{i}. 
-#' If, in addition, there are more years in the output set \code{fcst.out} than in the input 
-#' set \code{fcst}, the bias correction for the remaining years in \code{fcst.out} is computed 
-#' based on all years in \code{fcst}.
+#' If \code{forward} is set to \code{TRUE}, the debiasing for forecast \code{i}
+#' is computed based on all previous forecast observation pairs. The first
+#' \code{nforward} forecasts, however, are debiased normally (as with
+#' \code{forward = FALSE}).
 #' 
 #' @examples
 #' ## initialise forcast observation pairs
@@ -36,7 +45,7 @@
 #' 
 #' @keywords util
 #' @export
-debias <- function(fcst, obs, method='unbias', crossval=FALSE, blocklength=1, forward=FALSE, fcst.out=fcst, fc.time=NULL, fcout.time=fc.time, ...){
+debias <- function(fcst, obs, method='unbias', crossval=FALSE, blocklength=1, forward=FALSE, fcst.out=fcst, fc.time=NULL, fcout.time=fc.time, nforward=10, ...){
   ## get name of bias correction function
   dfun <- try(get(method), silent=TRUE)
   if (class(dfun) == 'try-error') stop('Bias correction method has not been implemented yet')
@@ -86,12 +95,20 @@ debias <- function(fcst, obs, method='unbias', crossval=FALSE, blocklength=1, fo
                                 ...)
     }
   } else if (forward) {
-    fcst.debias <- array(fcst.out, dim(fcst.out))
+    fcst.debias <- fcst.out
+    nforward <- min(nforward, ncol(fcst.out))
     ## loop through n-years of forecasts to debias all the forecast in year i
-    ## with all the forecasts before year i. The first forecast is not debiased at all.
-    if (ncol(fcst.out) > 5){
+    ## with all the forecasts before year i. 
+    ## The first nforward forecasts are debiased normally (in sample)
+    fcst.debias[,1:nforward,] <- dfun(fcst=fcst[,1:nforward,,drop=FALSE],
+                                      obs=obs[,1:nforward,drop=FALSE],
+                                      fcst.out=fcst.out[,1:nforward,,drop=FALSE],
+                                      fc.time=if(is.null(fc.time)) NULL else fc.time[,1:nforward,drop=FALSE], 
+                                      fcout.time=if (is.null(fcout.time)) NULL else fcout.time[,1:nforward,drop=FALSE], 
+                                      ...)
+    if (ncol(fcst.out) > nforward){
       nfcst <- ncol(fcst)
-      for (i in 5:ncol(fcst.out)){
+      for (i in seq(nforward + 1, ncol(fcst.out))){
         fcst.debias[,i,] <- dfun(fcst=fcst[,seq(1,min(i-1, nfcst)),, drop=FALSE],
                                  obs=obs[,seq(1,min(i-1, nfcst)),drop=FALSE],
                                  fcst.out=fcst.out[,i,,drop=FALSE],

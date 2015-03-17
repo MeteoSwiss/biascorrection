@@ -54,7 +54,7 @@ This bias correction method assumes that the bias can be decomposed
 seasonal <- sin(seq(0,4,length=215))
 signal <- outer(seasonal, rnorm(30), '+')
 fcst <- array(rnorm(215*30*51), c(215, 30, 15)) +
-  1.5*c(signal)
+  2*c(signal)
 obs <- array(rnorm(215*30, mean=2), c(215, 30)) +
   signal
 fcst.debias <- biascorrection:::conditional(fcst[,1:20,],
