@@ -1,3 +1,7 @@
+## biascorrection 0.4.11
+
+* added CCR for daily data based on linear regression (using polynomial lead-time dependency)
+
 ## biascorrection 0.4.10
 
 * changed treatment of first forecast in forward mode. First `nforward` forecasts are calibrated normally. Default is `nforward = 10`.

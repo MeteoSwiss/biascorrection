@@ -2,9 +2,10 @@
 % Please edit documentation in R/smoothccr.R
 \name{smoothccr}
 \alias{smoothccr}
-\title{Daily CCR with smoothed parameters}
+\title{Daily CCR with monthly correction factors}
 \usage{
-smoothccr(fcst, obs, fcst.out = fcst, span = min(1, 31/nrow(fcst)), ...)
+smoothccr(fcst, obs, fcst.out = fcst, fc.time, fcout.time = fc.time,
+  span = min(1, 31/nrow(fcst)), ...)
 }
 \arguments{
 \item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble members}
@@ -14,23 +15,30 @@ smoothccr(fcst, obs, fcst.out = fcst, span = min(1, 31/nrow(fcst)), ...)
 \item{fcst.out}{array of forecast values to which bias correction
 should be applied (defaults to \code{fcst})}
 
+\item{fc.time}{forecast times as R-dates for lead time dependency}
+
+\item{fcout.time}{forecast time for array to which bias correction is applied
+for back compatibility with leave-one-out cross-validation in \code{\link{debias}}}
+
 \item{span}{the parameter which controls the degree of smoothing (see \code{\link{loess}})}
 
 \item{...}{additional arguments for compatibility with other bias correction methods}
 }
 \description{
-Computes climate conserving recalibration on daily data with
-smoothing for climatology (experimental)
+Computes climate conserving recalibration on daily time series using
+a linear regression approach with parameters following a polynomial (2nd order)
+lead time dependency
 }
 \examples{
-fcst <- array(rnorm(3000*1*51, mean=1, sd=rep(seq(0.5,2, length=3000), each=1)),
-c(1, 3000, 51)) + 0.5*sin(seq(0,4,length=1))
-obs <- array(rnorm(3000, mean=2), c(1, 3000)) + sin(seq(0,4, length=1))
-fcst.debias <- biascorrection:::ccr(fcst, obs, span=0.5)
-f.rmse <- sqrt(apply((obs - apply(fcst.debias, 2, mean))**2, 1, mean))
-f.sd <- sqrt(mean(apply(fcst.debias, 2, sd)**2))
-f.sd / f.rmse
-bias <- mean(fcst.debias - obs[1,])
+signal <- rep(rnorm(30, sd=2), each=215)
+fcst <- array(rnorm(30*215*51, mean=1, sd=rep(seq(0.5,2, length=30), each=215)),
+c(215, 30, 51)) + 0.5*sin(seq(0,4,length=215)) + signal*0.5
+obs <- array(rnorm(30*215, mean=2), c(215, 30)) + sin(seq(0,4, length=215)) + signal
+fc.time <- outer(1:215, 1981:2010, function(x,y) as.Date(paste0(y, '-11-01')) - 1 + x)
+fcst.debias <- biascorrection:::smoothccr(fcst, obs, fc.time=fc.time, span=0.5)
+fcst.mon <- month(fcst, fc.time)
+obs.mon <- month(obs, fc.time)
+fcst.mondebias <- month(fcst.debias, fc.time)
 }
 \keyword{util}
 
