@@ -122,6 +122,7 @@ debias <- function(fcst, obs, method='unbias', crossval=FALSE, blocklength=1, fo
                         obs=obs, 
                         fcst.out=fcst.out, 
                         fc.time=fc.time, 
+                        fcout.time=fcout.time,
                         ...)
   }
   return(fcst.debias)
