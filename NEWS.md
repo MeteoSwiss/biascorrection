@@ -1,3 +1,7 @@
+## biascorrection 0.4.12
+
+* new forward approach: first 15 years are calibrated 'backwards'
+
 ## biascorrection 0.4.11
 
 * added CCR for daily data based on linear regression (using polynomial lead-time dependency)

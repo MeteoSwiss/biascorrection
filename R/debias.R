@@ -97,17 +97,28 @@ debias <- function(fcst, obs, method='unbias', crossval=FALSE, blocklength=1, fo
   } else if (forward) {
     fcst.debias <- fcst.out
     nforward <- min(nforward, ncol(fcst.out))
-    ## loop through n-years of forecasts to debias all the forecast in year i
-    ## with all the forecasts before year i. 
-    ## The first nforward forecasts are debiased normally (in sample)
-    fcst.debias[,1:nforward,] <- dfun(fcst=fcst[,1:nforward,,drop=FALSE],
-                                      obs=obs[,1:nforward,drop=FALSE],
-                                      fcst.out=fcst.out[,1:nforward,,drop=FALSE],
-                                      fc.time=if(is.null(fc.time)) NULL else fc.time[,1:nforward,drop=FALSE], 
-                                      fcout.time=if (is.null(fcout.time)) NULL else fcout.time[,1:nforward,drop=FALSE], 
-                                      ...)
+    nfcst <- ncol(fcst)
+    
+    ## new approach: first nforward years are calibrated backwards
+    for (i in seq(1, min(nforward, ncol(fcst.out)))){
+      fcst.debias[,i,] <- dfun(fcst=fcst[,seq(i+1,nfcst),, drop=FALSE],
+                               obs=obs[,seq(i+1, nfcst),drop=FALSE],
+                               fcst.out=fcst.out[,i,,drop=FALSE],
+                               fc.time=if(is.null(fc.time)) NULL else fc.time[,seq(i+1, nfcst),drop=FALSE], 
+                               fcout.time=if (is.null(fcout.time)) NULL else fcout.time[,i,drop=FALSE], 
+                               ...)
+    }      
+    
+#     ## loop through n-years of forecasts to debias all the forecast in year i
+#     ## with all the forecasts before year i. 
+#     ## The first nforward forecasts are debiased normally (in sample)
+#     fcst.debias[,1:nforward,] <- dfun(fcst=fcst[,1:nforward,,drop=FALSE],
+#                                       obs=obs[,1:nforward,drop=FALSE],
+#                                       fcst.out=fcst.out[,1:nforward,,drop=FALSE],
+#                                       fc.time=if(is.null(fc.time)) NULL else fc.time[,1:nforward,drop=FALSE], 
+#                                       fcout.time=if (is.null(fcout.time)) NULL else fcout.time[,1:nforward,drop=FALSE], 
+#                                       ...)
     if (ncol(fcst.out) > nforward){
-      nfcst <- ncol(fcst)
       for (i in seq(nforward + 1, ncol(fcst.out))){
         fcst.debias[,i,] <- dfun(fcst=fcst[,seq(1,min(i-1, nfcst)),, drop=FALSE],
                                  obs=obs[,seq(1,min(i-1, nfcst)),drop=FALSE],
