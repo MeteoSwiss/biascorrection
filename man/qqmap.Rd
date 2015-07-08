@@ -2,10 +2,14 @@
 % Please edit documentation in R/qqmap.R
 \name{qqmap}
 \alias{qqmap}
+\alias{qqmap_int}
+\alias{qqmap_mul}
 \title{Quantile mapping}
 \usage{
 qqmap(fcst, obs, fcst.out = fcst, anomalies = FALSE,
   multiplicative = FALSE, nn = nrow(fcst), exact = FALSE, ...)
+
+qqmap_mul(...)
 }
 \arguments{
 \item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble

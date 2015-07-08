@@ -149,10 +149,7 @@ fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=
         fcst.debias[ind2,,] <- fcst.out[ind2,,] * qcorr[fout.qi]
       } else {
         fcst.debias[ind2,,] <- fcst.out[ind2,,] - (fq - oq)[fout.qi]    
-      }
-      print(range(ind2))
-      print(c(mean(oq == 0), mean(fq == 0), mean(fcst.debias[ind2,,] <= 0)))
-      
+      }      
     } ## end of loop on lead times
   } ## end of if on window length
   if (!is.null(lower.bound)){

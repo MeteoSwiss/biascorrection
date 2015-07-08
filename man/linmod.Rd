@@ -24,9 +24,9 @@ for back compatibility with leave-one-out cross-validation in
 \code{\link{debias}}}
 
 \item{formula}{model formula to model deviations from the climatology
-(see \link{details})}
+(see details)}
 
-\item{recal}{logical, should the ensemble spread be recalibrated? (see \link{details})}
+\item{recal}{logical, should the ensemble spread be recalibrated? (see details)}
 
 \item{smooth}{logical, should model climatology (and ensemble spread) be
 smoothed?}
@@ -86,7 +86,7 @@ observation climatology and residual standard deviation can be switched of with
 \code{smoothobs = FALSE}
 
 Both the residual standard deviation (\code{psd}) and the ensemble spread
-(\code{fsd}) are smoothed using \code{\link{stats::loess}} as follows.
+(\code{fsd}) are smoothed using \code{\link{loess}} as follows.
 
 \code{psd.smooth = exp(loess(log(psd) ~ log(seq(along=psd)), span=span)$fit)}
 

@@ -1,5 +1,12 @@
+#'@name qqmap
+#'
+#'@aliases
+#'qqmap_int
+#'
+#'@title
 #'Quantile mapping
 #'
+#'@description
 #'Computes bias correction with quantile mapping
 #'
 #'@param fcst n x m x k array of n lead times, m forecasts, of k ensemble 
@@ -134,7 +141,9 @@ qqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=FALS
       ## assume constant correction by discrete quantiles
       fout.qi <- findInterval(fcst.out.anom[i,,], fqbnds) + 1
       if (multiplicative){
-        fcst.debias[i,,] <- fcst.out[i,,] / (fq/oq)[fout.qi]
+        qcorr <- oq/fq
+        qcorr[fq == 0] <- 1
+        fcst.debias[i,,] <- fcst.out[i,,]*qcorr[fout.qi]
       } else {
         fcst.debias[i,,] <- fcst.out[i,,] - (fq - oq)[fout.qi]    
       }
@@ -153,3 +162,7 @@ qqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=FALS
   } 
   return(fcst.debias)
 }
+
+#'@rdname qqmap
+#'
+qqmap_mul <- function(...) qqmap(..., multiplicative=TRUE)
