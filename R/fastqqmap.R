@@ -64,10 +64,10 @@
 #' oprob <- (seq(obs[,21:30]) - 1/3) / (length(obs[,21:30]) + 1/3)
 #' oldpar <- par(no.readonly=TRUE)
 #' par(mfrow=c(1,2))
-#' plot(density(fcst.debias, from=0, to=80), lwd=2, col=1, 
+#' plot(density(fcst.debias[,,1], from=0, to=80, bw=1), lwd=2, col=1, 
 #'      main='Distribution in validation period')
-#' lines(density(fcst[,21:30,], from=0, to=80), lwd=2, lty=2)
-#' lines(density(obs[,21:30], from=0, to=80), lwd=2, col=2)
+#' lines(density(fcst[,21:30,1], from=0, to=80, bw=1), lwd=2, lty=2)
+#' lines(density(obs[,21:30], from=0, to=80, bw=1), lwd=2, col=2)
 #' legend('topright', c('Observations', 'No bias correction', 'fastqqmap'), 
 #'        lwd=2, col=c(2,1,1), lty=c(1,2,1), inset=0.05)
 #' plot(quantile(obs[,21:30], type=8, oprob), 
@@ -83,10 +83,10 @@
 #' 
 #'@keywords util
 fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=FALSE, lower.bound=NULL, window=min(nrow(fcst), 91), ...){
-  ## estimate the quantile correction excluding the 5 smallest/largest values
-  ## minprob <- min((6 - 1/3) / (ncol(obs)* window + 1/3), 0.05)
   ## estimate the quantile correction for the full range
-  minprob <- min((2/3) / (ncol(obs)* window + 1/3), 0.05)
+  ## minprob <- min((2/3) / (ncol(obs)* window + 1/3), 0.01)
+  ## estimate the quantile correction excluding the 5 smallest/largest values
+  minprob <- min((6 - 1/3) / (ncol(obs)* window + 1/3), 0.01)
   prob <- seq(minprob, 1 - minprob, length=floor(max(50, ncol(obs)*window/20)))
   ## fq <- quantile(fcst, type=8, prob=prob)
   if (anomalies){
@@ -108,13 +108,16 @@ fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=
   }
   nlead <- nrow(fcst)
   if (window >= nlead){
-    fq <- rowMeans(apply(fcst.anom, 3, quantile, type=8, prob=prob))
+    fq <- quantile(fcst.anom, type=8, prob=prob)
     oq <- quantile(obs.anom, type=8, prob=prob)
     ## find boundaries in between quantiles
     fqbnds <- fq[-length(fq)] + 0.5*diff(fq)
     fout.qi <- findInterval(fcst.out.anom, fqbnds) + 1
     if (multiplicative){
-      fcst.debias <- fcst.out * (oq / fq)[fout.qi]
+      qcorr <- oq/fq
+      qcorr[fq == 0 & oq != 0] <- 1
+      qcorr[fq == 0 & oq == 0] <- 0
+      fcst.debias <- fcst.out * qcorr[fout.qi]
     } else {
       fcst.debias <- fcst.out + (oq - fq)[fout.qi]
     }
@@ -145,7 +148,8 @@ fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=
       fout.qi <- findInterval(fcst.out.anom[ind2,,], fqbnds) + 1
       if (multiplicative){
         qcorr <- oq/fq
-        qcorr[fq == 0] <- 1
+        qcorr[fq == 0 & oq != 0] <- 1
+        qcorr[fq == 0 & oq == 0] <- 0
         fcst.debias[ind2,,] <- fcst.out[ind2,,] * qcorr[fout.qi]
       } else {
         fcst.debias[ind2,,] <- fcst.out[ind2,,] - (fq - oq)[fout.qi]    
