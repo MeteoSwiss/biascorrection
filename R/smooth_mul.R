@@ -30,9 +30,11 @@ smooth_mul <- function(fcst, obs, fcst.out=fcst, span=min(1, 31/nrow(fcst)), ...
   fcst.ens <- rowMeans(fcst, dims=2)
   fcst.ens[is.na(obs)] <- NA
   fcst.mn <- rowMeans(fcst.ens, dims=1, na.rm=T)
-  fcst.clim <- sloess(fcst.mn, span=span)
+  fcst.clim <- pmax(sloess(fcst.mn, span=span),0)
   obs.mn <- rowMeans(obs, dims=1, na.rm=T)
-  obs.clim <- sloess(obs.mn, span=span)
-  fcst.debias <- fcst.out / fcst.clim * obs.clim
+  obs.clim <- pmax(sloess(obs.mn, span=span), 0)
+  mulcor <- pmin(obs.clim / fcst.clim, 10)
+  mulcor[obs.clim == 0 & fcst.clim == 0] <- 1
+  fcst.debias <- fcst.out * mulcor
   return(fcst.debias)
 }

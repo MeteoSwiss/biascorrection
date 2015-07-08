@@ -31,7 +31,9 @@ smoothobs_mul <- function(fcst, obs, fcst.out=fcst, span=min(1, 31/nrow(fcst)), 
   fcst.ens[is.na(obs)] <- NA
   fcst.mn <- rowMeans(fcst.ens, dims=1, na.rm=T)
   obs.mn <- rowMeans(obs, dims=1, na.rm=T)
-  obs.clim <- sloess(obs.mn, span=span)
-  fcst.debias <- fcst.out / fcst.mn * obs.clim
+  obs.clim <- pmax(sloess(obs.mn, span=span), 0)
+  mulcor <- pmin(obs.clim / fcst.mn, 10)
+  mulcor[obs.clim == 0 & fcst.mn == 0] <- 1
+  fcst.debias <- fcst.out * mulcor
   return(fcst.debias)
 }

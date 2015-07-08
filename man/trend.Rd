@@ -2,12 +2,16 @@
 % Please edit documentation in R/trend.R
 \name{trend}
 \alias{trend}
+\alias{trendRecal}
 \title{Bias with linear time trend}
 \usage{
-trend(fcst, obs, fcst.out = fcst, fc.time, fcout.time = fc.time,
-  span = min(1, 31/nrow(fcst)), ...)
+trend(...)
+
+trendRecal(...)
 }
 \arguments{
+\item{...}{additional arguments for compatibility with other bias correction methods}
+
 \item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble members}
 
 \item{obs}{n x m matrix of veryfing observations}
@@ -21,8 +25,6 @@ should be applied (defaults to \code{fcst})}
 for back compatibility with leave-one-out cross-validation in \code{\link{debias}}}
 
 \item{span}{the parameter which controls the degree of smoothing (see \code{\link{loess}})}
-
-\item{...}{additional arguments for compatibility with other bias correction methods}
 }
 \description{
 Computes mean de-biasing with linear time trend
@@ -42,7 +44,10 @@ sin(seq(0,4, length=215)) +
 rep(seq(0,3,length=30), each=215)
 fc.time <- outer(1:215, 1981:2010, function(x,y) as.Date(paste0(y, '-11-01')) - 1 + x)
 fcst.debias <- biascorrection:::trend(fcst[,1:20,],
-obs[,1:20], fcst.out=fcst, fc.time=fc.time, span=0.5)
+obs[,1:20], fcst.out=fcst, fc.time=fc.time[],1:20], fcout.time=fc.time, span=0.5)
+}
+\seealso{
+linmod
 }
 \keyword{util}
 
