@@ -60,7 +60,7 @@
 #' obs <- array(rgamma(length(signal), shape=3, scale=1), dim(signal)) *
 #'   signal * (runif(length(signal)) > 0.3)
 #' fcst.debias <- biascorrection:::fastqqmap(fcst[,1:20,], 
-#'   obs[,1:20], fcst.out=fcst[,21:30,], lower.bound=0)
+#'   obs[,1:20], fcst.out=fcst[,21:30,], lower.bound=0, multiplicative=TRUE)
 #' oprob <- (seq(obs[,21:30]) - 1/3) / (length(obs[,21:30]) + 1/3)
 #' oldpar <- par(no.readonly=TRUE)
 #' par(mfrow=c(1,2))
@@ -149,10 +149,7 @@ fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=
         fcst.debias[ind2,,] <- fcst.out[ind2,,] * qcorr[fout.qi]
       } else {
         fcst.debias[ind2,,] <- fcst.out[ind2,,] - (fq - oq)[fout.qi]    
-      }
-      print(range(ind2))
-      print(c(mean(oq == 0), mean(fq == 0), mean(fcst.debias[ind2,,] <= 0)))
-      
+      }      
     } ## end of loop on lead times
   } ## end of if on window length
   if (!is.null(lower.bound)){
