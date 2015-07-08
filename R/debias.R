@@ -1,5 +1,9 @@
+#' @name debias
+#' 
+#' @title
 #' Calibration of daily time series
 #' 
+#' @description
 #' Applies bias correction derived from forecast and observation data to
 #' forecast data set
 #' 
@@ -45,7 +49,9 @@
 #' 
 #' @keywords util
 #' @export
-debias <- function(fcst, obs, method='unbias', crossval=FALSE, blocklength=1, forward=FALSE, fcst.out=fcst, fc.time=NULL, fcout.time=fc.time, nforward=10, ...){
+debias <- function(fcst, obs, method='unbias', crossval=FALSE, 
+                   blocklength=1, forward=FALSE, fcst.out=fcst, 
+                   fc.time=NULL, fcout.time=fc.time, nforward=10, ...){
   ## get name of bias correction function
   dfun <- try(get(method), silent=TRUE)
   if (class(dfun) == 'try-error') stop('Bias correction method has not been implemented yet')
