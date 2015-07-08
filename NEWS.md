@@ -1,3 +1,29 @@
+## biascorrection 0.5.3
+
+* Included fast quantile mapping `fastqqmap` using moving windows with larger steps
+
+## biascorrection 0.5.2.1
+
+* Debugged division by zero in `smooth_mul` and `smoothobs_mul`
+
+## biascorrection 0.5.2
+
+* correct negative climatological values for `smooth_mul` and `smoothobs_mul`
+
+## biascorrection 0.5.1
+
+* new differences switch for model fitting on first order differences (`linmod`)
+
+## biascorrection 0.5
+
+* calibration methods now use linear modelling capabilities (`linmod`)
+* most calibration methods are expressed using the `linmod` function
+
+## biascorrection 0.4.12
+
+* new conditional approach with rescaling of residuals
+* new quantile mapping with 15 day windows (doesn't work well)
+
 ## biascorrection 0.4.12
 
 * new forward approach: first 15 years are calibrated 'backwards'
