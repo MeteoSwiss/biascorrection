@@ -7,7 +7,7 @@
 \usage{
 fastqqmap(fcst, obs, fcst.out = fcst, anomalies = FALSE,
   multiplicative = FALSE, lower.bound = NULL, window = min(nrow(fcst),
-  91), ...)
+  31), minjump = 11, ...)
 
 fastqqmap_mul(fcst, obs, fcst.out = fcst, anomalies = FALSE,
   multiplicative = TRUE, lower.bound = NULL, window = min(nrow(fcst), 91),
@@ -35,6 +35,9 @@ precipitation)}
 computation speed, the window moves along at approximately 1/6 of the window
 width (i.e. jumps by 15 days for a 91 day window)}
 
+\item{minjump}{minimum number of days the moving quantile window jumps (see
+details)}
+
 \item{...}{additional arguments for compatibility with other bias correction
  methods}
 }
@@ -43,7 +46,7 @@ Computes bias correction with quantile mapping
 }
 \details{
 The quantile mapping algorithm estimates quantile correction factors
- for \code{n} quantiles. For each forecast value in \code{fcst.out}, the
+ for \code{q} quantiles. For each forecast value in \code{fcst.out}, the
  percentile within which the value falls in the distribution of input
  forecasts \code{fcst} is determined and the corresponding quantile
  correction applied. For multiplicative quantile mapping
@@ -51,19 +54,22 @@ The quantile mapping algorithm estimates quantile correction factors
  (\code{fcst.out}) is divided by the ratio of forecast to observed quantiles,
  whereas for additive quantile mapping \code{multiplicative = FALSE}, the
  difference between the forecast and observed quantiles are subtracted from
- \code{fcst.out}. The quantiles are estimated for at least 50 discrete values
- from the 5th to 95th percentile, or, if there are enough observations for
- \code{n = n_obs / 10} discrete quantiles excluding the 5 smallest and
- largest values. If \code{anomalies} is set, forecast and observed anomalies
- are computed with reference to the forecast ensemble mean (the signal) and
- the quantile mapping is only applied to the anomalies with the signal being
- left uncorrected.
+ \code{fcst.out}. The quantiles are estimated for \code{q = n_obs * window/
+ 20} discrete quantiles excluding the 5 smallest and largest values. If
+ \code{anomalies} is set, forecast and observed anomalies are computed with
+ reference to the forecast ensemble mean (the signal) and the quantile
+ mapping is only applied to the anomalies with the signal being left
+ uncorrected.
 
- The quantile mapping is lead time dependent, parameter \code{windo} is used
+ The quantile mapping is lead time dependent, parameter \code{window} is used
  to select the number of lead times to be included in the quantile
  estimation. For the beginning and end of the series, the lead-time interval
  is kept constant, so that to estimate the quantile correction for the first
- lead time, the first \code{window} lead times are used.
+ lead time, the first \code{window} lead times are used. In order to speed up
+ the computation, the quantile mapping moving window moves along in steps of
+ \code{max(minjump, floor(window/6))}. I.e. by default, the algorithm
+ advances in jumps of 15 days for a 91 day window, or 11 days for the default
+ of 31 day windows.
 }
 \examples{
 ## initialise forcast observation pairs
@@ -74,14 +80,14 @@ fcst <- array(rgamma(length(signal)*nens, shape=2, scale=2), c(dim(signal), nens
 obs <- array(rgamma(length(signal), shape=3, scale=1), dim(signal)) *
   signal * (runif(length(signal)) > 0.3)
 fcst.debias <- biascorrection:::fastqqmap(fcst[,1:20,],
-  obs[,1:20], fcst.out=fcst[,21:30,], lower.bound=0)
+  obs[,1:20], fcst.out=fcst[,21:30,], lower.bound=0, multiplicative=TRUE)
 oprob <- (seq(obs[,21:30]) - 1/3) / (length(obs[,21:30]) + 1/3)
 oldpar <- par(no.readonly=TRUE)
 par(mfrow=c(1,2))
-plot(density(fcst.debias, from=0, to=80), lwd=2, col=1,
+plot(density(fcst.debias[,,1], from=0, to=80, bw=1), lwd=2, col=1,
      main='Distribution in validation period')
-lines(density(fcst[,21:30,], from=0, to=80), lwd=2, lty=2)
-lines(density(obs[,21:30], from=0, to=80), lwd=2, col=2)
+lines(density(fcst[,21:30,1], from=0, to=80, bw=1), lwd=2, lty=2)
+lines(density(obs[,21:30], from=0, to=80, bw=1), lwd=2, col=2)
 legend('topright', c('Observations', 'No bias correction', 'fastqqmap'),
        lwd=2, col=c(2,1,1), lty=c(1,2,1), inset=0.05)
 plot(quantile(obs[,21:30], type=8, oprob),

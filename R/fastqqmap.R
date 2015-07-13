@@ -1,15 +1,11 @@
-#'@name
-#'fastqqmap
-#'
-#'@aliases
-#'fastqqmap_mul
-#'
-#'@title
-#'Quantile mapping
-#'
-#'@description
-#'Computes bias correction with quantile mapping
-#'
+#'@name fastqqmap
+#'  
+#'@aliases fastqqmap_mul
+#'  
+#'@title Quantile mapping
+#'  
+#'@description Computes bias correction with quantile mapping
+#'  
 #'@param fcst n x m x k array of n lead times, m forecasts, of k ensemble 
 #'  members
 #'@param obs n x m matrix of veryfing observations
@@ -17,18 +13,20 @@
 #'  applied (defaults to \code{fcst})
 #'@param multiplicative logical, is quantile correction to be applied 
 #'  multiplicatively?
-#'@param lower.bound is used to truncate output if set (e.g. to zero for
+#'@param lower.bound is used to truncate output if set (e.g. to zero for 
 #'  precipitation)
 #'@param anomalies logical, should quantile mapping be applied to forecast and 
 #'  observed anomalies (from forecast ensemble mean) only?
 #'@param window width of window to be used for quantile mapping. To increase 
 #'  computation speed, the window moves along at approximately 1/6 of the window
 #'  width (i.e. jumps by 15 days for a 91 day window)
+#'@param minjump minimum number of days the moving quantile window jumps (see
+#'  details)
 #'@param ... additional arguments for compatibility with other bias correction 
 #'  methods
 #'  
 #'@details The quantile mapping algorithm estimates quantile correction factors 
-#'  for \code{n} quantiles. For each forecast value in \code{fcst.out}, the 
+#'  for \code{q} quantiles. For each forecast value in \code{fcst.out}, the 
 #'  percentile within which the value falls in the distribution of input 
 #'  forecasts \code{fcst} is determined and the corresponding quantile 
 #'  correction applied. For multiplicative quantile mapping 
@@ -36,19 +34,22 @@
 #'  (\code{fcst.out}) is divided by the ratio of forecast to observed quantiles,
 #'  whereas for additive quantile mapping \code{multiplicative = FALSE}, the 
 #'  difference between the forecast and observed quantiles are subtracted from 
-#'  \code{fcst.out}. The quantiles are estimated for at least 50 discrete values
-#'  from the 5th to 95th percentile, or, if there are enough observations for 
-#'  \code{n = n_obs / 10} discrete quantiles excluding the 5 smallest and 
-#'  largest values. If \code{anomalies} is set, forecast and observed anomalies 
-#'  are computed with reference to the forecast ensemble mean (the signal) and 
-#'  the quantile mapping is only applied to the anomalies with the signal being 
-#'  left uncorrected.
+#'  \code{fcst.out}. The quantiles are estimated for \code{q = n_obs * window/ 
+#'  20} discrete quantiles excluding the 5 smallest and largest values. If 
+#'  \code{anomalies} is set, forecast and observed anomalies are computed with 
+#'  reference to the forecast ensemble mean (the signal) and the quantile 
+#'  mapping is only applied to the anomalies with the signal being left 
+#'  uncorrected.
 #'  
-#'  The quantile mapping is lead time dependent, parameter \code{windo} is used
-#'  to select the number of lead times to be included in the quantile
-#'  estimation. For the beginning and end of the series, the lead-time interval
-#'  is kept constant, so that to estimate the quantile correction for the first
-#'  lead time, the first \code{window} lead times are used.
+#'  The quantile mapping is lead time dependent, parameter \code{window} is used
+#'  to select the number of lead times to be included in the quantile 
+#'  estimation. For the beginning and end of the series, the lead-time interval 
+#'  is kept constant, so that to estimate the quantile correction for the first 
+#'  lead time, the first \code{window} lead times are used. In order to speed up
+#'  the computation, the quantile mapping moving window moves along in steps of 
+#'  \code{max(minjump, floor(window/6))}. I.e. by default, the algorithm
+#'  advances in jumps of 15 days for a 91 day window, or 11 days for the default
+#'  of 31 day windows.
 #'  
 #'  
 #' @examples
@@ -82,7 +83,7 @@
 #' par(oldpar)
 #' 
 #'@keywords util
-fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=FALSE, lower.bound=NULL, window=min(nrow(fcst), 91), ...){
+fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=FALSE, lower.bound=NULL, window=min(nrow(fcst), 31), minjump=11, ...){
   ## estimate the quantile correction for the full range
   ## minprob <- min((2/3) / (ncol(obs)* window + 1/3), 0.01)
   ## estimate the quantile correction excluding the 5 smallest/largest values
@@ -125,9 +126,9 @@ fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=
     ## do everything along the lead times
     fcst.debias <- NA*fcst.out.anom
     ## figure out jump width
-    njump <- floor(window/6)
+    njump <- min(max(floor(window/6), minjump), nlead)
     isteps <- seq(ceiling(window/2),
-                  nlead - floor(window/2),
+                  nlead - ceiling(window/2) + 1,
                   by=njump)
     for (i in seq(along=isteps)){
       ## lead times for estimating quantiles

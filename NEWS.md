@@ -1,3 +1,7 @@
+## biascorrection 0.5.3.1
+
+* Changed default for `fastqqmap` to `window = 31` and `minjump = 11`
+
 ## biascorrection 0.5.3
 
 * Included fast quantile mapping `fastqqmap` using moving windows with larger steps
