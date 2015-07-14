@@ -1,3 +1,8 @@
+## biascorrection 0.5.4
+
+* Added option `type` to `ccr` for out-of-sample recalibration
+* Fixed bug in `ccrlm`
+
 ## biascorrection 0.5.3.1
 
 * Changed default for `fastqqmap` to `window = 31` and `minjump = 11`

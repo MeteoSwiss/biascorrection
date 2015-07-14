@@ -111,9 +111,10 @@ ccrlm <- function(fcst, obs, pred=NULL,
     }
     flm <- lm(obs ~ ., fdf)
     pred.lm <- predict(flm, newdata=odf, interval='predict')
-    pred.sd <- apply(pred.lm[,-1], 1, diff) / diff(qnorm(c(0.025, 0.975)))
+    tfrac <- -qt((1 - 0.95)/2, flm$df.res)
+    pred.sd <- apply(pred.lm[,-1], 1, diff) / 2 / tfrac
     repred.lm <- predict(flm, newdata=fdf, interval='predict')
-    repred.sd <- apply(repred.lm[,-1], 1, diff) / diff(qnorm(c(0.025, 0.975)))
+    repred.sd <- apply(repred.lm[,-1], 1, diff) / 2 / tfrac
     ## fcst.debias[i,,] <- predict(flm, newdata=odf) + 
     ##   (fcst.out[i,,] - fcst.out.ens[i,]) * sd(flm$res) / fcst.spread[i] * sqrt((nfcst - 1) / nfcst)
     fcst.debias[i,,] <- pred.lm[,1] + 
