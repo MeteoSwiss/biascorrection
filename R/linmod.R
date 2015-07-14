@@ -174,11 +174,15 @@ linmod <- function(fcst, obs, fcst.out=fcst,
   
   ## compute lead-time dependent inflation for recalibration
   if (recal){
-    fres <- obs - predict(f.lm, newdata=in.df)
+    fres <- array(in.df$obs - predict(f.lm, newdata=in.df), dim(obs))
     psd <- apply(fres, 1, sd)
-    fsd <- apply(fcst.out - c(fcst.out.ens), 1, sd)
+    fsd <- apply(fcst - c(fcst.ens), 1, sd)
     if (smooth) fsd <- exp(loess(log(fsd) ~ log(seq(fsd)), span=span)$fit)
     if (smoothobs) psd <- exp(loess(log(psd) ~ log(seq(psd)), span=span)$fit)
+    ## prediction interval is tfrac*sd_pred
+    ## plm <- predict(f.lm, newdata=out.df, interval='prediction', level=pnorm(1))
+    ## tfrac <- -qt((1 - pnorm(1))/2, f.lm$df.residual)
+    ## pred.sd <- (plm[,'upr'] - plm[,'fit'])/tfrac    
     inflate <- psd / fsd 
       
   } else {

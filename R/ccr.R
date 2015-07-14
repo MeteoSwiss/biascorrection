@@ -1,14 +1,36 @@
 #' Climate conserving recalibration
 #' 
-#' Climate conserving recalibration with correction factors for each lead 
-#' time without smoothing (application to daily series not recommended).
+#' Climate conserving recalibration with correction factors for each lead time 
+#' without smoothing (application to daily series not recommended).
 #' 
-#' @param fcst n x m x k array of n lead times, m forecasts, of k ensemble members
+#' @param fcst n x m x k array of n lead times, m forecasts, of k ensemble 
+#'   members
 #' @param obs n x m matrix of veryfing observations
-#' @param fcst.out array of forecast values to which bias correction
-#' should be applied (defaults to \code{fcst})
-#' @param ... additional arguments for compatibility with other bias correction methods
-#' 
+#' @param fcst.out array of forecast values to which bias correction should be 
+#'   applied (defaults to \code{fcst})
+#' @param type if set to "prediction", additional inflation of the spread as in 
+#'   linear regression (see details)
+#' @param ... additional arguments for compatibility with other bias correction 
+#'   methods
+#'   
+#' @details In \code{calibration} mode, the climate conserving recalibration 
+#'   (CCR) follows Weigel \emph{et al.} (2008). In \code{prediction} mode, the 
+#'   CCR spread correction is expanded to take into account additional 
+#'   uncertainty from the signal calibration following linear regression theory.
+#'   I.e. the inflation factor \code{s.pred} is
+#'   
+#'   \deqn{.spred = s \sqrt{1 + 1/n + f_0^2 / \sum{f_j^2}}}{s.pred = s * sqrt(1 + 1/n + %
+#'   fo^2 / sum(fj^2))}
+#'   
+#'   where \eqn{f_0}{fo} is the ensemble mean forecast anomaly that is to be
+#'   adjusted, and \eqn{\sum{f_j^2}}{sum(fj^2)} is the sum of the squared
+#'   ensemble mean forecast anomalies in the calibration set. \eqn{n} is the 
+#'   number of forecast instances in the calibration set.
+#'   
+#' @references Weigel, A., M. Liniger and C. Appenzeller (2008). Seasonal 
+#'   Ensemble Forecasts: Are Recalibrated Single Models Better than Multimodels?
+#'   \emph{Monthly Weather Review}, 137(4), 1460-1479.
+#'   
 #' @examples
 #' fcst <- array(rnorm(3000*1*51, mean=1, sd=rep(seq(0.5,2, length=3000), each=1)), 
 #' c(1, 3000, 51)) + 0.5*sin(seq(0,4,length=1))
@@ -20,7 +42,8 @@
 #' mean(fcst.debias - obs[1,]) ## should be 0 (rounding errors)
 #' 
 #' @keywords util
-ccr <- function(fcst, obs, fcst.out=fcst, ...){
+ccr <- function(fcst, obs, fcst.out=fcst, type=c("calibration", "prediction"), ...){
+  type <- match.arg(type)
   fcst.ens <- rowMeans(fcst, dims=2)
   fcst.ens[is.na(obs)] <- NA
   ## compute climatology
@@ -40,6 +63,10 @@ ccr <- function(fcst, obs, fcst.out=fcst, ...){
   ## put everything back together (with de-biasing)
   fi_out <- fcst.out - fcst.clim
   mu_fout <- rowMeans(fi_out, dims=2)
-  fi_ccr <- as.vector(rr * mu_fout) + ss * (fi_out - as.vector(mu_fout)) + obs.clim  
+  ## add additional spread correction for out-of-sample calibration  
+  if (type == 'prediction'){
+    ss <- ss*sqrt(1 + 1/ncol(mu_f) + mu_fout**2 / apply(mu_f**2, 1, sum))
+  }
+  fi_ccr <- as.vector(rr * mu_fout) + c(ss) * (fi_out - as.vector(mu_fout)) + obs.clim  
   return(fi_ccr)
 }
