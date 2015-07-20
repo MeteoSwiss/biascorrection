@@ -1,3 +1,7 @@
+## biascorrection 0.5.4.1
+
+* Added option `type` also to `linmod`
+
 ## biascorrection 0.5.4
 
 * Added option `type` to `ccr` for out-of-sample recalibration

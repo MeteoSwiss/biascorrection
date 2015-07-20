@@ -6,7 +6,8 @@
 \usage{
 linmod(fcst, obs, fcst.out = fcst, fc.time = NULL, fcout.time = NULL,
   formula = obs ~ fcst, recal = FALSE, smooth = TRUE, smoothobs = TRUE,
-  span = min(1, 91/nrow(fcst)), differences = FALSE, ...)
+  span = min(1, 91/nrow(fcst)), bleach = TRUE, differences = FALSE,
+  type = c("calibration", "prediction"), ...)
 }
 \arguments{
 \item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble
@@ -23,21 +24,30 @@ applied (defaults to \code{fcst})}
 for back compatibility with leave-one-out cross-validation in
 \code{\link{debias}}}
 
-\item{formula}{model formula to model deviations from the climatology
-(see details)}
+\item{formula}{model formula to model deviations from the climatology (see
+details)}
 
-\item{recal}{logical, should the ensemble spread be recalibrated? (see details)}
+\item{recal}{logical, should the ensemble spread be recalibrated? (see
+details)}
 
 \item{smooth}{logical, should model climatology (and ensemble spread) be
 smoothed?}
 
-\item{smoothobs}{logical, should observation climatology (and residual standard
-deviation) be smoothed?}
+\item{smoothobs}{logical, should observation climatology (and residual
+standard deviation) be smoothed?}
 
 \item{span}{the parameter which controls the degree of smoothing (see
 \code{\link{loess}})}
 
-\item{differences}{logical, should model be fit on first order differences (see details)?}
+\item{bleach}{logical, should variance of the residuals be controlled for
+(see details)?}
+
+\item{differences}{logical, should model be fit on first order differences
+(see details)?}
+
+\item{type}{one of \code{prediction} or \code{calibration}, where signal
+calibration uncertainties are propagated for \code{type = "prediction"}
+(see details).}
 
 \item{...}{additional arguments for compatibility with other calibration
   methods}
@@ -48,56 +58,67 @@ Compute calibration for biases that follow various linear models
 \details{
 This is the workhorse for calibration methods that can be expressed
   as linear models. The systematic model errors are decomposed into a
-  seasonally varying (and thus lead-time dependent) bias and ensemble
-  mean errors that depend on forecast anomalies from the mean forecast, on
-  lead time, and/or on forecast date.
+  seasonally varying (and thus lead-time dependent) bias and ensemble mean
+  errors that depend on forecast anomalies from the mean forecast, on lead
+  time, and/or on forecast date.
 
-  A variety of linear models for calibration
-  can be specified using \code{R}'s \code{formula} notation and a few
-  examples are given below (see also \code{example(linmod)}).
+  A variety of linear models for calibration can be specified using
+  \code{R}'s \code{formula} notation and a few examples are given below (see
+  also \code{example(linmod)}).
 
-\describe{
-  \item{\code{obs ~ offset(fcst) - 1}}{
-  Simple bias correction with
-  seasonally varying mean bias}
-  \item{\code{obs ~ fcst}}{
-  Model error dependent on forecast (with
-  dependence being constant across lead times)}
-  \item{\code{obs ~ fcst + fcst:poly(lead,3)}}{
-  Model error dependent
-  on forecast with dependence varying across lead times}
-  \item{\code{obs ~ offset(fcst) + year}}{
-  Linear time trend in bias
-  (time trend constant across lead times)}
-  \item{\code{obs ~ offset(fcst) + year*as.factor(format(date, "\%m"))}}{
-  Linear time trend in bias  with trend depending on forecast month}
-}
+  \describe{ \item{\code{obs ~ offset(fcst) - 1}}{ Simple bias correction
+  with seasonally varying mean bias} \item{\code{obs ~ fcst}}{ Model error
+  dependent on forecast (with dependence being constant across lead times)}
+  \item{\code{obs ~ fcst + fcst:poly(lead,3)}}{ Model error dependent on
+  forecast with dependence varying across lead times} \item{\code{obs ~
+  offset(fcst) + year}}{ Linear time trend in bias (time trend constant
+  across lead times)} \item{\code{obs ~ offset(fcst) +
+  year*as.factor(format(date, "\%m"))}}{ Linear time trend in bias  with
+  trend depending on forecast month} }
 
-In addition to complex dependence of the systematic ensemble mean errors on
-forecast, lead-time, and forecast dates, \code{linmod} also allows a recalibration
-of the ensemble spread. If \code{recal = TRUE}, the lead time dependent ensemble
-spread is inflated (shrunk) to reflect the lead time dependent standard deviation
-of the observation residuals.
+  In addition to complex dependence of the systematic ensemble mean errors on
+  forecast, lead-time, and forecast dates, \code{linmod} also allows a
+  recalibration of the ensemble spread. If \code{recal = TRUE}, the lead time
+  dependent ensemble spread is inflated (shrunk) to reflect the lead time
+  dependent standard deviation of the observation residuals. In addition, if
+  \code{type = 'prediction'}, the ensemble spread matches the predictive
+  standard deviation for the out-of-sample forecast. That is, for a simple
+  linear model with \eqn{y = ax + b + \varepsilon}{y = ax + b + e}, the
+  predictive standard error is \eqn{\sigma \sqrt{1 + 1/n + {x_0}^2 /
+  \sum{x_j^2}}}{ s * sqrt(1 + 1/n + x0^2 / sum(xj^2))}, where \eqn{n} is the
+  number of forecasts in the calibration set, \eqn{x_0}{x0} is the ensemble
+  mean of the foracst that is to be bias-corrected, and \eqn{x_j}{xj} are the
+  forecast ensemble means in the calibration set.
 
-By default, the seasonally varying bias and the residual errors and model spread
-are smoothed using a \code{loess} smoothing. Smoothing of the model ensemble mean
-and model spread can be switched of with \code{smooth = FALSE}, smoothing of the
-observation climatology and residual standard deviation can be switched of with
-\code{smoothobs = FALSE}
+  The underlying assumption of \code{iid} residuals in the linear model is
+  generally not fullfilled, thus a simple pre-whitening technique is
+  introduced with \code{bleach = TRUE}. The pre-whitening consists of an
+  \emph{ad hoc} lead-time dependent scaling to approximate uniform variance
+  in the residuals after the fit. It is strongly recommeded to only use this
+  pre-whitening in combination with \code{smooth = TRUE} to guarantee a
+  smooth variance scaling across lead times.
 
-Both the residual standard deviation (\code{psd}) and the ensemble spread
-(\code{fsd}) are smoothed using \code{\link{loess}} as follows.
+  By default, the seasonally varying bias and the residual errors and model
+  spread are smoothed using a \code{loess} smoothing. Smoothing of the model
+  ensemble mean and model spread can be switched of with \code{smooth =
+  FALSE}, smoothing of the observation climatology and residual standard
+  deviation can be switched of with \code{smoothobs = FALSE}
 
-\code{psd.smooth = exp(loess(log(psd) ~ log(seq(along=psd)), span=span)$fit)}
+  Both the residual standard deviation (\code{psd}) and the ensemble spread
+  (\code{fsd}) are smoothed using \code{\link{loess}} as follows.
 
-Alternatively, the model parameters can be estimated on time series after taking
-first order differences (but preserving the forecast signal) to reduce the effect
-of auto-correlation in the residuals.
+  \code{psd.smooth = exp(loess(log(psd) ~ log(seq(along=psd)),
+  span=span)$fit)}
+
+  Alternatively, the model parameters can be estimated on time series after
+  taking first order differences (but preserving the forecast signal) to
+  reduce the effect of auto-correlation in the residuals with
+  \code{differences = TRUE}.
 }
 \note{
-The linear models are fit using maximum likelihood assuming \code{iid} residuals
-which will generally not apply for real forecasts (auto-correlation and
-heteroscedasticity).
+The linear models are fit using maximum likelihood assuming \code{iid}
+  residuals which will generally not apply for real forecasts
+  (auto-correlation and heteroscedasticity).
 }
 \examples{
 seasonal   <- sin(seq(0,4,length=215))
