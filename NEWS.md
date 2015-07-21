@@ -1,3 +1,7 @@
+## biascorrection 0.5.4.3
+
+* Use R's built-in weighted least squares functionality
+
 ## biascorrection 0.5.4.2
 
 * Minor bug fix

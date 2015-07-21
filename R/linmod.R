@@ -27,8 +27,8 @@
 #'   (see details)?
 #' @param differences logical, should model be fit on first order differences 
 #'   (see details)?
-#' @param type one of \code{prediction} or \code{calibration}, where signal
-#'   calibration uncertainties are propagated for \code{type = "prediction"}
+#' @param type one of \code{prediction} or \code{calibration}, where signal 
+#'   calibration uncertainties are propagated for \code{type = "prediction"} 
 #'   (see details).
 #' @param ... additional arguments for compatibility with other calibration 
 #'   methods
@@ -68,12 +68,9 @@
 #'   forecast ensemble means in the calibration set.
 #'   
 #'   The underlying assumption of \code{iid} residuals in the linear model is 
-#'   generally not fullfilled, thus a simple pre-whitening technique is 
-#'   introduced with \code{bleach = TRUE}. The pre-whitening consists of an 
-#'   \emph{ad hoc} lead-time dependent scaling to approximate uniform variance 
-#'   in the residuals after the fit. It is strongly recommeded to only use this 
-#'   pre-whitening in combination with \code{smooth = TRUE} to guarantee a 
-#'   smooth variance scaling across lead times.
+#'   generally not fullfilled, thus weighted least squares can be used instead 
+#'   with \code{bleach = TRUE}. The weighting is chosen proportional to the
+#'   inverse of the lead-time dependent variance of the residuals.
 #'   
 #'   By default, the seasonally varying bias and the residual errors and model 
 #'   spread are smoothed using a \code{loess} smoothing. Smoothing of the model 
@@ -197,10 +194,9 @@ linmod <- function(fcst, obs, fcst.out=fcst,
     if (bleach){
       sd.res <- apply(array(in.df2$obs - predict(f.lm, newdata=in.df2), dim(obs[-1,])), 1, sd)
       if (smooth) sd.res <- exp(loess(log(sd.res) ~ log(seq(sd.res)))$fit)
+      in.df2$ww <- 1 / sd.res**2
       sd.res <- sd.res[c(seq(sd.res), length(sd.res))]
-      in.df2$fcst <- in.df2$fcst / sd.res[-length(sd.res)]
-      in.df$fcst <- in.df$fcst / sd.res
-      f.lm <- lm(formula, in.df2)      
+      f.lm <- lm(formula, in.df2, weights=ww)      
     } else {
       sd.res <- 1
     }    
@@ -209,8 +205,8 @@ linmod <- function(fcst, obs, fcst.out=fcst,
     if (bleach){
       sd.res <- apply(array(f.lm$res, dim(obs)), 1, sd)
       if (smooth) sd.res <- exp(loess(log(sd.res) ~ log(seq(sd.res)))$fit)
-      in.df$obs <- in.df$obs / sd.res
-      f.lm <- lm(formula, in.df)
+      in.df$ww <- 1 / sd.res**2
+      f.lm <- lm(formula, in.df, weights=ww)
     } else {
       sd.res <- rep(1, nrow(obs))
     }
@@ -220,25 +216,25 @@ linmod <- function(fcst, obs, fcst.out=fcst,
   ## compute lead-time dependent inflation for recalibration
   if (recal){
     fsd <- apply(fcst - c(fcst.ens), 1, sd)
+    if (smooth) fsd <- exp(loess(log(fsd) ~ log(seq(fsd)), span=span)$fit)
     if (type == 'prediction'){
       ## prediction interval is tfrac*sd_pred
-      plm <- predict(f.lm, newdata=out.df, interval='prediction', level=pnorm(1))
+      plm <- predict(f.lm, newdata=out.df, interval='prediction', level=pnorm(1), weights=1 / sd.res**2)
       tfrac <- -qt((1 - pnorm(1))/2, f.lm$df.residual)
-      psd <- (plm[,'upr'] - plm[,'fit'])/tfrac * sd.res
+      psd <- array((plm[,'upr'] - plm[,'fit'])/tfrac, dim(fcst.out.ens))
       if (differences){
         ## additional correction to take into account that
         ## sd(f.lm$res) != sd(in.df$obs - predict(f.lm, in.df))
-        sd.corr1 <- apply(matrix(in.df$obs - predict(f.lm, in.df), nrow(obs)), 1, sd)
+        sd.corr1 <- apply(matrix(in.df$obs - predict(f.lm, in.df, weights=1/sd.res**2), nrow(obs)), 1, sd)
         sd.corr2 <- apply(matrix(f.lm$res, nrow(obs) - 1), 1, sd)
         sd.corr2 <- sd.corr2[c(seq(sd.corr2), length(sd.corr2))]
         sd.corr <- sd.corr1 / sd.corr2
-        if (smoothobs) sd.corr <- exp(loess(log(sd.corr) ~ log(seq(sd.corr)))$fit) 
         psd <- psd*sd.corr
       }
+      if (smoothobs) psd <- c(apply(psd, 2, function(y) exp(loess(log(y) ~ log(seq(y)), span=span)$fit)))
     } else {
-      fres <- array(in.df$obs - predict(f.lm, newdata=in.df), dim(obs)) * sd.res
+      fres <- array(in.df$obs - predict(f.lm, newdata=in.df, weights=1 / sd.res**2), dim(obs))
       psd <- apply(fres, 1, sd)
-      if (smooth) fsd <- exp(loess(log(fsd) ~ log(seq(fsd)), span=span)$fit)
       if (smoothobs) psd <- exp(loess(log(psd) ~ log(seq(psd)), span=span)$fit)
     }
     inflate <- c(psd / fsd) 
@@ -247,7 +243,7 @@ linmod <- function(fcst, obs, fcst.out=fcst,
   }
   
   fcst.debias <- obs.clim + 
-    predict(f.lm, newdata=out.df) * sd.res + 
+    predict(f.lm, newdata=out.df, weights=1 / sd.res**2) + 
     (fcst.out - c(fcst.out.ens)) * inflate
   
   return(fcst.debias)

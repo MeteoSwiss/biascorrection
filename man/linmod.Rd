@@ -91,12 +91,9 @@ This is the workhorse for calibration methods that can be expressed
   forecast ensemble means in the calibration set.
 
   The underlying assumption of \code{iid} residuals in the linear model is
-  generally not fullfilled, thus a simple pre-whitening technique is
-  introduced with \code{bleach = TRUE}. The pre-whitening consists of an
-  \emph{ad hoc} lead-time dependent scaling to approximate uniform variance
-  in the residuals after the fit. It is strongly recommeded to only use this
-  pre-whitening in combination with \code{smooth = TRUE} to guarantee a
-  smooth variance scaling across lead times.
+  generally not fullfilled, thus weighted least squares can be used instead
+  with \code{bleach = TRUE}. The weighting is chosen proportional to the
+  inverse of the lead-time dependent variance of the residuals.
 
   By default, the seasonally varying bias and the residual errors and model
   spread are smoothed using a \code{loess} smoothing. Smoothing of the model
@@ -111,7 +108,7 @@ This is the workhorse for calibration methods that can be expressed
   span=span)$fit)}
 
   Alternatively, the model parameters can be estimated on time series after
-  taking first order differences (but preserving the forecast signal) to
+  taking first-order differences (but preserving the forecast signal) to
   reduce the effect of auto-correlation in the residuals with
   \code{differences = TRUE}.
 }
