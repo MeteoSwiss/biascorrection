@@ -88,7 +88,7 @@
 #'   span=span)$fit)}
 #'   
 #'   Alternatively, the model parameters can be estimated on time series after 
-#'   taking first order differences (but preserving the forecast signal) to 
+#'   taking first-order differences (but preserving the forecast signal) to 
 #'   reduce the effect of auto-correlation in the residuals with 
 #'   \code{differences = TRUE}.
 #'   
@@ -179,7 +179,7 @@ linmod <- function(fcst, obs, fcst.out=fcst,
   if (differences){
     ## estimate first-order autoregression of residuals
     fres <- array(f.lm$res, dim(obs))
-    pp <- mean(apply(fres, 2, function(x) pacf(x, plot=F)$acf[1]))
+    pp <- tanh(mean(atanh(apply(fres, 2, function(x) pacf(x, plot=F)$acf[1]))))
     
     ## use lead-time deviation from seasonal mean signal
     ffres <- fcst.ens - fcst.clim - rep(colMeans(fcst.ens - fcst.clim), each=nrow(fcst.ens)) 
@@ -199,9 +199,7 @@ linmod <- function(fcst, obs, fcst.out=fcst,
       if (smooth) sd.res <- exp(loess(log(sd.res) ~ log(seq(sd.res)))$fit)
       sd.res <- sd.res[c(seq(sd.res), length(sd.res))]
       in.df2$fcst <- in.df2$fcst / sd.res[-length(sd.res)]
-      in.df2$obs <- in.df2$obs / sd.res[-length(sd.res)]
       in.df$fcst <- in.df$fcst / sd.res
-      in.df$obs <- in.df$obs / sd.res
       f.lm <- lm(formula, in.df2)      
     } else {
       sd.res <- 1
@@ -211,7 +209,6 @@ linmod <- function(fcst, obs, fcst.out=fcst,
     if (bleach){
       sd.res <- apply(array(f.lm$res, dim(obs)), 1, sd)
       if (smooth) sd.res <- exp(loess(log(sd.res) ~ log(seq(sd.res)))$fit)
-      in.df$fcst <- in.df$fcst / sd.res
       in.df$obs <- in.df$obs / sd.res
       f.lm <- lm(formula, in.df)
     } else {
@@ -219,10 +216,6 @@ linmod <- function(fcst, obs, fcst.out=fcst,
     }
     
   }
-
-  
-  ## shrink output forecasts for heteroskedasticity correction
-  out.df$fcst <- out.df$fcst / sd.res
   
   ## compute lead-time dependent inflation for recalibration
   if (recal){

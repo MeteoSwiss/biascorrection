@@ -1,3 +1,7 @@
+## biascorrection 0.5.4.2
+
+* Minor bug fix
+
 ## biascorrection 0.5.4.1
 
 * Added option `type` also to `linmod`
