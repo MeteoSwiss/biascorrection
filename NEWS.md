@@ -1,3 +1,7 @@
+## biascorrection 0.5.5
+
+* Added dry-day threshold correction in `fastqqmap`. Please note, dry-day correction only works for additive corrections.
+
 ## biascorrection 0.5.4.3
 
 * Use R's built-in weighted least squares functionality

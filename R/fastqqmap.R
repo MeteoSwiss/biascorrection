@@ -108,55 +108,50 @@ fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=
     fcst.out.anom <- fcst.out
   }
   nlead <- nrow(fcst)
+  ## do everything along the lead times
+  fcst.debias <- NA*fcst.out.anom
+  ## figure out jump width
   if (window >= nlead){
-    fq <- quantile(fcst.anom, type=8, prob=prob)
-    oq <- quantile(obs.anom, type=8, prob=prob)
+    njump <- 1
+    isteps <- ceiling(nlead / 2)
+    window <- nlead + 3 ## doesn't really matter
+  } else {
+    njump <- min(max(floor(window/6), minjump), nlead)
+    isteps <- seq(ceiling(window/2),
+                  nlead - ceiling(window/2) + 1,
+                  by=njump)    
+  }
+  for (i in seq(along=isteps)){
+    ## lead times for estimating quantiles
+    ind <- seq(if(i == 1) 1 else isteps[i] - floor(window/2), 
+               if (i == length(isteps)) nlead else isteps[i] + floor(window/2))
+    ## lead times to be bias corrected
+    ind2 <- seq(if(i == 1) 1 else isteps[i] - floor(njump/2), 
+                if (i == length(isteps)) nlead else isteps[i] + floor(njump/2))
+    oq <- quantile(obs.anom[ind,], prob=prob, type=8)
+    fq <- quantile(fcst.anom[ind,,], prob=prob, type=8)
+    ## fq <- rowMeans(apply(fcst.anom[ind,,], 3, quantile, prob=prob, type=8))
     ## find boundaries in between quantiles
     fqbnds <- fq[-length(fq)] + 0.5*diff(fq)
-    fout.qi <- findInterval(fcst.out.anom, fqbnds) + 1
+    
+    ## get the probability of the output fcst given the forecast
+    ## i.e. the reverse quantile function
+    ## assume constant correction by discrete quantiles
+    fout.qi <- findInterval(fcst.out.anom[ind2,,], fqbnds) + 1
     if (multiplicative){
       qcorr <- oq/fq
       qcorr[fq == 0 & oq != 0] <- 1
       qcorr[fq == 0 & oq == 0] <- 0
-      fcst.debias <- fcst.out * qcorr[fout.qi]
+      fcst.debias[ind2,,] <- fcst.out[ind2,,] * qcorr[fout.qi]
     } else {
-      fcst.debias <- fcst.out + (oq - fq)[fout.qi]
-    }
-  } else {
-    ## do everything along the lead times
-    fcst.debias <- NA*fcst.out.anom
-    ## figure out jump width
-    njump <- min(max(floor(window/6), minjump), nlead)
-    isteps <- seq(ceiling(window/2),
-                  nlead - ceiling(window/2) + 1,
-                  by=njump)
-    for (i in seq(along=isteps)){
-      ## lead times for estimating quantiles
-      ind <- seq(if(i == 1) 1 else isteps[i] - floor(window/2), 
-                 if (i == length(isteps)) nlead else isteps[i] + floor(window/2))
-      ## lead times to be bias corrected
-      ind2 <- seq(if(i == 1) 1 else isteps[i] - floor(njump/2), 
-                  if (i == length(isteps)) nlead else isteps[i] + floor(njump/2))
-      oq <- quantile(obs.anom[ind,], prob=prob, type=8)
-      fq <- quantile(fcst.anom[ind,,], prob=prob, type=8)
-      ## fq <- rowMeans(apply(fcst.anom[ind,,], 3, quantile, prob=prob, type=8))
-      ## find boundaries in between quantiles
-      fqbnds <- fq[-length(fq)] + 0.5*diff(fq)
-      
-      ## get the probability of the output fcst given the forecast
-      ## i.e. the reverse quantile function
-      ## assume constant correction by discrete quantiles
-      fout.qi <- findInterval(fcst.out.anom[ind2,,], fqbnds) + 1
-      if (multiplicative){
-        qcorr <- oq/fq
-        qcorr[fq == 0 & oq != 0] <- 1
-        qcorr[fq == 0 & oq == 0] <- 0
-        fcst.debias[ind2,,] <- fcst.out[ind2,,] * qcorr[fout.qi]
-      } else {
-        fcst.debias[ind2,,] <- fcst.out[ind2,,] - (fq - oq)[fout.qi]    
-      }      
-    } ## end of loop on lead times
-  } ## end of if on window length
+      ## dry day correction
+      ndry <- sum(fq == min(fq))
+      if (ndry > 1){
+        fout.qi[fout.qi == ndry] <- ceiling(runif(sum(fout.qi == ndry), min=0, max=ndry))
+      }
+      fcst.debias[ind2,,] <- fcst.out[ind2,,] - (fq - oq)[fout.qi]    
+    }      
+  } ## end of loop on lead times
   if (!is.null(lower.bound)){
     fcst.debias[fcst.debias < lower.bound] <- lower.bound
   }
