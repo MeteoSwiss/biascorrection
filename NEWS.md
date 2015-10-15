@@ -1,3 +1,7 @@
+## biascorrection 0.5.6
+
+* Added smooth scaling correction for both on anomalies from the climatology `smooth_scale` and anomalies from the ensemble mean `smooth_scalespread`. The latter corrects ensemble spread only with the signal being untouched.
+
 ## biascorrection 0.5.5
 
 * Added dry-day threshold correction in `fastqqmap`. Please note, dry-day correction only works for additive corrections.

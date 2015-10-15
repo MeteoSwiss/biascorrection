@@ -2,9 +2,13 @@
 % Please edit documentation in R/smooth_scale.R
 \name{smooth_scale}
 \alias{smooth_scale}
+\alias{smooth_scalespread}
 \title{Smoothed mean de-biasing with scaling}
 \usage{
 smooth_scale(fcst, obs, fcst.out = fcst, span = min(1, 31/nrow(fcst)), ...)
+
+smooth_scalespread(fcst, obs, fcst.out = fcst, span = min(1, 31/nrow(fcst)),
+  ...)
 }
 \arguments{
 \item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble members}
@@ -19,11 +23,13 @@ should be applied (defaults to \code{fcst})}
 \item{...}{additional arguments for compatibility with other bias correction methods}
 }
 \description{
-Computes mean de-biasing with loess smoothing and adjusts variance
+Computes mean de-biasing with loess smoothing and adjusts variance. \code{smooth_scale}
+scales the ensemble deviations from the climatology, whereas \code{smooth_scalespread}
+only scales the ensemble anomalies (change to the ensemble spread).
 }
 \details{
-The standard deviation of the observations and simulations is computed against
-the smoothed climatology (1/n definition) in order to get consistent results
+The standard deviation (1/n definition) of the observations and simulations is computed against
+the smoothed climatology  in order to get consistent results
 should the forecast ensemble collapse on the observations. The disadvantage of this
 approach is the dependence of the scaling on the climatological fit.
 }
