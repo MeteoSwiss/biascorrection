@@ -5,7 +5,7 @@
 #' 
 #' @keywords util
 #' @export
-month <- function(x, time){
+monmean <- function(x, time){
   datstr <- format(time, '%Y %m')
   nmon <- length(unique(gsub('.* ', '', datstr)))
   nyears <- ncol(x)

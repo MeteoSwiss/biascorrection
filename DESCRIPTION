@@ -1,8 +1,8 @@
 Package: biascorrection
-Title: Bias correct daily ensemble forecasts
+Title: Bias Correct Daily Ensemble Forecasts
 Date: "`r Sys.Date()`"
-Version: 0.5.6
-Authors@R: "Jonas Bhend <jonas.bhend@gmx.ch> [aut, cre]"
+Version: 0.5.6.9000
+Authors@R: person("Jonas", "Bhend", email="jonas.bhend@gmx.ch", role = c("aut", "cre"))
 Description: Collection of functions to calibrate daily ensemble forecasts.
     This package includes a variety of functions with a focus on ease-of-use
     rather than performance when applied to large datasets. Consequently,
@@ -16,5 +16,3 @@ LazyData: true
 Suggests: testthat, knitr
 VignetteBuilder: knitr
 Packaged: 2015-03-09 12:51:54 UTC; bhendj
-Author: "Jonas Bhend" [aut, cre]
-Maintainer: "Jonas Bhend" <jonas.bhend@gmx.ch>

@@ -18,9 +18,9 @@
 #' obs <- array(rnorm(30*215, mean=2), c(215, 30)) + sin(seq(0,4, length=215))
 #' fc.time <- outer(1:215, 1981:2010, function(x,y) as.Date(paste0(y, '-11-01')) - 1 + x)
 #' fcst.debias <- biascorrection:::ccr_monthly(fcst, obs, fc.time=fc.time, span=0.5)
-#' fcst.mon <- month(fcst, fc.time)
-#' obs.mon <- month(obs, fc.time)
-#' fcst.mondebias <- month(fcst.debias, fc.time)
+#' fcst.mon <- monmean(fcst, fc.time)
+#' obs.mon <- monmean(obs, fc.time)
+#' fcst.mondebias <- monmean(fcst.debias, fc.time)
 #' 
 #' @keywords util
 ccr_monthly <- function(fcst, obs, fcst.out=fcst, fc.time, fcout.time=fc.time, 
@@ -29,8 +29,8 @@ ccr_monthly <- function(fcst, obs, fcst.out=fcst, fc.time, fcout.time=fc.time,
   stopifnot(length(fc.time) >= length(fcst[,,1]))
   
   ## compute monthly forecasts and observations
-  fcst.mon <- month(fcst, fc.time[seq(along=fcst[,,1])])
-  obs.mon <- month(obs, fc.time[seq(obs)])
+  fcst.mon <- monmean(fcst, fc.time[seq(along=fcst[,,1])])
+  obs.mon <- monmean(obs, fc.time[seq(obs)])
   
   ## compute climatologies
   fcst.ens <- rowMeans(fcst, dims=2)
@@ -42,7 +42,7 @@ ccr_monthly <- function(fcst, obs, fcst.out=fcst, fc.time, fcout.time=fc.time,
   fcst.monclim <- rowMeans(fcst.mon, dims=1, na.rm=T)
   obs.monclim <- rowMeans(obs.mon, dims=1, na.rm=T)
   ## additional monthly bias to assure monthly means fit
-  monbias <- rowMeans(month(fcst.ens - obs - (fcst.clim - obs.clim), 
+  monbias <- rowMeans(monmean(fcst.ens - obs - (fcst.clim - obs.clim), 
                             fc.time[seq(along=fcst.ens)]), 
                       dims=1, na.rm=T)
   
@@ -61,7 +61,7 @@ ccr_monthly <- function(fcst, obs, fcst.out=fcst, fc.time, fcout.time=fc.time,
   monstr.out <- format(fcout.time, '%m')
   fi_out <- fcst.out - fcst.clim
   mu_fout <- rowMeans(fi_out, dims=2)
-  mu_fout.mon <- month(mu_fout, fcout.time)
+  mu_fout.mon <- monmean(mu_fout, fcout.time)
   ## fix to be able to get the correct index out
   colnames(mu_fout.mon) <- as.character(1:ncol(mu_fout.mon))
   ind <- cbind(monstr.out, rep(1:ncol(mu_fout.mon), each=nrow(mu_fout)))

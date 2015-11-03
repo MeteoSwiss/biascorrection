@@ -1,3 +1,7 @@
+## biascorrection 0.5.6.9000
+
+* changed `month` to `monmean` to avoid confusion with `month` from package `lubridate`
+
 ## biascorrection 0.5.6
 
 * Added smooth scaling correction for both on anomalies from the climatology `smooth_scale` and anomalies from the ensemble mean `smooth_scalespread`. The latter corrects ensemble spread only with the signal being untouched.

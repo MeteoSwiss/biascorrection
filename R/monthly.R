@@ -21,7 +21,7 @@ monthly <- function(fcst, obs, fcst.out=fcst, fc.time, fcout.time=fc.time, ...){
   }
   fcst.ens <- rowMeans(fcst, dims=2)
   ## compute monthly bias
-  bias.mon <- rowMeans(month(fcst.ens - obs, fc.time), dims=1)
+  bias.mon <- rowMeans(monmean(fcst.ens - obs, fc.time), dims=1)
   ## de-bias with monthly means
   fcst.debias <- fcst.out - as.vector(bias.mon[format(fcout.time, '%m')])
   return(fcst.debias)

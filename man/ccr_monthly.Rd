@@ -33,9 +33,9 @@ c(215, 30, 51)) + 0.5*sin(seq(0,4,length=215))
 obs <- array(rnorm(30*215, mean=2), c(215, 30)) + sin(seq(0,4, length=215))
 fc.time <- outer(1:215, 1981:2010, function(x,y) as.Date(paste0(y, '-11-01')) - 1 + x)
 fcst.debias <- biascorrection:::ccr_monthly(fcst, obs, fc.time=fc.time, span=0.5)
-fcst.mon <- month(fcst, fc.time)
-obs.mon <- month(obs, fc.time)
-fcst.mondebias <- month(fcst.debias, fc.time)
+fcst.mon <- monmean(fcst, fc.time)
+obs.mon <- monmean(obs, fc.time)
+fcst.mondebias <- monmean(fcst.debias, fc.time)
 }
 \keyword{util}
 

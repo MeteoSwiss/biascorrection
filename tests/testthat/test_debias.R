@@ -6,7 +6,8 @@ fc.time <- outer(seq(1, length=nrow(fcst)), seq(1961, length=ncol(fcst)), functi
 na.vec <- rep(1, nrow(fcst))
 na.vec[1] <- NA
 obs <- array(rnorm(1000), c(10, 30))
-mnames <- setdiff(ls(pos='package:biascorrection'), c('debias', 'month', 'sloess', 'cor', 'list_methods'))
+mnames <- c('ccr', 'ccr_monthly', 'fastqqmap', 'qqmap', 'smooth_scale', 
+            c(outer(c('comb', 'conditional', 'smooth', 'smoothobs'), c('', 'Recal'), paste0)))
 
 test_that("Missing value handling", {
   expect_error(debias(fcst, obs*na.vec))
