@@ -1,6 +1,7 @@
 #' @name smooth
 #' @aliases smooth
 #' @aliases smoothobs
+#' @aliases unbias
 #' 
 #' @title
 #' Mean de-biasing

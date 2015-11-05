@@ -83,12 +83,14 @@
 #' par(oldpar)
 #' 
 #'@keywords util
-fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=FALSE, lower.bound=NULL, window=min(nrow(fcst), 31), minjump=11, ...){
+fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, 
+                      multiplicative=FALSE, lower.bound=NULL, 
+                      window=min(nrow(fcst), 31), minjump=11, ...){
   ## estimate the quantile correction for the full range
   ## minprob <- min((2/3) / (ncol(obs)* window + 1/3), 0.01)
   ## estimate the quantile correction excluding the 5 smallest/largest values
   minprob <- min((6 - 1/3) / (ncol(obs)* window + 1/3), 0.01)
-  prob <- seq(minprob, 1 - minprob, length=floor(max(50, ncol(obs)*window/20)))
+  prob <- seq(minprob, 1 - minprob, length=floor(max(99, ncol(obs)*window/20)))
   ## fq <- quantile(fcst, type=8, prob=prob)
   if (anomalies){
     fcst.ens <- rowMeans(fcst, dims=2)
@@ -147,7 +149,7 @@ fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=
       ## dry day correction
       ndry <- sum(fq == min(fq))
       if (ndry > 1){
-        fout.qi[fout.qi == ndry] <- ceiling(runif(sum(fout.qi == ndry), min=0, max=ndry))
+        fout.qi[!is.na(fout.qi) & fout.qi == ndry] <- ceiling(runif(sum(!is.na(fout.qi) & fout.qi == ndry), min=0, max=ndry))
       }
       fcst.debias[ind2,,] <- fcst.out[ind2,,] - (fq - oq)[fout.qi]    
     }      
@@ -159,10 +161,9 @@ fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=
 }
 
 #'@rdname fastqqmap
-#'@export
 #'
 fastqqmap_mul <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=TRUE, lower.bound=NULL, window=min(nrow(fcst), 91), ...){
   fastqqmap(fcst=fcst, obs=obs, fcst.out=fcst.out, 
             anomalies=anomalies, multiplicative=multiplicative,
-            lower.bound=lower.bound, window=window, ...=...)
+            lower.bound=lower.bound, window=window, ...)
 }

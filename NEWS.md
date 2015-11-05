@@ -1,3 +1,7 @@
+## biascorrection 0.5.6.9001
+
+* added support for missing ensemble members in `fcst.out` (except for `useqmap`), forecast arrays for calibration (i.e. `fcst`) have to be complete
+
 ## biascorrection 0.5.6.9000
 
 * changed `month` to `monmean` to avoid confusion with `month` from package `lubridate`

@@ -118,7 +118,9 @@ qqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=FALS
     fqbnds <- fq[-length(fq)] + 0.5*diff(fq)
     fout.qi <- findInterval(fcst.out.anom, fqbnds) + 1
     if (multiplicative){
-      fcst.debias <- fcst.out * (oq / fq)[fout.qi]
+      qcorr <- oq / fq
+      qcorr[fq == 0] <- 1
+      fcst.debias <- fcst.out * qcorr[fout.qi]
     } else {
       fcst.debias <- fcst.out + (oq - fq)[fout.qi]
     }
@@ -155,7 +157,9 @@ qqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=FALS
     fqbnds <- apply(fq[-nrow(fq),] + 0.5*apply(fq, 2, diff), 2, list)
     fout.qi <- Map(function(x,y) findInterval(x[[1]], y[[1]]) + 1, apply(fcst.out.anom, 1, list), fqbnds)
     if (multiplicative){
-      fcst.debias <- fcst.out / (fq/oq)[cbind(c(t(sapply(fout.qi, function(x) x))), 1:nrow(fcst.out))]
+      qcorr <- oq/fq
+      qcorr[fq == 0] <- 1
+      fcst.debias <- fcst.out * qcorr[cbind(c(t(sapply(fout.qi, function(x) x))), 1:nrow(fcst.out))]
     } else {
       fcst.debias <- fcst.out - (fq - oq)[cbind(c(t(sapply(fout.qi, function(x) x))), 1:nrow(fcst.out))]
     }   

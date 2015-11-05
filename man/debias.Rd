@@ -4,9 +4,9 @@
 \alias{debias}
 \title{Calibration of daily time series}
 \usage{
-debias(fcst, obs, method = "unbias", crossval = FALSE, blocklength = 1,
-  forward = FALSE, fcst.out = fcst, fc.time = NULL,
-  fcout.time = fc.time, nforward = 10, ...)
+debias(fcst, obs, method = "unbias", fcst.out = fcst, fc.time = NULL,
+  fcout.time = fc.time, crossval = FALSE, blocklength = 1,
+  forward = FALSE, nforward = floor(ncol(fcst)/2), ...)
 }
 \arguments{
 \item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble
@@ -15,14 +15,6 @@ members}
 \item{obs}{n x m matrix of veryfing observations}
 
 \item{method}{character string with bias correction method name}
-
-\item{crossval}{logical, should leave-one-out crossvalidation be used (see
-details)?}
-
-\item{blocklength}{block length for moving blocks crossvalidation (defaults
-to 1 for leave-one-out crossvalidation)}
-
-\item{forward}{logical, should only past hindcasts be used for calibration?}
 
 \item{fcst.out}{array of forecast values to which bias correction should be
 applied (defaults to \code{fcst})}
@@ -33,7 +25,15 @@ applied (defaults to \code{fcst})}
 \item{fcout.time}{forecast dates of class 'Date' (for monthly correction, see
 \code{\link{monthly}})}
 
-\item{nforward}{number of forecasts to debias normally in forward mode (see
+\item{crossval}{logical, should leave-one-out crossvalidation be used (see
+details)?}
+
+\item{blocklength}{block length for moving blocks crossvalidation (defaults
+to 1 for leave-one-out crossvalidation)}
+
+\item{forward}{logical, should only past hindcasts be used for calibration?}
+
+\item{nforward}{number of forecasts to debias backwards in forward mode (see
 details).}
 
 \item{...}{additional arguments passed to bias correction methods}
@@ -43,6 +43,10 @@ Applies bias correction derived from forecast and observation data to
 forecast data set
 }
 \details{
+No missing values are tolerated in either `obs` or `fcst` to ensure consistency
+of calibration. Missing ensemble members, however, are tolerated in `fcst.out`,
+thereby allowing calibration of non-homogeneous ensembles.
+
 If \code{crossval} is set to \code{TRUE}, the debiasing for years in
 block \code{i} are computed based on the forecast and observation data set
 excluding years in block \code{i}. If, in addition, there are more years in
@@ -52,8 +56,8 @@ all years in \code{fcst}.
 
 If \code{forward} is set to \code{TRUE}, the debiasing for forecast \code{i}
 is computed based on all previous forecast observation pairs. The first
-\code{nforward} forecasts, however, are debiased normally (as with
-\code{forward = FALSE}).
+\code{nforward} forecasts, however, are debiased backwards (i.e. forecast \code{i}
+is calibrated with forecasts \code{i+1} to \code{n}).
 }
 \examples{
 ## initialise forcast observation pairs

@@ -34,8 +34,10 @@ smoothobs_scale <- function(fcst, obs, fcst.out=fcst, span=min(1, 31/nrow(fcst))
   obs.mn <- rowMeans(obs, dims=1, na.rm=T)
   obs.clim <- sloess(obs.mn, span=span)
   obs.sd <- sqrt(apply((obs - obs.clim)**2, 1, mean, na.rm=T))
-  obs.sdsmooth <- sloess(obs.sd, span=span)
+  obs.sdsmooth <- sloess(sqrt(obs.sd), span=span)**2
   fcst.sd <- sqrt(apply((fcst - fcst.mn)**2, 1, mean, na.rm=T))
-  fcst.debias <- (fcst.out - fcst.mn) * obs.sdsmooth / fcst.sd + obs.clim
+  inflate <- obs.sdsmooth / fcst.sd
+  inflate[!is.finite(inflate)] <- 1
+  fcst.debias <- (fcst.out - fcst.mn) * inflate + obs.clim
   return(fcst.debias)
 }

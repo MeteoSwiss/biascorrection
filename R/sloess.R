@@ -8,7 +8,6 @@
 #' @param ... additional parameters handed over to loess
 #' 
 #' @keywords util
-#' @export
 sloess <- function(x, ...){
   if (sum(!is.na(x)) > 5){
     xout <- loess(x ~ seq(along=x), ...)$fit

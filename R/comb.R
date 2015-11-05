@@ -1,5 +1,4 @@
 #' @name comb
-#' @aliases comb
 #' @aliases combRecal
 #' 
 #' @title

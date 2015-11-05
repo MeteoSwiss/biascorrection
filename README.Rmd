@@ -15,19 +15,13 @@ knitr::opts_chunk$set(
 # biascorrection
 
 ## Introduction
-Collection of functions to de-bias daily ensemble forecasts. This package includes a variety of functions with a focus on ease-of-use rather than performance when applied to large datasets. Accordingly, specific functions will have to be implemented separately to be applicable in an operational setting.
-
+Collection of functions to calibrate daily ensemble forecasts. This package includes a wrapper for performing bias correction in in-sample, cross-validation, moving blocks cross-validation and forward modes and also includes a variety of calibration functions (regression-based, quantile mapping). The focus is on ease-of-use rather than performance when applied to large datasets. Consequently, specific functions will have to be implemented separately to be applicable in an operational setting. No support is provided so far to apply calibration to large datasets.
+    
 The bias correction options include:
-
-* mean de-biasing (`unbias`)
-* mean de-biasing with loess smoothing (`smooth`, `smoothobs`)
-* mean de-biasing with variance scaling (`smooth_scale`, `smoothobs_scale`)
-* monthly-mean de-biasing (`monthly`)
-* climate conserving recalibration based (`ccr`) based on smoothed climatology (`smoothccr`) or monthly climatology (`ccr_monthly`)
-* quantile mapping (`qqmap`)
-* mean de-biasing with linear time trend (`trend`)
-* mean de-biasing with bias conditional on signal (`conditional`)
-* ...
+```{r, echo=TRUE, eval=TRUE}
+library(biascorrection)
+list_methods()
+```
 
 ## Getting started
 

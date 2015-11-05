@@ -1,13 +1,16 @@
 Package: biascorrection
 Title: Bias Correct Daily Ensemble Forecasts
 Date: "`r Sys.Date()`"
-Version: 0.5.6.9000
+Version: 0.5.6.9001
 Authors@R: person("Jonas", "Bhend", email="jonas.bhend@gmx.ch", role = c("aut", "cre"))
 Description: Collection of functions to calibrate daily ensemble forecasts.
-    This package includes a variety of functions with a focus on ease-of-use
-    rather than performance when applied to large datasets. Consequently,
+    This package includes a wrapper for performing bias correction in in-sample, 
+    cross-validation, moving blocks cross-validation and forward modes and also includes
+    a variety of calibration functions (regression-based, quantile mapping). The focus is 
+    on ease-of-use rather than performance when applied to large datasets. Consequently,
     specific functions will have to be implemented separately to be applicable
-    in an operational setting.
+    in an operational setting. No support is provided so far to apply calibration to large
+    datasets.
 Depends: R (>= 3.0.1),
          qmap, 
          stats

@@ -29,6 +29,8 @@ mul <- function(fcst, obs, fcst.out=fcst,  ...){
   fcst.ens[is.na(obs)] <- NA
   fcst.mn <- rowMeans(fcst.ens, dims=1, na.rm=T)
   obs.mn <- rowMeans(obs, dims=1, na.rm=T)
-  fcst.debias <- fcst.out / fcst.mn * obs.mn
+  f.corr <- obs.mn / fcst.mn
+  f.corr[fcst.mn == 0] <- 1
+  fcst.debias <- fcst.out * f.corr
   return(fcst.debias)
 }

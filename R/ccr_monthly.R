@@ -60,7 +60,7 @@ ccr_monthly <- function(fcst, obs, fcst.out=fcst, fc.time, fcout.time=fc.time,
   ## put everything back together
   monstr.out <- format(fcout.time, '%m')
   fi_out <- fcst.out - fcst.clim
-  mu_fout <- rowMeans(fi_out, dims=2)
+  mu_fout <- rowMeans(fi_out, dims=2, na.rm=T)
   mu_fout.mon <- monmean(mu_fout, fcout.time)
   ## fix to be able to get the correct index out
   colnames(mu_fout.mon) <- as.character(1:ncol(mu_fout.mon))

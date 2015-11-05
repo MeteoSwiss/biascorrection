@@ -61,7 +61,7 @@ smooth_scalespread <-function (fcst, obs, fcst.out = fcst,
   obs.sdsmooth <- sloess(obs.sd, span = span)
   fcst.sd <- sqrt(apply((fcst - fcst.clim)^2, 1, mean, na.rm = T))
   fcst.sdsmooth <- sloess(fcst.sd, span = span)
-  fcst.out.ens <- rowMeans(fcst.out, dims=2)
+  fcst.out.ens <- rowMeans(fcst.out, dims=2, na.rm=T)
   fcst.debias <- (fcst.out - c(fcst.out.ens))* obs.sdsmooth / fcst.sdsmooth + 
     c(fcst.out.ens) - fcst.clim + obs.clim
   

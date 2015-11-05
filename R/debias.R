@@ -11,22 +11,27 @@
 #'   members
 #' @param obs n x m matrix of veryfing observations
 #' @param method character string with bias correction method name
-#' @param crossval logical, should leave-one-out crossvalidation be used (see
-#'   details)?
-#' @param blocklength block length for moving blocks crossvalidation (defaults
-#'   to 1 for leave-one-out crossvalidation)
-#' @param forward logical, should only past hindcasts be used for calibration?
 #' @param fcst.out array of forecast values to which bias correction should be
 #'   applied (defaults to \code{fcst})
 #' @param fc.time forecast dates of class 'Date' (for monthly correction, see
 #'   \code{\link{monthly}})
 #' @param fcout.time forecast dates of class 'Date' (for monthly correction, see
 #'   \code{\link{monthly}})
-#' @param nforward number of forecasts to debias normally in forward mode (see
+#' @param crossval logical, should leave-one-out crossvalidation be used (see
+#'   details)?
+#' @param blocklength block length for moving blocks crossvalidation (defaults
+#'   to 1 for leave-one-out crossvalidation)
+#' @param forward logical, should only past hindcasts be used for calibration?
+#' @param nforward number of forecasts to debias backwards in forward mode (see
 #'   details).
 #' @param ... additional arguments passed to bias correction methods
 #'   
-#' @details If \code{crossval} is set to \code{TRUE}, the debiasing for years in
+#' @details 
+#' No missing values are tolerated in either `obs` or `fcst` to ensure consistency
+#' of calibration. Missing ensemble members, however, are tolerated in `fcst.out`,
+#' thereby allowing calibration of non-homogeneous ensembles.
+#' 
+#' If \code{crossval} is set to \code{TRUE}, the debiasing for years in
 #' block \code{i} are computed based on the forecast and observation data set
 #' excluding years in block \code{i}. If, in addition, there are more years in
 #' the output set \code{fcst.out} than in the input set \code{fcst}, the bias
@@ -35,8 +40,8 @@
 #' 
 #' If \code{forward} is set to \code{TRUE}, the debiasing for forecast \code{i}
 #' is computed based on all previous forecast observation pairs. The first
-#' \code{nforward} forecasts, however, are debiased normally (as with
-#' \code{forward = FALSE}).
+#' \code{nforward} forecasts, however, are debiased backwards (i.e. forecast \code{i}
+#' is calibrated with forecasts \code{i+1} to \code{n}).
 #' 
 #' @examples
 #' ## initialise forcast observation pairs
@@ -49,9 +54,10 @@
 #' 
 #' @keywords util
 #' @export
-debias <- function(fcst, obs, method='unbias', crossval=FALSE, 
-                   blocklength=1, forward=FALSE, fcst.out=fcst, 
-                   fc.time=NULL, fcout.time=fc.time, nforward=10, ...){
+debias <- function(fcst, obs, method='unbias', fcst.out=fcst, 
+                   fc.time=NULL, fcout.time=fc.time, crossval=FALSE, 
+                   blocklength=1, forward=FALSE, nforward=floor(ncol(fcst) / 2),
+                   ...){
   ## get name of bias correction function
   dfun <- try(get(method), silent=TRUE)
   if (class(dfun) == 'try-error') stop('Bias correction method has not been implemented yet')
@@ -59,7 +65,8 @@ debias <- function(fcst, obs, method='unbias', crossval=FALSE,
   if (forward){
     ## check on forecasts    
     flen <- min(ncol(fcst), ncol(fcst.out))
-    if (!all(fcst[,1:flen,] == fcst.out[,1:flen,])){
+    minens <- min(dim(fcst)[3], dim(fcst.out)[3])
+    if (!all(fcst[,1:flen,1:minens] == fcst.out[,1:flen,1:minens])){
       stop('Forward only works with default fcst.out as of yet')      
     } else if (!all(dim(fcst) == dim(fcst.out))) {
       warning("fcst.out is assumed to start at same time as fcst")
@@ -71,22 +78,28 @@ debias <- function(fcst, obs, method='unbias', crossval=FALSE,
 
   ## missing values are not tolerated in forecast
   if (method != 'ccr'){
-    stopifnot(!is.na(fcst), !is.na(fcst.out))
+    stopifnot(!is.na(fcst))
+    ## stopifnot(!is.na(fcst.out))
     stopifnot(!is.na(obs))
     if (!is.null(fc.time)) stopifnot(!is.na(fc.time), !is.na(fcout.time))
-  }  
+  } 
+  ## missing values are not tolerated in output for useqmap
+  if (method == 'useqmap' & any(is.na(fcst.out))) stop("Missing values not tolerated in useqmap")
   
   ## apply bias correction function
   if (crossval){
     fcst.debias <- array(NA, dim(fcst.out))
     ## figure out number of blocks
-    for (i in seq(1, ncol(fcst), blocklength)){
-      ii <- seq(i, min(i+blocklength - 1, ncol(fcst)))
-      fcst.debias[,ii,] <- dfun(fcst=fcst[,-ii,,drop=FALSE], 
-                               obs=obs[,-ii,drop=FALSE], 
-                               fcst.out=fcst.out[,ii,,drop=FALSE], 
-                               fc.time=if (is.null(fc.time)) NULL else fc.time[,-ii,drop=FALSE], 
-                               fcout.time=if (is.null(fcout.time)) NULL else fcout.time[,ii,drop=FALSE],
+    nblocks <- ceiling(min(ncol(fcst.out), ncol(fcst)) / blocklength)
+    for (i in seq(1, nblocks)){
+      ii.out <- seq((i - 1)*blocklength + 1, min(ncol(fcst.out), i*blocklength))
+      ii.cal <- setdiff(seq(1, ncol(fcst)), seq((i-1)*blocklength + 1,
+                                                min(ncol(fcst), i*blocklength)))
+      fcst.debias[,ii.out,] <- dfun(fcst=fcst[,ii.cal,,drop=FALSE], 
+                               obs=obs[,ii.cal,drop=FALSE], 
+                               fcst.out=fcst.out[,ii.out,,drop=FALSE], 
+                               fc.time=if (is.null(fc.time)) NULL else fc.time[,ii.cal,drop=FALSE], 
+                               fcout.time=if (is.null(fcout.time)) NULL else fcout.time[,ii.out,drop=FALSE],
                                ...)
     }
     ## compute the bias for the remaining years from full set
@@ -106,7 +119,7 @@ debias <- function(fcst, obs, method='unbias', crossval=FALSE,
     nfcst <- ncol(fcst)
     
     ## new approach: first nforward years are calibrated backwards
-    for (i in seq(1, min(nforward, ncol(fcst.out)))){
+    for (i in seq(1, nforward)){
       fcst.debias[,i,] <- dfun(fcst=fcst[,seq(i+1,nfcst),, drop=FALSE],
                                obs=obs[,seq(i+1, nfcst),drop=FALSE],
                                fcst.out=fcst.out[,i,,drop=FALSE],

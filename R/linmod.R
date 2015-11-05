@@ -126,7 +126,6 @@
 #' mean')
 #' 
 #' @keywords util
-#' @export
 linmod <- function(fcst, obs, fcst.out=fcst, 
                    fc.time=NULL,
                    fcout.time=NULL,
@@ -159,7 +158,7 @@ linmod <- function(fcst, obs, fcst.out=fcst,
   obs.mn <- rowMeans(obs, dims=1, na.rm=T)
   obs.clim <- if (smoothobs) sloess(obs.mn, span=span) else obs.mn
   
-  fcst.out.ens <- rowMeans(fcst.out, dims=2)
+  fcst.out.ens <- rowMeans(fcst.out, dims=2, na.rm=T)
   
   in.df <- data.frame(fcst=c(fcst.ens - fcst.clim),
                       obs=c(obs - obs.clim), 
@@ -204,19 +203,19 @@ linmod <- function(fcst, obs, fcst.out=fcst,
     ## compute pre-whitening and rescale forecast and obs anomalies
     if (bleach){
       sd.res <- apply(array(f.lm$res, dim(obs)), 1, sd)
-      if (smooth) sd.res <- exp(loess(log(sd.res) ~ log(seq(sd.res)))$fit)
+      sd.res <- pmax(sd.res, 0.01*max(sd.res, na.rm=T))
+      if (smooth) sd.res <- loess(sqrt(sd.res) ~ log(seq(sd.res)))$fit**2
       in.df$ww <- 1 / sd.res**2
       f.lm <- lm(formula, in.df, weights=ww)
     } else {
       sd.res <- rep(1, nrow(obs))
     }
-    
   }
   
   ## compute lead-time dependent inflation for recalibration
   if (recal){
     fsd <- apply(fcst - c(fcst.ens), 1, sd)
-    if (smooth) fsd <- exp(loess(log(fsd) ~ log(seq(fsd)), span=span)$fit)
+    if (smooth) fsd <- loess(sqrt(fsd) ~ log(seq(fsd)), span=span)$fit**2
     if (type == 'prediction'){
       ## prediction interval is tfrac*sd_pred
       plm <- predict(f.lm, newdata=out.df, interval='prediction', level=pnorm(1), weights=1 / sd.res**2)
@@ -235,9 +234,10 @@ linmod <- function(fcst, obs, fcst.out=fcst,
     } else {
       fres <- array(in.df$obs - predict(f.lm, newdata=in.df, weights=1 / sd.res**2), dim(obs))
       psd <- apply(fres, 1, sd)
-      if (smoothobs) psd <- exp(loess(log(psd) ~ log(seq(psd)), span=span)$fit)
+      if (smoothobs) psd <- loess(sqrt(psd) ~ log(seq(psd)), span=span)$fit**2
     }
     inflate <- c(psd / fsd) 
+    inflate[fsd == 0] <- 1
   } else {
     inflate <- 1
   }

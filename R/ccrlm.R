@@ -60,7 +60,7 @@ ccrlm <- function(fcst, obs, pred=NULL,
   fcst.ens <- rowMeans(fcst, dims=2)
   fcst.ens[is.na(obs)] <- NA
   fcst.spread <- sqrt(rowMeans(apply(fcst, 1:2, sd)**2))
-  fcst.out.ens <- rowMeans(fcst.out, dims=2)
+  fcst.out.ens <- rowMeans(fcst.out, dims=2, na.rm=T)
   nfcst <- ncol(fcst)
   
   ## check input arguments and make sure it's a list with matrices
@@ -112,13 +112,15 @@ ccrlm <- function(fcst, obs, pred=NULL,
     flm <- lm(obs ~ ., fdf)
     pred.lm <- predict(flm, newdata=odf, interval='predict')
     tfrac <- -qt((1 - 0.95)/2, flm$df.res)
-    pred.sd <- apply(pred.lm[,-1], 1, diff) / 2 / tfrac
+    pred.sd <- apply(pred.lm[,-1,drop=F], 1, diff) / 2 / tfrac
     repred.lm <- predict(flm, newdata=fdf, interval='predict')
     repred.sd <- apply(repred.lm[,-1], 1, diff) / 2 / tfrac
     ## fcst.debias[i,,] <- predict(flm, newdata=odf) + 
     ##   (fcst.out[i,,] - fcst.out.ens[i,]) * sd(flm$res) / fcst.spread[i] * sqrt((nfcst - 1) / nfcst)
+    spread.corr <- pred.sd / fcst.spread[i]
+    spread.corr[fcst.spread[i] == 0] <- 1
     fcst.debias[i,,] <- pred.lm[,1] + 
-      (fcst.out[i,,] - fcst.out.ens[i,]) / fcst.spread[i] * pred.sd # / sqrt(mean(repred.sd**2))
+      (fcst.out[i,,] - fcst.out.ens[i,]) * spread.corr # / sqrt(mean(repred.sd**2))
   }
   
   return(fcst.debias)

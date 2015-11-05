@@ -34,7 +34,7 @@ smoothccr <- function(fcst, obs, fcst.out=fcst, fc.time, fcout.time=fc.time,
   ## compute climatologies
   fcst.ens <- rowMeans(fcst, dims=2)
   fcst.ens[is.na(obs)] <- NA
-  fcst.out.ens <- rowMeans(fcst.out, dims=2)
+  fcst.out.ens <- rowMeans(fcst.out, dims=2, na.rm=T)
 
   in.day <- apply(fc.time, 2, function(x) x - x[1])
   out.day <- apply(fcout.time, 2, function(x) x - x[1])
@@ -52,7 +52,7 @@ smoothccr <- function(fcst, obs, fcst.out=fcst, fc.time, fcout.time=fc.time,
   ## add scaled anomalies
   fanom <- fcst.out - c(fcst.out.ens)
   res.sd <- sqrt(1 / ncol(obs) * apply(array(flm$res, dim(obs))**2, 1, sum))
-  fout.sd <- sloess(sqrt(apply(apply(fanom, 1:2, sd)**2, 1, mean)))
+  fout.sd <- sloess(sqrt(apply(apply(fanom, 1:2, sd, na.rm=T)**2, 1, mean)))
   fcst.debias <- fanom / fout.sd * res.sd + c(fpred)
   return(fcst.debias)  
 }
