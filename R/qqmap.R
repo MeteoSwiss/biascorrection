@@ -112,8 +112,8 @@ qqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=FALS
   }
   nlead <- nrow(fcst)
   if (nn >= nlead){
-    fq <- rowMeans(apply(fcst.anom, 3, quantile, type=8, prob=prob))
-    oq <- quantile(obs.anom, type=8, prob=prob)
+    fq <- rowMeans(apply(fcst.anom, 3, quantile, type=8, prob=prob, na.rm=T))
+    oq <- quantile(obs.anom, type=8, prob=prob, na.rm=T)
     ## find boundaries in between quantiles
     fqbnds <- fq[-length(fq)] + 0.5*diff(fq)
     fout.qi <- findInterval(fcst.out.anom, fqbnds) + 1
@@ -131,8 +131,8 @@ qqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=FALS
     for (i in 1:nrow(obs.anom)){
       ind <- seq(0, nn - 1) + min(max(i - ceiling((nn - 1)/2), 1), nlead - nn + 1)
       if (! all(ind == indold)){
-        oq <- quantile(obs.anom[ind,], prob=prob, type=8)
-        fq <- rowMeans(apply(fcst.anom[ind,,], 3, quantile, type=8, prob=prob))
+        oq <- quantile(obs.anom[ind,], prob=prob, type=8, na.rm=T)
+        fq <- rowMeans(apply(fcst.anom[ind,,], 3, quantile, type=8, prob=prob, na.rm=T))
         ## find boundaries in between quantiles
         fqbnds <- fq[-length(fq)] + 0.5*diff(fq)
       } 
