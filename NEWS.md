@@ -1,3 +1,7 @@
+## biascorrection 0.5.6.9004
+
+* added support for quantile mapping on climatological anomalies in `fastqqmap`
+
 ## biascorrection 0.5.6.9001
 
 * added support for missing ensemble members in `fcst.out` (except for `useqmap`), forecast arrays for calibration (i.e. `fcst`) have to be complete

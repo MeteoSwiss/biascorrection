@@ -22,6 +22,10 @@
 #'  width (i.e. jumps by 15 days for a 91 day window)
 #'@param minjump minimum number of days the moving quantile window jumps (see
 #'  details)
+#'@param debias logical, should quantile mapping be applied to anomalies from 
+#'  smoothed climatology (only additive)?
+#'@param span the parameter which controls the degree of smoothing (see 
+#'   \code{\link{loess}})
 #'@param ... additional arguments for compatibility with other bias correction 
 #'  methods
 #'  
@@ -56,41 +60,48 @@
 #' ## initialise forcast observation pairs
 #' nens <- 51
 #' signal <- outer(sin(seq(0,4,length=215)), sort(rnorm(30, sd=0.2)), '+') + 2
-#' fcst <- array(rgamma(length(signal)*nens, shape=2, scale=2), c(dim(signal), nens)) *
-#'   c(signal) * (runif(length(signal)*nens) > 0.1)
+#' fcst <- list(raw=array(rgamma(length(signal)*nens, shape=2, scale=2), c(dim(signal), nens)) *
+#'   c(signal) * (runif(length(signal)*nens) > 0.1))
 #' obs <- array(rgamma(length(signal), shape=3, scale=1), dim(signal)) *
 #'   signal * (runif(length(signal)) > 0.3)
-#' fcst.debias <- biascorrection:::fastqqmap(fcst[,1:20,], 
-#'   obs[,1:20], fcst.out=fcst[,21:30,], lower.bound=0, multiplicative=TRUE)
+#' fcst$fastqqmap <- biascorrection:::fastqqmap(fcst$raw[,1:20,], 
+#'   obs[,1:20], fcst.out=fcst$raw[,21:30,], lower.bound=0)
+#' fcst$fastqqmap_mul <- biascorrection:::fastqqmap_mul(fcst$raw[,1:20,], 
+#'   obs[,1:20], fcst.out=fcst$raw[,21:30,], lower.bound=0)
 #' oprob <- (seq(obs[,21:30]) - 1/3) / (length(obs[,21:30]) + 1/3)
 #' oldpar <- par(no.readonly=TRUE)
 #' par(mfrow=c(1,2))
-#' plot(density(fcst.debias[,,1], from=0, to=80, bw=1), lwd=2, col=1, 
+#' plot(density(obs[,21:30], from=0, to=80, bw=1), type='n',
 #'      main='Distribution in validation period')
-#' lines(density(fcst[,21:30,1], from=0, to=80, bw=1), lwd=2, lty=2)
+#' lines(density(fcst[[1]][,21:30,1], from=0, to=80, bw=1), lwd=2, lty=1)
+#' for (i in 2:length(fcst)) lines(density(fcst[[i]][,,1], from=0, to=80, bw=1), lwd=2, lty=i)
 #' lines(density(obs[,21:30], from=0, to=80, bw=1), lwd=2, col=2)
-#' legend('topright', c('Observations', 'No bias correction', 'fastqqmap'), 
-#'        lwd=2, col=c(2,1,1), lty=c(1,2,1), inset=0.05)
+#' legend('topright', c('Observations', 'No bias correction', names(fcst)[-1]), 
+#'        lwd=2, col=c(2,rep(1, length(fcst))), lty=c(1,seq(fcst)), inset=0.05)
 #' plot(quantile(obs[,21:30], type=8, oprob), 
-#'   quantile(fcst[,21:30,], type=8, oprob),
-#'   type='l', lwd=2, lty=2, xlab='Observed quantiles',
+#'   quantile(fcst[[1]][,21:30,], type=8, oprob),
+#'   type='l', lwd=2, xlab='Observed quantiles',
 #'   ylab='Forecast quantiles',
 #'   main='Out-of-sample validation for fastqqmap')
 #' abline(c(0,1), lwd=2, col=2)
-#' lines(quantile(obs[,21:30], type=8, oprob),
-#'   quantile(fcst.debias, type=8, oprob), lwd=2)
-#' legend('topleft', c('No bias correction', 'fastqqmap'), lwd=2, lty=2:1, inset=0.05)
+#' for (i in 2:length(fcst)) lines(quantile(obs[,21:30], type=8, oprob),
+#'   quantile(fcst[[i]], type=8, oprob), lwd=2, lty=i)
+#' legend('topleft', c('No bias correction', names(fcst)[-1]), lwd=2, lty=seq(along=fcst), inset=0.05)
 #' par(oldpar)
 #' 
 #'@keywords util
 fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, 
                       multiplicative=FALSE, lower.bound=NULL, 
-                      window=min(nrow(fcst), 31), minjump=11, ...){
+                      window=min(nrow(fcst), 31), minjump=11,
+                      debias=FALSE, mul.clim=FALSE, span=min(91/nrow(fcst), 1), ...){
   ## estimate the quantile correction for the full range
   ## minprob <- min((2/3) / (ncol(obs)* window + 1/3), 0.01)
   ## estimate the quantile correction excluding the 5 smallest/largest values
   minprob <- min((6 - 1/3) / (ncol(obs)* window + 1/3), 0.01)
   prob <- seq(minprob, 1 - minprob, length=floor(max(99, ncol(obs)*window/20)))
+  if (anomalies & debias) stop("only one of forecast signal anomalies or climatological 
+                               anomalies can be chosen")
+  if (debias & multiplicative) stop("Combination not implemented yet, do not know how to do this!")
   ## fq <- quantile(fcst, type=8, prob=prob)
   if (anomalies){
     fcst.ens <- rowMeans(fcst, dims=2)
@@ -104,6 +115,12 @@ fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE,
       obs.anom <- obs - fcst.ens
       fcst.out.anom <- fcst.out - c(fcst.out.ens)
     }    
+  } else if (debias){
+    fcst.clim <- sloess(rowMeans(fcst), span=span)
+    obs.clim <- sloess(rowMeans(obs), span=span)
+    obs.anom <- obs - obs.clim
+    fcst.anom <- fcst - fcst.clim
+    fcst.out.anom <- fcst - fcst.clim
   } else {
     fcst.anom <- fcst
     obs.anom <- obs
@@ -144,26 +161,48 @@ fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE,
       qcorr <- oq/fq
       qcorr[fq == 0 & oq != 0] <- 1
       qcorr[fq == 0 & oq == 0] <- 0
-      fcst.debias[ind2,,] <- fcst.out[ind2,,] * qcorr[fout.qi]
+      fcst.debias[ind2,,] <- fcst.out.anom[ind2,,] * qcorr[fout.qi]
     } else {
       ## dry day correction
       ndry <- sum(fq == min(fq))
       if (ndry > 1){
         fout.qi[!is.na(fout.qi) & fout.qi == ndry] <- ceiling(runif(sum(!is.na(fout.qi) & fout.qi == ndry), min=0, max=ndry))
       }
-      fcst.debias[ind2,,] <- fcst.out[ind2,,] - (fq - oq)[fout.qi]    
+      fcst.debias[ind2,,] <- fcst.out.anom[ind2,,] - (fq - oq)[fout.qi]    
     }      
   } ## end of loop on lead times
+  
+  if (anomalies){
+    if (multiplicative){
+      fcst.debias <- fcst.debias * c(fcst.out.ens)
+    } else {
+      fcst.debias <- fcst.debias + c(fcst.out.ens)
+    }    
+  } else if (debias){
+    fcst.debias <- fcst.debias + obs.clim
+  }
+  
   if (!is.null(lower.bound)){
     fcst.debias[fcst.debias < lower.bound] <- lower.bound
   }
+  
   return(fcst.debias)
 }
 
 #'@rdname fastqqmap
 #'
-fastqqmap_mul <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, multiplicative=TRUE, lower.bound=NULL, window=min(nrow(fcst), 91), ...){
+fastqqmap_mul <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, ...){
   fastqqmap(fcst=fcst, obs=obs, fcst.out=fcst.out, 
-            anomalies=anomalies, multiplicative=multiplicative,
-            lower.bound=lower.bound, window=window, ...)
+            multiplicative=TRUE,
+            ...)
 }
+
+#'@rdname fastqqmap
+#'
+fastqqmap_debias <- function(fcst, obs, fcst.out=fcst, ...){
+  fastqqmap(fcst=fcst, obs=obs, fcst.out=fcst.out, 
+            anomalies=FALSE, multiplicative=FALSE,
+            debias=TRUE,
+            ...)
+}
+

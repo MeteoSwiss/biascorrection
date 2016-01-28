@@ -2,16 +2,18 @@
 % Please edit documentation in R/fastqqmap.R
 \name{fastqqmap}
 \alias{fastqqmap}
+\alias{fastqqmap_debias}
 \alias{fastqqmap_mul}
 \title{Quantile mapping}
 \usage{
 fastqqmap(fcst, obs, fcst.out = fcst, anomalies = FALSE,
   multiplicative = FALSE, lower.bound = NULL, window = min(nrow(fcst),
-  31), minjump = 11, ...)
+  31), minjump = 11, debias = FALSE, mul.clim = FALSE,
+  span = min(91/nrow(fcst), 1), ...)
 
-fastqqmap_mul(fcst, obs, fcst.out = fcst, anomalies = FALSE,
-  multiplicative = TRUE, lower.bound = NULL, window = min(nrow(fcst), 91),
-  ...)
+fastqqmap_mul(fcst, obs, fcst.out = fcst, anomalies = FALSE, ...)
+
+fastqqmap_debias(fcst, obs, fcst.out = fcst, ...)
 }
 \arguments{
 \item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble
@@ -37,6 +39,12 @@ width (i.e. jumps by 15 days for a 91 day window)}
 
 \item{minjump}{minimum number of days the moving quantile window jumps (see
 details)}
+
+\item{debias}{logical, should quantile mapping be applied to anomalies from
+smoothed climatology (only additive)?}
+
+\item{span}{the parameter which controls the degree of smoothing (see
+\code{\link{loess}})}
 
 \item{...}{additional arguments for compatibility with other bias correction
  methods}
@@ -75,30 +83,33 @@ The quantile mapping algorithm estimates quantile correction factors
 ## initialise forcast observation pairs
 nens <- 51
 signal <- outer(sin(seq(0,4,length=215)), sort(rnorm(30, sd=0.2)), '+') + 2
-fcst <- array(rgamma(length(signal)*nens, shape=2, scale=2), c(dim(signal), nens)) *
-  c(signal) * (runif(length(signal)*nens) > 0.1)
+fcst <- list(raw=array(rgamma(length(signal)*nens, shape=2, scale=2), c(dim(signal), nens)) *
+  c(signal) * (runif(length(signal)*nens) > 0.1))
 obs <- array(rgamma(length(signal), shape=3, scale=1), dim(signal)) *
   signal * (runif(length(signal)) > 0.3)
-fcst.debias <- biascorrection:::fastqqmap(fcst[,1:20,],
-  obs[,1:20], fcst.out=fcst[,21:30,], lower.bound=0, multiplicative=TRUE)
+fcst$fastqqmap <- biascorrection:::fastqqmap(fcst$raw[,1:20,],
+  obs[,1:20], fcst.out=fcst$raw[,21:30,], lower.bound=0)
+fcst$fastqqmap_mul <- biascorrection:::fastqqmap_mul(fcst$raw[,1:20,],
+  obs[,1:20], fcst.out=fcst$raw[,21:30,], lower.bound=0)
 oprob <- (seq(obs[,21:30]) - 1/3) / (length(obs[,21:30]) + 1/3)
 oldpar <- par(no.readonly=TRUE)
 par(mfrow=c(1,2))
-plot(density(fcst.debias[,,1], from=0, to=80, bw=1), lwd=2, col=1,
+plot(density(obs[,21:30], from=0, to=80, bw=1), type='n',
      main='Distribution in validation period')
-lines(density(fcst[,21:30,1], from=0, to=80, bw=1), lwd=2, lty=2)
+lines(density(fcst[[1]][,21:30,1], from=0, to=80, bw=1), lwd=2, lty=1)
+for (i in 2:length(fcst)) lines(density(fcst[[i]][,,1], from=0, to=80, bw=1), lwd=2, lty=i)
 lines(density(obs[,21:30], from=0, to=80, bw=1), lwd=2, col=2)
-legend('topright', c('Observations', 'No bias correction', 'fastqqmap'),
-       lwd=2, col=c(2,1,1), lty=c(1,2,1), inset=0.05)
+legend('topright', c('Observations', 'No bias correction', names(fcst)[-1]),
+       lwd=2, col=c(2,rep(1, length(fcst))), lty=c(1,seq(fcst)), inset=0.05)
 plot(quantile(obs[,21:30], type=8, oprob),
-  quantile(fcst[,21:30,], type=8, oprob),
-  type='l', lwd=2, lty=2, xlab='Observed quantiles',
+  quantile(fcst[[1]][,21:30,], type=8, oprob),
+  type='l', lwd=2, xlab='Observed quantiles',
   ylab='Forecast quantiles',
   main='Out-of-sample validation for fastqqmap')
 abline(c(0,1), lwd=2, col=2)
-lines(quantile(obs[,21:30], type=8, oprob),
-  quantile(fcst.debias, type=8, oprob), lwd=2)
-legend('topleft', c('No bias correction', 'fastqqmap'), lwd=2, lty=2:1, inset=0.05)
+for (i in 2:length(fcst)) lines(quantile(obs[,21:30], type=8, oprob),
+  quantile(fcst[[i]], type=8, oprob), lwd=2, lty=i)
+legend('topleft', c('No bias correction', names(fcst)[-1]), lwd=2, lty=seq(along=fcst), inset=0.05)
 par(oldpar)
 }
 \keyword{util}
