@@ -1,4 +1,4 @@
-## biascorrection 0.5.6.9004
+## biascorrection 0.5.6.9006
 
 * added support for quantile mapping on climatological anomalies in `fastqqmap`
 

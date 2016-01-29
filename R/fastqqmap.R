@@ -151,7 +151,7 @@ fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE,
     fq <- quantile(fcst.anom[ind,,], prob=prob, type=8)
     ## fq <- rowMeans(apply(fcst.anom[ind,,], 3, quantile, prob=prob, type=8))
     ## find boundaries in between quantiles
-    fqbnds <- fq[-length(fq)] + 0.5*diff(fq)
+    fqbnds <- sort(fq[-length(fq)] + 0.5*diff(fq))
     
     ## get the probability of the output fcst given the forecast
     ## i.e. the reverse quantile function
