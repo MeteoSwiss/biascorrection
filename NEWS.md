@@ -1,3 +1,7 @@
+## biascorrection 0.5.6.9007
+
+* changed randomization of dry-day percentiles in `fastqqmap`
+
 ## biascorrection 0.5.6.9006
 
 * added support for quantile mapping on climatological anomalies in `fastqqmap`

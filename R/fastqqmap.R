@@ -166,7 +166,11 @@ fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE,
       ## dry day correction
       ndry <- sum(fq == min(fq))
       if (ndry > 1){
-        fout.qi[!is.na(fout.qi) & fout.qi == ndry] <- ceiling(runif(sum(!is.na(fout.qi) & fout.qi == ndry), min=0, max=ndry))
+        ffi <- !is.na(fout.qi) & fout.qi == ndry
+        ffsample <- rep(1:ndry, ceiling(sum(ffi)/ndry))
+        fout.qi[ffi] <- sample(ffsample, sum(ffi), replace=FALSE)
+        ## old resampling
+        ## fout.qi[!is.na(fout.qi) & fout.qi == ndry] <- ceiling(runif(sum(!is.na(fout.qi) & fout.qi == ndry), min=0, max=ndry))
       }
       fcst.debias[ind2,,] <- fcst.out.anom[ind2,,] - (fq - oq)[fout.qi]    
     }      
