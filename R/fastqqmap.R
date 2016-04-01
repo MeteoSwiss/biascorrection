@@ -93,7 +93,7 @@
 fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, 
                       multiplicative=FALSE, lower.bound=NULL, 
                       window=min(nrow(fcst), 31), minjump=11,
-                      debias=FALSE, mul.clim=FALSE, span=min(91/nrow(fcst), 1), ...){
+                      debias=FALSE, span=min(91/nrow(fcst), 1), ...){
   ## estimate the quantile correction for the full range
   ## minprob <- min((2/3) / (ncol(obs)* window + 1/3), 0.01)
   ## estimate the quantile correction excluding the 5 smallest/largest values
@@ -104,8 +104,8 @@ fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE,
   if (debias & multiplicative) stop("Combination not implemented yet, do not know how to do this!")
   ## fq <- quantile(fcst, type=8, prob=prob)
   if (anomalies){
-    fcst.ens <- rowMeans(fcst, dims=2)
-    fcst.out.ens <- rowMeans(fcst.out, dims=2)
+    fcst.ens <- rowMeans(fcst, dims=2, na.rm=T)
+    fcst.out.ens <- rowMeans(fcst.out, dims=2, na.rm=T)
     if (multiplicative){
       fcst.anom <- fcst / c(fcst.ens)
       obs.anom <- obs/fcst.ens
@@ -116,11 +116,11 @@ fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE,
       fcst.out.anom <- fcst.out - c(fcst.out.ens)
     }    
   } else if (debias){
-    fcst.clim <- sloess(rowMeans(fcst), span=span)
-    obs.clim <- sloess(rowMeans(obs), span=span)
+    fcst.clim <- sloess(rowMeans(fcst, na.rm=T), span=span)
+    obs.clim <- sloess(rowMeans(obs, na.rm=T), span=span)
     obs.anom <- obs - obs.clim
     fcst.anom <- fcst - fcst.clim
-    fcst.out.anom <- fcst - fcst.clim
+    fcst.out.anom <- fcst.out - fcst.clim
   } else {
     fcst.anom <- fcst
     obs.anom <- obs
@@ -195,18 +195,15 @@ fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE,
 
 #'@rdname fastqqmap
 #'
-fastqqmap_mul <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, ...){
-  fastqqmap(fcst=fcst, obs=obs, fcst.out=fcst.out, 
-            multiplicative=TRUE,
-            ...)
+fastqqmap_mul <- function(...){
+  fastqqmap(..., 
+            multiplicative=TRUE)
 }
 
 #'@rdname fastqqmap
 #'
-fastqqmap_debias <- function(fcst, obs, fcst.out=fcst, ...){
-  fastqqmap(fcst=fcst, obs=obs, fcst.out=fcst.out, 
-            anomalies=FALSE, multiplicative=FALSE,
-            debias=TRUE,
-            ...)
+fastqqmap_debias <- function(...){
+  fastqqmap(..., anomalies=FALSE, multiplicative=FALSE,
+            debias=TRUE)
 }
 

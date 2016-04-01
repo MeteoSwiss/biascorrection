@@ -80,11 +80,13 @@ debias <- function(fcst, obs, method='unbias', fcst.out=fcst,
   if (method != 'ccr'){
     stopifnot(!is.na(fcst))
     ## stopifnot(!is.na(fcst.out))
-    stopifnot(!is.na(obs))
+    ## stopifnot(!is.na(obs))
+    if (any(is.na(obs))) warning("Missing values in observations")
     if (!is.null(fc.time)) stopifnot(!is.na(fc.time), !is.na(fcout.time))
   } 
   ## missing values are not tolerated in output for useqmap
   if (method == 'useqmap' & any(is.na(fcst.out))) stop("Missing values not tolerated in useqmap")
+  if (method == 'useqmap' & any(is.na(obs))) stop("Missing values not tolerated in useqmap")
   
   ## apply bias correction function
   if (crossval){

@@ -8,12 +8,11 @@
 \usage{
 fastqqmap(fcst, obs, fcst.out = fcst, anomalies = FALSE,
   multiplicative = FALSE, lower.bound = NULL, window = min(nrow(fcst),
-  31), minjump = 11, debias = FALSE, mul.clim = FALSE,
-  span = min(91/nrow(fcst), 1), ...)
+  31), minjump = 11, debias = FALSE, span = min(91/nrow(fcst), 1), ...)
 
-fastqqmap_mul(fcst, obs, fcst.out = fcst, anomalies = FALSE, ...)
+fastqqmap_mul(...)
 
-fastqqmap_debias(fcst, obs, fcst.out = fcst, ...)
+fastqqmap_debias(...)
 }
 \arguments{
 \item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble

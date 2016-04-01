@@ -1,3 +1,7 @@
+## biascorrection 0.5.6.9008
+
+* Allow for missing values in observations (most methods support this)
+
 ## biascorrection 0.5.6.9007
 
 * changed randomization of dry-day percentiles in `fastqqmap`
