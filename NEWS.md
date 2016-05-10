@@ -1,3 +1,7 @@
+## biascorrection 0.5.6.9009
+
+* Fixed bugs in `linmod` causing crashes with single lead time forecasts
+
 ## biascorrection 0.5.6.9008
 
 * Allow for missing values in observations (most methods support this)

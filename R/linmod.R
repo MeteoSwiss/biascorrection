@@ -192,9 +192,9 @@ linmod <- function(fcst, obs, fcst.out=fcst,
     
     if (bleach){
       sd.res <- apply(array(in.df2$obs - predict(f.lm, newdata=in.df2), dim(obs[-1,])), 1, sd)
-      if (smooth) sd.res <- exp(loess(log(sd.res) ~ log(seq(sd.res)))$fit)
+      if (smooth) sd.res <- exp(loess(log(sd.res) ~ log(seq(along=sd.res)))$fit)
       in.df2$ww <- 1 / sd.res**2
-      sd.res <- sd.res[c(seq(sd.res), length(sd.res))]
+      sd.res <- sd.res[c(seq(along=sd.res), length(sd.res))]
       f.lm <- lm(formula, in.df2, weights=ww)      
     } else {
       sd.res <- 1
@@ -204,7 +204,7 @@ linmod <- function(fcst, obs, fcst.out=fcst,
     if (bleach){
       sd.res <- apply(array(f.lm$res, dim(obs)), 1, sd)
       sd.res <- pmax(sd.res, 0.01*max(sd.res, na.rm=T))
-      if (smooth) sd.res <- loess(sqrt(sd.res) ~ log(seq(sd.res)))$fit**2
+      if (smooth) sd.res <- loess(sqrt(sd.res) ~ log(seq(along=sd.res)))$fit**2
       in.df$ww <- 1 / sd.res**2
       f.lm <- lm(formula, in.df, weights=ww)
     } else {
@@ -215,7 +215,7 @@ linmod <- function(fcst, obs, fcst.out=fcst,
   ## compute lead-time dependent inflation for recalibration
   if (recal){
     fsd <- apply(fcst - c(fcst.ens), 1, sd)
-    if (smooth) fsd <- loess(sqrt(fsd) ~ log(seq(fsd)), span=span)$fit**2
+    if (smooth) fsd <- loess(sqrt(fsd) ~ log(seq(along=fsd)), span=span)$fit**2
     if (type == 'prediction'){
       ## prediction interval is tfrac*sd_pred
       plm <- predict(f.lm, newdata=out.df, interval='prediction', level=pnorm(1), weights=1 / sd.res**2)
@@ -226,15 +226,15 @@ linmod <- function(fcst, obs, fcst.out=fcst,
         ## sd(f.lm$res) != sd(in.df$obs - predict(f.lm, in.df))
         sd.corr1 <- apply(matrix(in.df$obs - predict(f.lm, in.df, weights=1/sd.res**2), nrow(obs)), 1, sd)
         sd.corr2 <- apply(matrix(f.lm$res, nrow(obs) - 1), 1, sd)
-        sd.corr2 <- sd.corr2[c(seq(sd.corr2), length(sd.corr2))]
+        sd.corr2 <- sd.corr2[c(seq(along=sd.corr2), length(sd.corr2))]
         sd.corr <- sd.corr1 / sd.corr2
         psd <- psd*sd.corr
       }
-      if (smoothobs) psd <- c(apply(psd, 2, function(y) exp(loess(log(y) ~ log(seq(y)), span=span)$fit)))
+      if (smoothobs) psd <- c(apply(psd, 2, function(y) exp(loess(log(y) ~ log(seq(along=y)), span=span)$fit)))
     } else {
       fres <- array(in.df$obs - predict(f.lm, newdata=in.df, weights=1 / sd.res**2), dim(obs))
       psd <- apply(fres, 1, sd)
-      if (smoothobs) psd <- loess(sqrt(psd) ~ log(seq(psd)), span=span)$fit**2
+      if (smoothobs) psd <- loess(sqrt(psd) ~ log(seq(along=psd)), span=span)$fit**2
     }
     inflate <- c(psd / fsd) 
     inflate[fsd == 0] <- 1
