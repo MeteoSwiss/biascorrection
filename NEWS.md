@@ -1,3 +1,7 @@
+## biascorrection 0.5.6.9010
+
+* added wrapper for repeated application of `debias`
+
 ## biascorrection 0.5.6.9009
 
 * Fixed bugs in `linmod` causing crashes with single lead time forecasts

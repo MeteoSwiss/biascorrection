@@ -2,5 +2,5 @@
 #' 
 #' @name biascorrection
 #' @docType package
-#' @import qmap stats
+#' @import qmap stats parallel
 NULL
