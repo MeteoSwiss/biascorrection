@@ -58,6 +58,14 @@ debias <- function(fcst, obs, method='unbias', fcst.out=fcst,
                    fc.time=NULL, fcout.time=fc.time, crossval=FALSE, 
                    blocklength=1, forward=FALSE, nforward=floor(ncol(fcst) / 2),
                    ...){
+  ## check dimensions of fcst, obs, and fcst.out
+  fodims <- dim(fcst.out)
+  if (length(dim(fcst)) == 2 & length(obs) == nrow(fcst)){
+    fcst <- array(fcst, c(1, dim(fcst)))
+    obs <- array(obs, c(1, length(obs)))
+    fcst.out <- array(fcst.out, c(1, dim(fcst.out)))
+  }
+  
   ## get name of bias correction function
   dfun <- try(get(method), silent=TRUE)
   if (class(dfun) == 'try-error') stop('Bias correction method has not been implemented yet')
@@ -157,5 +165,5 @@ debias <- function(fcst, obs, method='unbias', fcst.out=fcst,
                         fcout.time=fcout.time,
                         ...)
   }
-  return(fcst.debias)
+  return(array(fcst.debias, fodims))
 }

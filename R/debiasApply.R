@@ -11,48 +11,66 @@
 #'   ensemble members in this order.
 #' @param obs array of observation used for calibration. Dimensions correspond
 #'   to the \code{fcst} array without the last dimension.
+#' @param method character string with bias correction method name
 #' @param fcst.out array of ensemble forecast data that is to be calibrated. All
 #'   but the forecast instance and ensemble dimensions have to be the same as
 #'   for \code{fcst}.
 #' @param ... Additional parameters passed on to \code{\link{debias}}
+#' @param atomic logical, should debiasing be applied to each forecast instance
+#'   separately (in contrast to jointly over lead times)?
 #' 
 #' @keywords util
 #' @export
-debiasApply <- function(fcst, obs, fcst.out=fcst, ...) {
+debiasApply <- function(fcst, obs, method='unbias', fcst.out=fcst, ..., atomic=FALSE) {
+
+  ## set number of minimum dimensions
+  nn <- ifelse(atomic, 2, 3)
+  
   # enquire dimensions of fcst, obs, and fcst.out
   fdims <- dim(fcst)
   ndims <- length(fdims)
+  stopifnot(ndims >= nn)
   odims <- dim(obs)
   fodims <- dim(fcst.out)
   stopifnot(odims == fdims[-ndims])
-  stopifnot(fodims[seq(1, ndims - 2)] == fdims[seq(1, ndims - 2)])
-  stopifnot(ndims >= 3)
+  stopifnot(fodims[seq(1, ndims - nn + 1)] == fdims[seq(1, ndims - nn + 1)])
   
   ## the trivial case
-  if (ndims == 3){
-    return(debias(fcst=fcst, obs=obs, fcst.out=fcst.out, ...))
+  if (ndims == nn){
+    return(debias(fcst=fcst, obs=obs, method=method, fcst.out=fcst.out, ...))
   } 
   
   ## deal with the non-trivial case of multiple instances
-  resdims <- fdims[seq(1,ndims - 3)]
-  indims <- c(prod(resdims), fdims[ndims - 2:0])
-  outdims <- c(prod(resdims), fodims[ndims - 2:0])
+  resdims <- fdims[seq(1,ndims - nn)]
+  indims <- c(prod(resdims), fdims[ndims - seq(nn - 1, 0)])
+  outdims <- c(prod(resdims), fodims[ndims - seq(nn - 1, 0)])
   
   ftmp <- array(fcst, indims)
   otmp <- array(obs, indims[-length(indims)])
   fotmp <- array(fcst.out, outdims)
 
   ## dimensions for arrays in debias
-  ifd <- fdims[ndims - 2:0]
-  iod <- odims[ndims - 2:1]
-  ofd <- fodims[ndims - 2:0]
+  ifd <- fdims[ndims - seq(nn - 1, 0)]
+  iod <- odims[ndims - seq(nn - 1, 1)]
+  ofd <- fodims[ndims - seq(nn - 1, 0)]
 
-  fout <- sapply(1:nrow(ftmp), function(i) debias(fcst=array(ftmp[i,,,], ifd), 
-                                                  obs=array(otmp[i,,], iod), 
-                                                  fcst.out=array(fotmp[i,,,], ofd), ...), 
-                 simplify='array')
-  
-  fcst.debias <- array(aperm(fout, c(4,1,2,3)), fodims)
-  
+  if (nn == 3){
+    fout <- sapply(1:nrow(ftmp), function(i) debias(fcst=array(ftmp[i,,,], ifd), 
+                                                    obs=array(otmp[i,,], iod), 
+                                                    method=method,
+                                                    fcst.out=array(fotmp[i,,,], ofd), ...), 
+                   simplify='array')
+    
+    fcst.debias <- array(aperm(fout, c(4,1,2,3)), fodims)
+  } else if (nn == 2) {
+    fout <- sapply(1:nrow(ftmp), function(i) debias(fcst=array(ftmp[i,,], ifd), 
+                                                    obs=array(otmp[i,], iod), 
+                                                    method=method,
+                                                    fcst.out=array(fotmp[i,,], ofd), ...), 
+                   simplify='array')
+    
+    fcst.debias <- array(aperm(fout, c(3,1,2)), fodims)    
+  }
+ 
   return(fcst.debias)
 }

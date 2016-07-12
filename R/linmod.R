@@ -131,9 +131,9 @@ linmod <- function(fcst, obs, fcst.out=fcst,
                    fcout.time=NULL,
                    formula=obs ~ fcst, 
                    recal=FALSE, 
-                   smooth=TRUE, smoothobs=TRUE,
+                   smooth=nrow(fcst) > 1, smoothobs=nrow(fcst) > 1,
                    span=min(1, 91/nrow(fcst)), 
-                   bleach=TRUE, 
+                   bleach=nrow(fcst) > 1, 
                    differences=FALSE, 
                    type=c("calibration", "prediction"), 
                    ...){
@@ -144,6 +144,7 @@ linmod <- function(fcst, obs, fcst.out=fcst,
   fdate <- function(x,y){
     as.Date(paste0(y,'-01-01')) + x - 1
   }
+  
   
   if (is.null(fc.time)) fc.time <- outer(1:nrow(fcst), 1980 + 1:ncol(fcst), fdate)
   if (is.null(fcout.time)) fcout.time <- outer(1:nrow(fcst.out), 1980 + 1:ncol(fcst.out), fdate)
@@ -193,9 +194,9 @@ linmod <- function(fcst, obs, fcst.out=fcst,
     if (bleach){
       sd.res <- apply(array(in.df2$obs - predict(f.lm, newdata=in.df2), dim(obs[-1,])), 1, sd)
       if (smooth) sd.res <- exp(loess(log(sd.res) ~ log(seq(along=sd.res)))$fit)
-      in.df2$ww <- 1 / sd.res**2
+      in.df2[['ww']] <- 1 / sd.res**2
       sd.res <- sd.res[c(seq(along=sd.res), length(sd.res))]
-      f.lm <- lm(formula, in.df2, weights=ww)      
+      f.lm <- lm(formula, in.df2, weights=in.df2[['ww']])      
     } else {
       sd.res <- 1
     }    
@@ -205,8 +206,8 @@ linmod <- function(fcst, obs, fcst.out=fcst,
       sd.res <- apply(array(f.lm$res, dim(obs)), 1, sd)
       sd.res <- pmax(sd.res, 0.01*max(sd.res, na.rm=T))
       if (smooth) sd.res <- loess(sqrt(sd.res) ~ log(seq(along=sd.res)))$fit**2
-      in.df$ww <- 1 / sd.res**2
-      f.lm <- lm(formula, in.df, weights=ww)
+      in.df[['ww']] <- 1 / sd.res**2
+      f.lm <- lm(formula, in.df, weights=in.df[['ww']])
     } else {
       sd.res <- rep(1, nrow(obs))
     }
@@ -214,13 +215,17 @@ linmod <- function(fcst, obs, fcst.out=fcst,
   
   ## compute lead-time dependent inflation for recalibration
   if (recal){
-    fsd <- apply(fcst - c(fcst.ens), 1, sd)
+    fsd <- sqrt(rowMeans(apply(fcst, 1:2, sd, na.rm=T)**2))
     if (smooth) fsd <- loess(sqrt(fsd) ~ log(seq(along=fsd)), span=span)$fit**2
     if (type == 'prediction'){
       ## prediction interval is tfrac*sd_pred
-      plm <- predict(f.lm, newdata=out.df, interval='prediction', level=pnorm(1), weights=1 / sd.res**2)
-      tfrac <- -qt((1 - pnorm(1))/2, f.lm$df.residual)
-      psd <- array((plm[,'upr'] - plm[,'fit'])/tfrac, dim(fcst.out.ens))
+      # plm <- predict(f.lm, newdata=out.df, interval='prediction', level=pnorm(1), weights=1 / sd.res**2)
+      # tfrac <- -qt((1 - pnorm(1))/2, f.lm$df.residual)
+      # nfrac <- -qnorm((1 - pnorm(1))/2)
+      # psd <- array((plm[,'upr'] - plm[,'fit'])/tfrac, dim(fcst.out.ens))
+      plm <- predict(f.lm, newdata=out.df, se.fit=TRUE, weights=1/sd.res**2)
+      psd <- array(sqrt(plm$res**2 + plm$se.fit**2), dim(fcst.out.ens))
+      ## psd <- array((plm[,'upr'] - plm[,'fit'])/nfrac, dim(fcst.out.ens))
       if (differences){
         ## additional correction to take into account that
         ## sd(f.lm$res) != sd(in.df$obs - predict(f.lm, in.df))
@@ -233,7 +238,7 @@ linmod <- function(fcst, obs, fcst.out=fcst,
       if (smoothobs) psd <- c(apply(psd, 2, function(y) exp(loess(log(y) ~ log(seq(along=y)), span=span)$fit)))
     } else {
       fres <- array(in.df$obs - predict(f.lm, newdata=in.df, weights=1 / sd.res**2), dim(obs))
-      psd <- apply(fres, 1, sd)
+      psd <- sqrt(rowMeans(fres**2))
       if (smoothobs) psd <- loess(sqrt(psd) ~ log(seq(along=psd)), span=span)$fit**2
     }
     inflate <- c(psd / fsd) 
