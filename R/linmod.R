@@ -196,7 +196,7 @@ linmod <- function(fcst, obs, fcst.out=fcst,
       if (smooth) sd.res <- exp(loess(log(sd.res) ~ log(seq(along=sd.res)))$fit)
       in.df2[['ww']] <- 1 / sd.res**2
       sd.res <- sd.res[c(seq(along=sd.res), length(sd.res))]
-      f.lm <- lm(formula, in.df2, weights=in.df2[['ww']])      
+      f.lm <- lm(formula, in.df2, weights=ww)      
     } else {
       sd.res <- 1
     }    
@@ -207,7 +207,7 @@ linmod <- function(fcst, obs, fcst.out=fcst,
       sd.res <- pmax(sd.res, 0.01*max(sd.res, na.rm=T))
       if (smooth) sd.res <- loess(sqrt(sd.res) ~ log(seq(along=sd.res)))$fit**2
       in.df[['ww']] <- 1 / sd.res**2
-      f.lm <- lm(formula, in.df, weights=in.df[['ww']])
+      f.lm <- lm(formula, in.df, weights=ww)
     } else {
       sd.res <- rep(1, nrow(obs))
     }
