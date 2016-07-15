@@ -14,6 +14,12 @@ knitr::opts_chunk$set(
 
 # biascorrection
 
+
+[![Build Status](https://travis-ci.org/jonasbhend/biascorrection.svg?branch=master)](https://travis-ci.org/jonasbhend/biascorrection)
+[![codecov](https://img.shields.io/codecov/c/github/jonasbhend/biascorrection.svg)](https://codecov.io/github/jonasbhend/biascorrection) 
+
+
+
 ## Introduction
 Collection of functions to calibrate daily ensemble forecasts. This package includes a wrapper for performing bias correction in in-sample, cross-validation, moving blocks cross-validation and forward modes and also includes a variety of calibration functions (regression-based, quantile mapping). The focus is on ease-of-use rather than performance when applied to large datasets. Consequently, specific functions will have to be implemented separately to be applicable in an operational setting. No support is provided so far to apply calibration to large datasets.
     
