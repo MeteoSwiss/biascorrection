@@ -5,8 +5,7 @@
 \title{Calibration of daily time series}
 \usage{
 debias(fcst, obs, method = "unbias", fcst.out = fcst, fc.time = NULL,
-  fcout.time = fc.time, crossval = FALSE, blocklength = 1,
-  forward = FALSE, nforward = floor(ncol(fcst)/2), ...)
+  fcout.time = fc.time, strategy = "none", ...)
 }
 \arguments{
 \item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble
@@ -25,16 +24,10 @@ applied (defaults to \code{fcst})}
 \item{fcout.time}{forecast dates of class 'Date' (for monthly correction, see
 \code{\link{monthly}})}
 
-\item{crossval}{logical, should leave-one-out crossvalidation be used (see
-details)?}
-
-\item{blocklength}{block length for moving blocks crossvalidation (defaults
-to 1 for leave-one-out crossvalidation)}
-
-\item{forward}{logical, should only past hindcasts be used for calibration?}
-
-\item{nforward}{number of forecasts to debias backwards in forward mode (see
-details).}
+\item{strategy}{keyword for out-of-sample strategy (defaults to "none", i.e.
+all values in obs/fcst are used to debias fcst.out), named list of parameters, or
+list of indices of obs/fcst pairs to be used for each instance in fcst.out
+(see \code{\link[easyVerification]{indRef}}).}
 
 \item{...}{additional arguments passed to bias correction methods}
 }
@@ -46,18 +39,6 @@ forecast data set
 No missing values are tolerated in either `obs` or `fcst` to ensure consistency
 of calibration. Missing ensemble members, however, are tolerated in `fcst.out`,
 thereby allowing calibration of non-homogeneous ensembles.
-
-If \code{crossval} is set to \code{TRUE}, the debiasing for years in
-block \code{i} are computed based on the forecast and observation data set
-excluding years in block \code{i}. If, in addition, there are more years in
-the output set \code{fcst.out} than in the input set \code{fcst}, the bias
-correction for the remaining years in \code{fcst.out} is computed based on
-all years in \code{fcst}.
-
-If \code{forward} is set to \code{TRUE}, the debiasing for forecast \code{i}
-is computed based on all previous forecast observation pairs. The first
-\code{nforward} forecasts, however, are debiased backwards (i.e. forecast \code{i}
-is calibrated with forecasts \code{i+1} to \code{n}).
 }
 \examples{
 ## initialise forcast observation pairs
