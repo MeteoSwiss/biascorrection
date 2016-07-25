@@ -7,7 +7,8 @@
 \title{Quantile mapping}
 \usage{
 qqmap(fcst, obs, fcst.out = fcst, anomalies = FALSE,
-  multiplicative = FALSE, nn = nrow(fcst), exact = FALSE, ...)
+  multiplicative = FALSE, window = nrow(fcst), minprob = 0.01,
+  exact = FALSE, ...)
 
 qqmap_mul(...)
 }
@@ -26,12 +27,16 @@ observed anomalies (from forecast ensemble mean) only?}
 \item{multiplicative}{logical, is quantile correction to be applied
 multiplicatively?}
 
-\item{nn}{number of lead times to be included around the lead time to be
-calibrated (i.e. \code{ceiling((nn - 1)/2)} before and \code{floor((nn -
+\item{window}{number of lead times to be included around the lead time to be
+calibrated (i.e. \code{ceiling((window - 1)/2)} before and \code{floor((window -
 1)/2)} after). The interval to estimate quantile corrections is held
-constant, that is, the first \code{nn} lead times are used to estimate the
+constant, that is, the first \code{window} lead times are used to estimate the
 quantile correction for lead time one. The default is to lump all lead times
-together \code{nn = nrow(fcst)}.}
+together \code{window = nrow(fcst)}.}
+
+\item{minprob}{probability boundary for quantiles to be estimated. Defaults to
+\code{0.01} for percentiles 1 to 99. At most 201 distinct quantiles between
+\code{[minprob, 1 - minprob]} are estimated.}
 
 \item{exact}{logical, should surrounding lead-times be used for quantiles of
 forecast as well?}
@@ -60,14 +65,14 @@ The quantile mapping algorithm estimates quantile correction factors
  the quantile mapping is only applied to the anomalies with the signal being
  left uncorrected.
 
- The quantile mapping is lead time dependent, parameter \code{nn} is used to
+ The quantile mapping is lead time dependent, parameter \code{window} is used to
  select the number of lead times on either side of the lead time that is to
- be corrected to be included in the quantile estimation. For the beginning
+ be corrected to be included in the quantile estimation. For the begiwindowing
  and end of the series, the lead-time interval is kept constant, so that to
  estimate the quantile correction for the first lead time, the first
- \code{nn} lead times are used. If \code{exact = FALSE}, the lead time
+ \code{window} lead times are used. If \code{exact = FALSE}, the lead time
  dependent quantiles for the forecast are directly estimated from single lead
- times without the surrounding \code{2*nn} lead times. This is a quick and
+ times without the surrounding \code{window} lead times. This is a quick and
  dirty fix to speed up processing.
 }
 \examples{

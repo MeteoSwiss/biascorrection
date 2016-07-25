@@ -1,3 +1,10 @@
+## biascorrection 0.5.7.9001
+* changed definition of window-width in `qqmap` to the one in `fastqqmap` (i.e. through parameter `window` instead of `nn`)
+* changed default parameters for quantiles to `minprob = 0.01` (i.e. percentile sampling)
+
+## biascorrection 0.5.7.9000
+* added new implementation to determine out-of-sample strategy for `debias`. This is now based on the implementation in package `easyVerification`
+
 ## biascorrection 0.5.6.9010
 
 * added wrapper for repeated application of `debias`

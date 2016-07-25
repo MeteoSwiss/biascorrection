@@ -8,7 +8,8 @@
 \usage{
 fastqqmap(fcst, obs, fcst.out = fcst, anomalies = FALSE,
   multiplicative = FALSE, lower.bound = NULL, window = min(nrow(fcst),
-  31), minjump = 11, debias = FALSE, span = min(91/nrow(fcst), 1), ...)
+  31), minprob = 0.01, minjump = 11, debias = FALSE,
+  span = min(91/nrow(fcst), 1), ...)
 
 fastqqmap_mul(...)
 
@@ -35,6 +36,10 @@ precipitation)}
 \item{window}{width of window to be used for quantile mapping. To increase
 computation speed, the window moves along at approximately 1/6 of the window
 width (i.e. jumps by 15 days for a 91 day window)}
+
+\item{minprob}{probability boundary for quantiles to be estimated. Defaults to
+\code{0.01} for percentiles 1 to 99. At most 201 distinct quantiles between
+\code{[minprob, 1 - minprob]} are estimated.}
 
 \item{minjump}{minimum number of days the moving quantile window jumps (see
 details)}

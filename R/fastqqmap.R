@@ -20,6 +20,9 @@
 #'@param window width of window to be used for quantile mapping. To increase 
 #'  computation speed, the window moves along at approximately 1/6 of the window
 #'  width (i.e. jumps by 15 days for a 91 day window)
+#'@param minprob probability boundary for quantiles to be estimated. Defaults to
+#'  \code{0.01} for percentiles 1 to 99. At most 201 distinct quantiles between
+#'  \code{[minprob, 1 - minprob]} are estimated.
 #'@param minjump minimum number of days the moving quantile window jumps (see
 #'  details)
 #'@param debias logical, should quantile mapping be applied to anomalies from 
@@ -92,13 +95,9 @@
 #'@keywords util
 fastqqmap <- function(fcst, obs, fcst.out=fcst, anomalies=FALSE, 
                       multiplicative=FALSE, lower.bound=NULL, 
-                      window=min(nrow(fcst), 31), minjump=11,
+                      window=min(nrow(fcst), 31), minprob=0.01, minjump=11,
                       debias=FALSE, span=min(91/nrow(fcst), 1), ...){
-  ## estimate the quantile correction for the full range
-  ## minprob <- min((2/3) / (ncol(obs)* window + 1/3), 0.01)
-  ## estimate the quantile correction excluding the 5 smallest/largest values
-  minprob <- min((6 - 1/3) / (ncol(obs)* window + 1/3), 0.01)
-  prob <- seq(minprob, 1 - minprob, length=floor(max(99, ncol(obs)*window/20)))
+  prob <- seq(minprob, 1 - minprob, length=min((1 - minprob) / minprob, 201))
   if (anomalies & debias) stop("only one of forecast signal anomalies or climatological 
                                anomalies can be chosen")
   if (debias & multiplicative) stop("Combination not implemented yet, do not know how to do this!")
