@@ -1,7 +1,7 @@
 Package: biascorrection
 Title: Bias Correct Daily Ensemble Forecasts
 Date: 2016-07-21
-Version: 0.5.7.9001
+Version: 0.5.7.9002
 Authors@R: c(person("Jonas", "Bhend", email="jonas.bhend@gmx.ch", role = c("aut", "cre")),
     person("Samuel", "Monhart", role="ctb"))
 Description: Collection of functions to calibrate daily ensemble forecasts.
@@ -16,16 +16,15 @@ Depends:
     R (>= 3.0.1),
     qmap, 
     stats,
-    easyVerification(>= 0.2.0.9004)
+    easyVerification(>= 0.2.0.9005)
 Imports: 
     parallel
 Suggests: 
     testthat, 
-    knitr,
     rmarkdown
 License: GPL-3
 LazyData: true
-VignetteBuilder: knitr
+VignetteBuilder: rmarkdown
 Packaged: 2015-03-09 12:51:54 UTC; bhendj
 URL: http://github.com/jonasbhend/biascorrection
 BugReports: http://github.com/jonasbhend/biascorrection/issues

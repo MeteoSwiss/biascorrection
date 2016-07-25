@@ -101,7 +101,6 @@ debias <- function(fcst, obs, method='unbias', fcst.out=fcst,
                                   fcst.out=fcst.out[,ii.out,,drop=FALSE], 
                                   fc.time=if (is.null(fc.time)) NULL else fc.time[,ii.cal,drop=FALSE], 
                                   fcout.time=if (is.null(fcout.time)) NULL else fcout.time[,ii.out,drop=FALSE],
-                                  strategy='none', 
                                   ...)
   }
 

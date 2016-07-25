@@ -20,36 +20,36 @@ test_that("Missing value handling", {
 
 test_that("Missing ensemble members for in-sample", {
   for (mn in setdiff(mnames, 'useqmap')){
-    expect_equal(mean(!is.na(debias(fna[,,1:3], obs, method=mn, 
-                                    fc.time=fc.time, fcst.out=fna))), 
-                 mean(!is.na(fna)))
+    expect_equal(!is.na(debias(fna[,,1:3], obs, method=mn, 
+                                    fc.time=fc.time, fcst.out=fna)), 
+                 !is.na(fna))
   }  
 })
 
 test_that("Missing ensemble members for forward", {
   for (mn in setdiff(mnames, 'useqmap')){
-    expect_equal(mean(!is.na(debias(fna[,,1:3], obs, method=mn, 
+    expect_equal(!is.na(debias(fna[,,1:3], obs, method=mn, 
                                     fc.time=fc.time, fcst.out=fna,
-                                    forward=TRUE))), 
-                 mean(!is.na(fna)))
+                                    strategy='forward')), 
+                 !is.na(fna))
   }  
 })
 
 test_that("Missing ensemble members for LOO crossval", {
   for (mn in setdiff(mnames, 'useqmap')){
-    expect_equal(mean(!is.na(debias(fna[,,1:3], obs, method=mn, 
+    expect_equal(!is.na(debias(fna[,,1:3], obs, method=mn, 
                                     fc.time=fc.time, fcst.out=fna,
-                                    crossval=TRUE))), 
-                 mean(!is.na(fna)))
+                                    strategy='crossval')), 
+                 !is.na(fna))
   }  
 })
 
 test_that("Missing ensemble members split sample", {
   for (mn in setdiff(mnames, 'useqmap')){
-    expect_equal(mean(!is.na(debias(fna[,,1:3], obs, method=mn, 
+    expect_equal(!is.na(debias(fna[,,1:3], obs, method=mn, 
                                     fc.time=fc.time, fcst.out=fna,
-                                    crossval=TRUE, blocklength=15))), 
-                 mean(!is.na(fna)))
+                                    strategy=list(type = 'block', blocklength=15))), 
+                 !is.na(fna))
   }  
 })
 
@@ -65,30 +65,30 @@ test_that('Output dimensions for in-sample', {
 
 test_that('Output dimensions for forward', {
   for (mn in mnames){
-    expect_equal(dim(debias(fcst, obs, method=mn, fc.time=fc.time, forward=TRUE)), 
+    expect_equal(dim(debias(fcst, obs, method=mn, fc.time=fc.time, strategy='forward')), 
                  dim(fcst))
   }
   for (i in 1:ncol(fcst)){
-    expect_equal(ncol(debias(fcst, obs, fcst.out=fcst[,1:i,,drop=F], forward=TRUE)), i)
+    expect_equal(ncol(debias(fcst, obs, fcst.out=fcst[,1:i,,drop=F], strategy='forward')), i)
   }
 })
 
 test_that('Output dimensions for LOO crossval', {
   for (mn in mnames){
-    expect_equal(dim(debias(fcst, obs, method=mn, fc.time=fc.time, crossval=TRUE)), 
+    expect_equal(dim(debias(fcst, obs, method=mn, fc.time=fc.time, strategy='crossval')), 
                  dim(fcst))
   }
   for (i in 1:ncol(fcst)){
-    expect_equal(ncol(debias(fcst, obs, fcst.out=fcst[,1:i,,drop=F], crossval=TRUE)), i)
+    expect_equal(ncol(debias(fcst, obs, fcst.out=fcst[,1:i,,drop=F], strategy='crossval')), i)
   }
 })
 
 test_that('Output dimensions for split sample', {
   for (mn in mnames){
-    expect_equal(dim(debias(fcst, obs, method=mn, fc.time=fc.time, crossval=TRUE, blocklength=15)), 
+    expect_equal(dim(debias(fcst, obs, method=mn, fc.time=fc.time, strategy=list(type='block', blocklength=15))), 
                  dim(fcst))
   }
   for (i in 1:ncol(fcst)){
-    expect_equal(ncol(debias(fcst, obs, fcst.out=fcst[,1:i,,drop=F], crossval=TRUE)), i)
+    expect_equal(ncol(debias(fcst, obs, fcst.out=fcst[,1:i,,drop=F], strategy='crossval')), i)
   }
 })

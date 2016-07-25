@@ -1,4 +1,9 @@
+## biascorrection 0.5.7.9002
+
+* Unified code for `qqmap` and `fastqqmap`
+
 ## biascorrection 0.5.7.9001
+
 * changed definition of window-width in `qqmap` to the one in `fastqqmap` (i.e. through parameter `window` instead of `nn`)
 * changed default parameters for quantiles to `minprob = 0.01` (i.e. percentile sampling)
 
