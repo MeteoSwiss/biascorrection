@@ -2,7 +2,7 @@
 #' @aliases combRecal
 #' 
 #' @title
-#' Conditional bias with linear time trend
+#' Conditional Bias With Linear Time Trend
 #' 
 #' @description
 #' Compute calibration for biases that are conditional on ensemble mean forecast

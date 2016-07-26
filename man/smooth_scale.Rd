@@ -3,7 +3,7 @@
 \name{smooth_scale}
 \alias{smooth_scale}
 \alias{smooth_scalespread}
-\title{Smoothed mean de-biasing with scaling}
+\title{Smoothed Mean De-biasing With Variance Scaling}
 \usage{
 smooth_scale(fcst, obs, fcst.out = fcst, span = min(1, 31/nrow(fcst)), ...)
 

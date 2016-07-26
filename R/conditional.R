@@ -3,7 +3,7 @@
 #' @aliases conditionalRecal
 #' 
 #' @title
-#' Bias conditional on forecast
+#' Bias Conditional on Forecast
 #' 
 #' @description
 #' Compute calibration for biases that are conditional on ensemble mean forecast

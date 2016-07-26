@@ -1,4 +1,4 @@
-#' Daily calibration with monthly mean
+#' Daily Calibration with Monthly Mean
 #' 
 #' Computes monthly mean de-biasing
 #' 

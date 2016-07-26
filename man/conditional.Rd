@@ -3,7 +3,7 @@
 \name{conditional}
 \alias{conditional}
 \alias{conditionalRecal}
-\title{Bias conditional on forecast}
+\title{Bias Conditional on Forecast}
 \usage{
 conditional(...)
 

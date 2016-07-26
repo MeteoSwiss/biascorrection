@@ -1,8 +1,10 @@
 #' @name linmod
 #'   
-#' @title Linear model of the bias
+#' @title Linear Models for Bias Correction
 #'   
 #' @description Compute calibration for biases that follow various linear models
+#'   in dependence of lead time, forecast anomalies and initialization /
+#'   forecast time.
 #'   
 #' @param fcst n x m x k array of n lead times, m forecasts, of k ensemble 
 #'   members
@@ -69,7 +71,7 @@
 #'   
 #'   The underlying assumption of \code{iid} residuals in the linear model is 
 #'   generally not fullfilled, thus weighted least squares can be used instead 
-#'   with \code{bleach = TRUE}. The weighting is chosen proportional to the
+#'   with \code{bleach = TRUE}. The weighting is chosen proportional to the 
 #'   inverse of the lead-time dependent variance of the residuals.
 #'   
 #'   By default, the seasonally varying bias and the residual errors and model 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/ccr.R
 \name{ccr}
 \alias{ccr}
-\title{Climate conserving recalibration}
+\title{Climate Conserving Recalibration}
 \usage{
 ccr(fcst, obs, fcst.out = fcst, type = c("calibration", "prediction"), ...)
 }
@@ -32,8 +32,8 @@ In \code{calibration} mode, the climate conserving recalibration
   uncertainty from the signal calibration following linear regression theory.
   I.e. the inflation factor \code{s.pred} is
 
-  \deqn{.spred = s \sqrt{1 + 1/n + f_0^2 / \sum{f_j^2}}}{s.pred = s * sqrt(1 + 1/n + %
-  fo^2 / sum(fj^2))}
+  \deqn{s.pred = s \sqrt{1 + 1/n + f_0^2 / \sum{f_j^2}}}{s.pred = s * sqrt(1
+  + 1/n + fo^2 / sum(fj^2))}
 
   where \eqn{f_0}{fo} is the ensemble mean forecast anomaly that is to be
   adjusted, and \eqn{\sum{f_j^2}}{sum(fj^2)} is the sum of the squared

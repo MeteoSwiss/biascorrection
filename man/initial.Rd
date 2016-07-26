@@ -19,7 +19,7 @@ should be applied (defaults to \code{fcst})}
 \item{...}{additional arguments for compatibility with other bias correction methods}
 }
 \description{
-Computes mean de-biasing in dependence of initial conditions
+Mean De-biasing in Dependence of Initial Conditions
 }
 \details{
 This bias correction method assumes that the time-dependent mean bias depends on the

@@ -7,7 +7,7 @@
 \alias{smoothobsRecal}
 \alias{unbias}
 \alias{unbiasRecal}
-\title{Mean de-biasing}
+\title{Mean De-biasing With Smoothing of Daily Climatology}
 \usage{
 unbias(...)
 

@@ -4,8 +4,8 @@
 \name{biascorrection}
 \alias{biascorrection}
 \alias{biascorrection-package}
-\title{biascorrection.}
+\title{biascorrection}
 \description{
-biascorrection.
+biascorrection
 }
 

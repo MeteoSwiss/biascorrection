@@ -3,7 +3,7 @@
 #' @aliases trendRecal
 #' 
 #' @title
-#' Bias with linear time trend
+#' Bias With Linear Time Trend
 #' 
 #' @description
 #' Computes mean de-biasing with linear time trend

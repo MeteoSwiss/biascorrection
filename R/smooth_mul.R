@@ -1,4 +1,4 @@
-#' Multiplicative de-biasing with smoothed climatologies
+#' Multiplicative De-biasing With Smoothed Climatologies
 #' 
 #' Computes multiplicative de-biasing with loess smoothing
 #' 

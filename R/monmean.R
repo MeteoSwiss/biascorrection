@@ -1,4 +1,4 @@
-#' Compute the monthly mean
+#' Compute the Monthly Mean
 #' 
 #' @param x input array (2-d or 3-d, i.e. obs or forecasting)
 #' @param time dates of input array (2-d, e.g. lead time x years)

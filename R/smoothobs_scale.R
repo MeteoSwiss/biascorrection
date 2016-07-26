@@ -1,4 +1,4 @@
-#' Smooth mean (obs. only) de-biasing with scaling
+#' Mean De-biasing With Variance Scaling
 #' 
 #' Computes mean de-biasing with loess smoothing (obs. only) and adjusts
 #' variance

@@ -1,4 +1,4 @@
-#' Climate conserving recalibration
+#' Climate Conserving Recalibration
 #' 
 #' Climate conserving recalibration with correction factors for each lead time 
 #' without smoothing (application to daily series not recommended).
@@ -19,11 +19,11 @@
 #'   uncertainty from the signal calibration following linear regression theory.
 #'   I.e. the inflation factor \code{s.pred} is
 #'   
-#'   \deqn{.spred = s \sqrt{1 + 1/n + f_0^2 / \sum{f_j^2}}}{s.pred = s * sqrt(1 + 1/n + %
-#'   fo^2 / sum(fj^2))}
+#'   \deqn{s.pred = s \sqrt{1 + 1/n + f_0^2 / \sum{f_j^2}}}{s.pred = s * sqrt(1
+#'   + 1/n + fo^2 / sum(fj^2))}
 #'   
-#'   where \eqn{f_0}{fo} is the ensemble mean forecast anomaly that is to be
-#'   adjusted, and \eqn{\sum{f_j^2}}{sum(fj^2)} is the sum of the squared
+#'   where \eqn{f_0}{fo} is the ensemble mean forecast anomaly that is to be 
+#'   adjusted, and \eqn{\sum{f_j^2}}{sum(fj^2)} is the sum of the squared 
 #'   ensemble mean forecast anomalies in the calibration set. \eqn{n} is the 
 #'   number of forecast instances in the calibration set.
 #'   

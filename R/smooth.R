@@ -4,7 +4,7 @@
 #' @aliases unbias
 #' 
 #' @title
-#' Mean de-biasing
+#' Mean De-biasing With Smoothing of Daily Climatology
 #' 
 #' @description
 #' Computes mean de-biasing (with and without loess smoothing)

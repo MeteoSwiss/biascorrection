@@ -1,4 +1,4 @@
-#' Quantile mapping using the qmap package
+#' Quantile Mapping Using the \code{qmap} Package
 #' 
 #' Computes bias correction with quantile mapping from the qmap package
 #' 

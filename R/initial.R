@@ -1,6 +1,6 @@
 #' Bias dependent on initial condition
 #' 
-#' Computes mean de-biasing in dependence of initial conditions
+#' Mean De-biasing in Dependence of Initial Conditions
 #' 
 ##' @param fcst n x m x k array of n lead times, m forecasts, of k ensemble members
 #' @param obs n x m matrix of veryfing observations

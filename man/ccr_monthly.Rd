@@ -2,7 +2,7 @@
 % Please edit documentation in R/ccr_monthly.R
 \name{ccr_monthly}
 \alias{ccr_monthly}
-\title{Daily CCR with monthly correction factors}
+\title{Daily CCR With Monthly Correction Factors}
 \usage{
 ccr_monthly(fcst, obs, fcst.out = fcst, fc.time, fcout.time = fc.time,
   span = min(1, 31/nrow(fcst)), ...)

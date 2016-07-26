@@ -2,7 +2,7 @@
 % Please edit documentation in R/ccrlm.R
 \name{ccrlm}
 \alias{ccrlm}
-\title{Climate conserving recalibration (as regression)}
+\title{Climate Conserving Recalibration (as Regression)}
 \usage{
 ccrlm(fcst, obs, pred = NULL, fcst.out = fcst, pred.out = pred, ...)
 }

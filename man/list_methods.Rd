@@ -2,7 +2,7 @@
 % Please edit documentation in R/list_methods.R
 \name{list_methods}
 \alias{list_methods}
-\title{List calibration methods}
+\title{List Calibration Methods}
 \usage{
 list_methods()
 }

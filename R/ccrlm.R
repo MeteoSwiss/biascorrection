@@ -1,4 +1,4 @@
-#' Climate conserving recalibration (as regression)
+#' Climate Conserving Recalibration (as Regression)
 #' 
 #' Climate conserving recalibration with correction factors for each lead time 
 #' without smoothing (application to daily series not recommended).

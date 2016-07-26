@@ -2,7 +2,7 @@
 % Please edit documentation in R/monmean.R
 \name{monmean}
 \alias{monmean}
-\title{Compute the monthly mean}
+\title{Compute the Monthly Mean}
 \usage{
 monmean(x, time)
 }
@@ -12,7 +12,7 @@ monmean(x, time)
 \item{time}{dates of input array (2-d, e.g. lead time x years)}
 }
 \description{
-Compute the monthly mean
+Compute the Monthly Mean
 }
 \keyword{util}
 

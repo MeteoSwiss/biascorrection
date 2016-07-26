@@ -2,7 +2,7 @@
 % Please edit documentation in R/smoothobs_scale.R
 \name{smoothobs_scale}
 \alias{smoothobs_scale}
-\title{Smooth mean (obs. only) de-biasing with scaling}
+\title{Mean De-biasing With Variance Scaling}
 \usage{
 smoothobs_scale(fcst, obs, fcst.out = fcst, span = min(1, 31/nrow(fcst)),
   ...)

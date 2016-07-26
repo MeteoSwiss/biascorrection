@@ -2,7 +2,7 @@
 % Please edit documentation in R/sloess.R
 \name{sloess}
 \alias{sloess}
-\title{Compute loess fit}
+\title{Compute Loess Fit}
 \usage{
 sloess(x, ...)
 }

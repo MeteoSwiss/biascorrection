@@ -1,4 +1,4 @@
-#' biascorrection.
+#' biascorrection
 #' 
 #' @name biascorrection
 #' @docType package

@@ -3,7 +3,7 @@
 \name{comb}
 \alias{comb}
 \alias{combRecal}
-\title{Conditional bias with linear time trend}
+\title{Conditional Bias With Linear Time Trend}
 \usage{
 comb(...)
 

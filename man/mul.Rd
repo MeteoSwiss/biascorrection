@@ -2,7 +2,7 @@
 % Please edit documentation in R/mul.R
 \name{mul}
 \alias{mul}
-\title{Multiplicative de-biasing}
+\title{Multiplicative De-biasing}
 \usage{
 mul(fcst, obs, fcst.out = fcst, ...)
 }

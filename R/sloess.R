@@ -1,4 +1,4 @@
-#' Compute loess fit
+#' Compute Loess Fit
 #' 
 #' @description
 #' This function computes a loess fit on the given vector if more than 5 non-missing

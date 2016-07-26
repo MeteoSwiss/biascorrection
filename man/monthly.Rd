@@ -2,7 +2,7 @@
 % Please edit documentation in R/monthly.R
 \name{monthly}
 \alias{monthly}
-\title{Daily calibration with monthly mean}
+\title{Daily Calibration with Monthly Mean}
 \usage{
 monthly(fcst, obs, fcst.out = fcst, fc.time, fcout.time = fc.time, ...)
 }

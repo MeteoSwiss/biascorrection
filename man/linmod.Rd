@@ -2,7 +2,7 @@
 % Please edit documentation in R/linmod.R
 \name{linmod}
 \alias{linmod}
-\title{Linear model of the bias}
+\title{Linear Models for Bias Correction}
 \usage{
 linmod(fcst, obs, fcst.out = fcst, fc.time = NULL, fcout.time = NULL,
   formula = obs ~ fcst, recal = FALSE, smooth = nrow(fcst) > 1,
@@ -55,6 +55,8 @@ calibration uncertainties are propagated for \code{type = "prediction"}
 }
 \description{
 Compute calibration for biases that follow various linear models
+  in dependence of lead time, forecast anomalies and initialization /
+  forecast time.
 }
 \details{
 This is the workhorse for calibration methods that can be expressed

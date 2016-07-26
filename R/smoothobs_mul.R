@@ -1,4 +1,4 @@
-#' Multiplicative de-biasing with smoothed obs. climatology
+#' Multiplicative De-biasing With Smoothed Observation Climatology
 #' 
 #' Computes multiplicative de-biasing with loess smoothing (obs. only)
 #' 

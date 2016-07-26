@@ -2,7 +2,7 @@
 % Please edit documentation in R/debias.R
 \name{debias}
 \alias{debias}
-\title{Calibration of daily time series}
+\title{Calibration of Daily Time Series}
 \usage{
 debias(fcst, obs, method = "unbias", fcst.out = fcst, fc.time = NULL,
   fcout.time = fc.time, strategy = "none", ...)

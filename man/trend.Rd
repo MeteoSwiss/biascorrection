@@ -3,7 +3,7 @@
 \name{trend}
 \alias{trend}
 \alias{trendRecal}
-\title{Bias with linear time trend}
+\title{Bias With Linear Time Trend}
 \usage{
 trend(...)
 

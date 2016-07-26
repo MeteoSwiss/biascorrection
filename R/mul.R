@@ -1,4 +1,4 @@
-#' Multiplicative de-biasing
+#' Multiplicative De-biasing
 #' 
 #' Computes multiplicative de-biasing without smoothing
 #' 

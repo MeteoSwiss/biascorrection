@@ -3,7 +3,7 @@
 #' @aliases smooth_scalespread
 #' 
 #' @title
-#' Smoothed mean de-biasing with scaling
+#' Smoothed Mean De-biasing With Variance Scaling
 #' 
 #' @description
 #' Computes mean de-biasing with loess smoothing and adjusts variance. \code{smooth_scale}

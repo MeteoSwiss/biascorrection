@@ -2,7 +2,7 @@
 % Please edit documentation in R/useqmap.R
 \name{useqmap}
 \alias{useqmap}
-\title{Quantile mapping using the qmap package}
+\title{Quantile Mapping Using the \code{qmap} Package}
 \usage{
 useqmap(fcst, obs, fcst.out = fcst, nn = nrow(fcst), exact = FALSE, ...)
 }

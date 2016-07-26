@@ -2,7 +2,7 @@
 % Please edit documentation in R/smoothobs_mul.R
 \name{smoothobs_mul}
 \alias{smoothobs_mul}
-\title{Multiplicative de-biasing with smoothed obs. climatology}
+\title{Multiplicative De-biasing With Smoothed Observation Climatology}
 \usage{
 smoothobs_mul(fcst, obs, fcst.out = fcst, span = min(1, 31/nrow(fcst)), ...)
 }
