@@ -1,3 +1,7 @@
+## biascorrection 0.5.7.9004
+
+* Added safety check in `ccr` for forecasts with no variance
+
 ## biascorrection 0.5.7.9002
 
 * Unified code for `qqmap` and `fastqqmap`
