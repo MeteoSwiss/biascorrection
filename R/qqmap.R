@@ -219,7 +219,7 @@ qqmap <- function(fcst, obs, fcst.out=fcst,
       fcst.debias[ind2,,] <- fout.anom[ind2,,] * qcorr[fout.qi]
     } else {
       ## dry day correction
-      ndry <- sum(fq == min(fq))
+      ndry <- sum(fq == min(fq, na.rm=T), na.rm=T)
       if (ndry > 1){
         ## randomly assign values that fall in identical, 
         ## lowest n quantiles to quantile bins such that 

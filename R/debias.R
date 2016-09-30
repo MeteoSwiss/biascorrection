@@ -50,21 +50,21 @@ debias <- function(fcst, obs, method='unbias', fcst.out=fcst,
     fcst.out <- array(fcst.out, c(1, dim(fcst.out)))
   }
   
+  ## check for missing values
+  nisna <- sum(!is.na(obs) & apply(!is.na(fcst), 1:2, any))
+  if (nisna < 5) return(fcst.out*NA)
+
+  if (!is.null(fc.time)) stopifnot(!is.na(fc.time), !is.na(fcout.time))
+  
+  
   ## get name of bias correction function
   dfun <- try(get(method), silent=TRUE)
   if (class(dfun) == 'try-error') stop('Bias correction method has not been implemented yet')
   if (!is.null(fc.time) & !all(dim(fcout.time) == dim(fcst.out)[1:2])){
     warning('Time for fcst.out not know -- inferred from time for fcst (fc.time)')
   }
-
-  ## missing values are not tolerated in forecast
-  if (method != 'ccr'){
-    stopifnot(!is.na(fcst))
-    ## stopifnot(!is.na(fcst.out))
-    ## stopifnot(!is.na(obs))
-    if (any(is.na(obs))) warning("Missing values in observations")
-    if (!is.null(fc.time)) stopifnot(!is.na(fc.time), !is.na(fcout.time))
-  } 
+  
+  
   ## missing values are not tolerated in output for useqmap
   if (method == 'useqmap' & any(is.na(fcst.out))) stop("Missing values not tolerated in useqmap")
   if (method == 'useqmap' & any(is.na(obs))) stop("Missing values not tolerated in useqmap")
