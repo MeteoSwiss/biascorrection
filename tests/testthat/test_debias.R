@@ -5,6 +5,8 @@ fcst <- array(rnorm(1000), c(10,30,15))
 fc.time <- outer(seq(1, length=nrow(fcst)), seq(1961, length=ncol(fcst)), function(x,y) as.Date(paste(y,'01', x, sep='-')))
 na.vec <- rep(1, nrow(fcst))
 na.vec[1] <- NA
+na.vec2 <- rep(1, length(obs))
+na.vec2[rep(c(1:4, rep(NA, 26)), each=nrow(fcst))] <- NA ## throws error if less than 5 forecasts
 obs <- array(rnorm(1000), c(10, 30))
 fnames <- unclass(lsf.str(envir = asNamespace("biascorrection"), all=T))
 mnames <- setdiff(fnames, c("debias", "list_methods", "monmean", "sloess"))
@@ -13,7 +15,7 @@ fna[,1:10,4:15] <- NA
 
 test_that("Missing value handling", {
   # expect_error(debias(fcst, obs*na.vec))
-  expect_error(debias(fcst*na.vec, obs))
+  expect_error(debias(fcst*na.vec2, obs))
   # expect_error(debias(fcst, obs, fcst.out=fcst*na.vec))
   expect_error(debias(fcst, obs, method='monthly', fc.time=fc.time*na.vec))
   })

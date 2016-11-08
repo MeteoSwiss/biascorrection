@@ -1,7 +1,7 @@
 Package: biascorrection
 Title: Bias Correct Ensemble Forecasts
-Date: 2016-09-16
-Version: 0.5.7.9005
+Date: 2016-10-01
+Version: 0.5.7.9006
 Authors@R: c(person("Jonas", "Bhend", email="jonas.bhend@gmx.ch", role = c("aut", "cre")),
     person("Samuel", "Monhart", role="ctb"))
 Description: Collection of functions to calibrate daily ensemble forecasts.
@@ -16,7 +16,7 @@ Depends:
     R (>= 3.0.1),
     qmap, 
     stats,
-    easyVerification(>= 0.2.0.9005)
+    easyVerification(>= 0.3.0)
 Imports: 
     parallel
 Suggests: 

@@ -51,8 +51,9 @@ debias <- function(fcst, obs, method='unbias', fcst.out=fcst,
   }
   
   ## check for missing values
-  nisna <- sum(!is.na(obs) & apply(!is.na(fcst), 1:2, any))
-  if (nisna < 5) return(fcst.out*NA)
+  ## at least 5 forecast dates with non-missing lead time(s)
+  nisna <- apply(apply(!is.na(fcst), 1:2, any) & !is.na(obs), 1, sum)
+  if (any(nisna >= 5)) return(fcst.out*NA)
 
   if (!is.null(fc.time)) stopifnot(!is.na(fc.time), !is.na(fcout.time))
   
