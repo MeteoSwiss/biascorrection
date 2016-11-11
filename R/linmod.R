@@ -217,8 +217,8 @@ linmod <- function(fcst, obs, fcst.out=fcst,
   
   ## compute lead-time dependent inflation for recalibration
   if (recal){
-    fsd <- sqrt(rowMeans(apply(fcst, 1:2, sd, na.rm=T)**2))
-    if (smooth) fsd <- loess(sqrt(fsd) ~ log(seq(along=fsd)), span=span)$fit**2
+    fsd <- sqrt(rowMeans(apply(fcst, 1:2, sd, na.rm=T)**2, na.rm=T))
+    if (smooth) fsd[!is.na(fsd)] <- loess(sqrt(fsd) ~ log(seq(along=fsd)), span=span)$fit**2
     if (type == 'prediction'){
       ## prediction interval is tfrac*sd_pred
       # plm <- predict(f.lm, newdata=out.df, interval='prediction', level=pnorm(1), weights=1 / sd.res**2)
