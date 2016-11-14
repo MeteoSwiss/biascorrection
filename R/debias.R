@@ -44,23 +44,29 @@ debias <- function(fcst, obs, method='unbias', fcst.out=fcst,
                    ...){
   ## check dimensions of fcst, obs, and fcst.out
   fodims <- dim(fcst.out)
+  if (is.null(fodims)) fodims <- length(fcst.out)
   fdims <- dim(fcst)
+  if (is.null(fdims)) fdims <- length(fcst)
   odims <- dim(obs)
+  if (is.null(odims)) odims <- length(obs)
   ## create ensemble of 1 if only 1 ensemble member
-  if (length(fdims) == length(dim(obs))) {
+  if (length(fdims) == length(odims)) {
     fcst <- array(fcst, c(fdims, 1))
     fcst.out <- array(fcst.out, c(fodims, 1))
   }
-  if (length(fdims) == 2 & length(obs) == nrow(fcst)){
-    fcst <- array(fcst, c(1, fdims))
+  ## create one lead time for consistency
+  if (length(dim(fcst)) == 2 & length(obs) == nrow(fcst)){
+    fcst <- array(fcst, c(1, dim(fcst)))
     obs <- array(obs, c(1, length(obs)))
     fcst.out <- array(fcst.out, c(1, dim(fcst.out)))
+    if (!is.null(fc.time)) dim(fc.time) <- dim(fcst)[1:2]
+    if (!is.null(fcout.time)) dim(fcout.time) <- dim(fcst.out)[1:2]
   }
   
   ## check for missing values
   ## at least 5 forecast dates with non-missing lead time(s)
   nisna <- apply(apply(!is.na(fcst), 1:2, any) & !is.na(obs), 1, sum)
-  if (!any(nisna >= 5)) return(fcst.out*NA)
+  if (!any(nisna >= 5)) return(array(fcst.out*NA, fodims))
 
   if (!is.null(fc.time)) stopifnot(!is.na(fc.time), !is.na(fcout.time))
   
@@ -111,6 +117,6 @@ debias <- function(fcst, obs, method='unbias', fcst.out=fcst,
                                   fcout.time=if (is.null(fcout.time)) NULL else fcout.time[,ii.out,drop=FALSE],
                                   ...)
   }
-
+  
   return(array(fcst.debias, fodims))
 }

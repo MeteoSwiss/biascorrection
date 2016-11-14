@@ -26,8 +26,8 @@ test_that("Missing ensemble members for forward", {
   for (mn in setdiff(mnames, c('useqmap', 'ccrlm'))){
     print(mn)
     expect_equal(!is.na(debias(fna[,,1:3], obs, method=mn, 
-                                    fc.time=fc.time, fcst.out=fna,
-                                    strategy='forward')), 
+                               fc.time=fc.time, fcst.out=fna,
+                               strategy='forward')), 
                  !is.na(fna))
   }  
 })
@@ -36,8 +36,8 @@ test_that("Missing ensemble members for LOO crossval", {
   for (mn in setdiff(mnames, 'useqmap')){
     print(mn)
     expect_equal(!is.na(debias(fna[,,1:3], obs, method=mn, 
-                                    fc.time=fc.time, fcst.out=fna,
-                                    strategy='crossval')), 
+                               fc.time=fc.time, fcst.out=fna,
+                               strategy='crossval')), 
                  !is.na(fna))
   }  
 })
@@ -46,8 +46,8 @@ test_that("Missing ensemble members split sample", {
   for (mn in setdiff(mnames, 'useqmap')){
     print(mn)
     expect_equal(!is.na(debias(fna[,,1:3], obs, method=mn, 
-                                    fc.time=fc.time, fcst.out=fna,
-                                    strategy=list(type = 'block', blocklength=15))), 
+                               fc.time=fc.time, fcst.out=fna,
+                               strategy=list(type = 'block', blocklength=15))), 
                  !is.na(fna))
   }  
 })
@@ -57,6 +57,14 @@ test_that('Output dimensions for in-sample', {
     print(mn)
     expect_equal(dim(debias(fcst, obs, method=mn, fc.time=fc.time)), 
                  dim(fcst))
+    for (drop in c(TRUE, FALSE)){
+      expect_equal(dim(debias(fcst[,,1, drop=drop], obs, method=mn, fc.time=fc.time)),
+                   dim(fcst[,,1,drop=drop]))
+      if (! mn %in% c("comb", "combRecal", "trend", "trendRecal", "conditional", "conditionalRecal")) {
+        expect_equal(dim(debias(fcst[1,,, drop=drop], obs[1,,drop=drop], method=mn, fc.time=fc.time[1,,drop=drop])),
+                     dim(fcst[1,,, drop=drop]))
+      }
+    }
   }
   for (i in 1:ncol(fcst)){
     expect_equal(ncol(debias(fcst, obs, fcst.out=fcst[,1:i,,drop=F])), i)
@@ -68,6 +76,14 @@ test_that('Output dimensions for forward', {
     print(mn)
     expect_equal(dim(debias(fcst, obs, method=mn, fc.time=fc.time, strategy='forward')), 
                  dim(fcst))
+    for (drop in c(TRUE, FALSE)){
+      expect_equal(dim(debias(fcst[,,1, drop=drop], obs, method=mn, fc.time=fc.time, strategy='forward')),
+                   dim(fcst[,,1, drop=drop]))
+      if (! mn %in% c("comb", "combRecal", "trend", "trendRecal", "conditional", "conditionalRecal")) {
+        expect_equal(dim(debias(fcst[1,,, drop=drop], obs[1,,drop=drop], method=mn, fc.time=fc.time[1,,drop=drop], strategy='forward')),
+                     dim(fcst[1,,, drop=drop]))
+      }
+    }
   }
   for (i in 1:ncol(fcst)){
     expect_equal(ncol(debias(fcst, obs, fcst.out=fcst[,1:i,,drop=F], strategy='forward')), i)
@@ -79,6 +95,14 @@ test_that('Output dimensions for LOO crossval', {
     print(mn)
     expect_equal(dim(debias(fcst, obs, method=mn, fc.time=fc.time, strategy='crossval')), 
                  dim(fcst))
+    for (drop in c(TRUE, FALSE)){
+      expect_equal(dim(debias(fcst[,,1, drop=drop], obs, method=mn, fc.time=fc.time, strategy='crossval')),
+                   dim(fcst[,,1, drop=drop]))
+      if (! mn %in% c("comb", "combRecal", "trend", "trendRecal", "conditional", "conditionalRecal")) {
+        expect_equal(dim(debias(fcst[1,,, drop=drop], obs[1,, drop=drop], method=mn, fc.time=fc.time[1,,drop=drop], strategy='crossval')),
+                     dim(fcst[1,,, drop=drop]))
+      }
+    }
   }
   for (i in 1:ncol(fcst)){
     expect_equal(ncol(debias(fcst, obs, fcst.out=fcst[,1:i,,drop=F], strategy='crossval')), i)
@@ -90,7 +114,15 @@ test_that('Output dimensions for split sample', {
     print(mn)
     expect_equal(dim(debias(fcst, obs, method=mn, fc.time=fc.time, strategy=list(type='block', blocklength=15))), 
                  dim(fcst))
-  }
+    for (drop in c(TRUE, FALSE)){
+      expect_equal(dim(debias(fcst[,,1, drop=drop], obs, method=mn, fc.time=fc.time, strategy=list(type='block', blocklength=15))),
+                   dim(fcst[,,1, drop=drop]))
+      if (! mn %in% c("comb", "combRecal", "trend", "trendRecal", "conditional", "conditionalRecal")) {
+        expect_equal(dim(debias(fcst[1,,, drop=drop], obs[1,, drop=drop], method=mn, fc.time=fc.time[1,,drop=drop], strategy=list(type='block', blocklength=15))),
+                     dim(fcst[1,,, drop=drop]))
+      }
+    }
+  }    
   for (i in 1:ncol(fcst)){
     expect_equal(ncol(debias(fcst, obs, fcst.out=fcst[,1:i,,drop=F], strategy='crossval')), i)
   }

@@ -29,10 +29,18 @@ debiasApply <- function(fcst, obs, method='unbias', fcst.out=fcst, ..., atomic=F
   # enquire dimensions of fcst, obs, and fcst.out
   fdims <- dim(fcst)
   ndims <- length(fdims)
-  stopifnot(ndims >= nn)
   odims <- dim(obs)
+  foutdims <- fodims <- dim(fcst.out)
+  # add ensemble member of one if none present
+  if (ndims == length(odims)){
+    fcst <- array(fcst, c(fdims, 1))
+    fcst.out <- array(fcst.out, c(fodims, 1))
+  }
+  fdims <- dim(fcst)
   fodims <- dim(fcst.out)
-  stopifnot(odims == fdims[-ndims])
+  ndims <- length(fdims)
+  stopifnot(ndims >= nn)
+  stopifnot(odims == fdims[seq(along=odims)])
   stopifnot(fodims[seq(1, ndims - nn + 1)] == fdims[seq(1, ndims - nn + 1)])
   
   ## the trivial case
@@ -72,5 +80,5 @@ debiasApply <- function(fcst, obs, method='unbias', fcst.out=fcst, ..., atomic=F
     fcst.debias <- array(aperm(fout, c(3,1,2)), fodims)    
   }
  
-  return(fcst.debias)
+  return(array(fcst.debias, foutdims))
 }

@@ -216,7 +216,7 @@ linmod <- function(fcst, obs, fcst.out=fcst,
   }
   
   ## compute lead-time dependent inflation for recalibration
-  if (recal){
+  if (recal & dim(fcst)[3] > 1){
     fsd <- sqrt(rowMeans(apply(fcst, 1:2, sd, na.rm=T)**2, na.rm=T))
     if (smooth) fsd[!is.na(fsd)] <- loess(sqrt(fsd) ~ log(seq(along=fsd)), span=span)$fit**2
     if (type == 'prediction'){

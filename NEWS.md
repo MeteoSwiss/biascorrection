@@ -1,3 +1,8 @@
+## biascorrection 0.5.7.9007
+
+* Added support for ensembles of size 1
+* fixed tests for builds to pass
+
 ## biascorrection 0.5.7.9005
 
 * Allow for some missing values in `debias`
