@@ -1,3 +1,7 @@
+## biascorrection 0.5.7.9008
+
+* Added moving window mean debiasing `moving`
+
 ## biascorrection 0.5.7.9007
 
 * Added support for ensembles of size 1

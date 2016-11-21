@@ -1,26 +1,26 @@
 Package: biascorrection
 Title: Bias Correct Ensemble Forecasts
-Date: 2016-11-14
-Version: 0.5.7.9007
+Date: 2016-11-21
+Version: 0.5.7.9008
 Authors@R: c(person("Jonas", "Bhend", email="jonas.bhend@gmx.ch", role = c("aut", "cre")),
     person("Samuel", "Monhart", role="ctb"))
-Description: Collection of functions to calibrate daily ensemble forecasts.
-    This package includes a wrapper for performing bias correction in in-sample, 
-    cross-validation, moving blocks cross-validation and forward modes and also includes
-    a variety of calibration functions (regression-based, quantile mapping). The focus is 
-    on ease-of-use rather than performance when applied to large datasets. Consequently,
-    specific functions will have to be implemented separately to be applicable
-    in an operational setting. No support is provided so far to apply calibration to large
-    datasets.
-Depends: 
+Description: Collection of functions to calibrate daily ensemble forecasts. This
+    package includes a wrapper for performing bias correction in in-sample, cross-
+    validation, moving blocks cross-validation and forward modes and also includes
+    a variety of calibration functions (regression-based, quantile mapping). The
+    focus is on ease-of-use rather than performance when applied to large datasets.
+    Consequently, specific functions will have to be implemented separately to be
+    applicable in an operational setting. No support is provided so far to apply
+    calibration to large datasets.
+Depends:
     R (>= 3.0.1),
-    qmap, 
+    qmap,
     stats,
     easyVerification(>= 0.3.0)
-Imports: 
+Imports:
     parallel
-Suggests: 
-    testthat, 
+Suggests:
+    testthat,
     rmarkdown
 License: GPL-3
 LazyData: true
@@ -28,3 +28,4 @@ VignetteBuilder: rmarkdown
 Packaged: 2015-03-09 12:51:54 UTC; bhendj
 URL: http://github.com/jonasbhend/biascorrection
 BugReports: http://github.com/jonasbhend/biascorrection/issues
+RoxygenNote: 5.0.1
