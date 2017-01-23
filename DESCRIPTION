@@ -1,8 +1,9 @@
 Package: biascorrection
 Title: Bias Correct Ensemble Forecasts
-Date: 2016-11-21
-Version: 0.5.7.9008
+Date: 2017-01-22
+Version: 0.5.8
 Authors@R: c(person("Jonas", "Bhend", email="jonas.bhend@gmx.ch", role = c("aut", "cre")),
+    person("MeteoSwiss", role="cph"),
     person("Samuel", "Monhart", role="ctb"))
 Description: Collection of functions to calibrate daily ensemble forecasts. This
     package includes a wrapper for performing bias correction in in-sample, cross-
