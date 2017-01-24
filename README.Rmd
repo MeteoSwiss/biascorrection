@@ -21,8 +21,10 @@ knitr::opts_chunk$set(
 
 
 ## Introduction
-Collection of functions to calibrate daily ensemble forecasts. This package includes a wrapper for performing bias correction in in-sample, cross-validation, moving blocks cross-validation and forward modes and also includes a variety of calibration functions (regression-based, quantile mapping). The focus is on ease-of-use rather than performance when applied to large datasets. Consequently, specific functions will have to be implemented separately to be applicable in an operational setting. No support is provided so far to apply calibration to large datasets.
-    
+Collection of functions to calibrate daily ensemble forecasts. This package includes a wrapper for performing bias correction in in-sample, cross-validation, moving blocks cross-validation and forward modes and also includes a variety of calibration functions (regression-based, quantile mapping). The focus is on ease-of-use rather than performance when applied to large datasets. Consequently, specific functions will have to be implemented separately to be applicable in an operational setting. 
+
+Marginal support is provided to apply calibration functions to large datasets. Function `debiasApply` automates calibration with collections of forecasts and calibrating observations.
+
 The bias correction options include:
 ```{r, echo=TRUE, eval=TRUE}
 library(biascorrection)
