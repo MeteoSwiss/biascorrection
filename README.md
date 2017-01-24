@@ -19,27 +19,28 @@ library(biascorrection)
 #> Loading required package: easyVerification
 #> Loading required package: SpecsVerification
 list_methods()
-#>            METHODS                                    DESCRIPTION
-#> 2              ccr               Climate Conserving Recalibration
-#> 4            ccrlm           Climate Conserving Recalibration (as
-#> 5                                                     Regression)
-#> 6             comb        Conditional Bias With Linear Time Trend
-#> 7      conditional                   Bias Conditional on Forecast
-#> 11         initial            Bias dependent on initial condition
-#> 12          linmod              Linear Models for Bias Correction
-#> 15         monthly            Daily Calibration with Monthly Mean
-#> 16             mul                      Multiplicative De-biasing
-#> 17           qqmap                               Quantile Mapping
-#> 19          smooth        Mean De-biasing With Smoothing of Daily
-#> 20                                                    Climatology
-#> 21      smooth_mul        Multiplicative De-biasing With Smoothed
-#> 22                                                  Climatologies
-#> 23    smooth_scale Smoothed Mean De-biasing With Variance Scaling
-#> 24   smoothobs_mul        Multiplicative De-biasing With Smoothed
-#> 25                                        Observation Climatology
-#> 26 smoothobs_scale          Mean De-biasing With Variance Scaling
-#> 27           trend                    Bias With Linear Time Trend
-#> 28         useqmap      Quantile Mapping Using the 'qmap' Package
+#>  METHODS          DESCRIPTION                                   
+#>  ccr              Climate Conserving Recalibration              
+#>  ccrlm            Climate Conserving Recalibration (as          
+#>                   Regression)                                   
+#>  comb             Conditional Bias With Linear Time Trend       
+#>  conditional      Bias Conditional on Forecast                  
+#>  initial          Bias dependent on initial condition           
+#>  linmod           Linear Models for Bias Correction             
+#>  monthly          Daily Calibration with Monthly Mean           
+#>  moving           Moving Window Mean De-biasing                 
+#>  mul              Multiplicative De-biasing                     
+#>  qqmap            Quantile Mapping                              
+#>  smooth           Mean De-biasing With Smoothing of Daily       
+#>                   Climatology                                   
+#>  smooth_mul       Multiplicative De-biasing With Smoothed       
+#>                   Climatologies                                 
+#>  smooth_scale     Smoothed Mean De-biasing With Variance Scaling
+#>  smoothobs_mul    Multiplicative De-biasing With Smoothed       
+#>                   Observation Climatology                       
+#>  smoothobs_scale  Mean De-biasing With Variance Scaling         
+#>  trend            Bias With Linear Time Trend                   
+#>  useqmap          Quantile Mapping Using the 'qmap' Package
 ```
 
 Getting started

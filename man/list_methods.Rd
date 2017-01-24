@@ -2,12 +2,19 @@
 % Please edit documentation in R/list_methods.R
 \name{list_methods}
 \alias{list_methods}
+\alias{print.biascorrection}
 \title{List Calibration Methods}
 \usage{
 list_methods()
+
+\method{print}{biascorrection}(df)
+}
+\arguments{
+\item{df}{data frame of methods to be used with \code{\link{debias}}}
 }
 \description{
-List calibration methods available in \code{biascorrection}
+\code{list_methods} lists calibration methods available in \code{biascorrection}
+and \code{print.biascorrection} is used to nicely format these for display.
 }
 \examples{
 list_methods()

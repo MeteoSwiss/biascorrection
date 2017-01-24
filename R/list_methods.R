@@ -24,7 +24,7 @@ list_methods <- function(){
 
 #' @rdname list_methods
 #' @param df data frame of methods to be used with \code{\link{debias}}
-
+#' @export
 print.biascorrection <- function(df){
   df$METHODS <- paste0(df$METHODS, ' ')
   class(df) <- 'data.frame'
