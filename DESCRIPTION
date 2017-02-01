@@ -1,7 +1,7 @@
 Package: biascorrection
 Title: Bias Correct Ensemble Forecasts
-Date: 2017-01-31
-Version: 0.5.9.9000
+Date: 2017-02-01
+Version: 0.5.10
 Authors@R: c(person("Jonas", "Bhend", email="jonas.bhend@gmx.ch", role = c("aut", "cre")),
     person("MeteoSwiss", role="cph"),
     person("Samuel", "Monhart", role="ctb"))
