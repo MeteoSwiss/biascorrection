@@ -3,6 +3,7 @@
 S3method(print,biascorrection)
 export(debias)
 export(debiasApply)
+export(iqqmap)
 export(list_methods)
 export(monmean)
 import(easyVerification)

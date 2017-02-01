@@ -9,7 +9,7 @@ na.vec[1] <- NA
 na.vec2 <- rep(1, length(obs))
 na.vec2[rep(c(1:4, rep(NA, 26)), each=nrow(fcst))] <- NA ## throws error if less than 5 forecasts
 fnames <- unclass(lsf.str(envir = asNamespace("biascorrection"), all=T))
-mnames <- setdiff(fnames, c("debias", "list_methods", "monmean", "sloess"))
+mnames <- setdiff(fnames, c("debias", "list_methods", "monmean", "sloess", "iqqmap", "print.biascorrection"))
 fna <- array(rnorm(1000), c(10, 30, 15))
 fna[,1:10,4:15] <- NA
 

@@ -16,11 +16,7 @@
 #'@param obs n x m matrix of veryfing observations
 #'@param fcst.out array of forecast values to which bias correction should be 
 #'  applied (defaults to \code{fcst})
-#'@param minprob probability boundary for quantiles. Quantiles from 
-#'  \code{minprob} to \code{1 - minprob} are estimated. Defaults to \code{0.01} 
-#'  for percentiles from 1 to 99.
-#'@param nprob number of quantiles to estimate correction factors. By default 
-#'  \code{min((1 - minprob) / minprob, 201)} quantiles are estimated.
+#'@param prob quantiles for which quantile correction is estimated
 #'@param window width of window to be used for quantile mapping
 #'@param jump minimum number of days the moving quantile window jumps (see 
 #'  below)
@@ -113,23 +109,21 @@
 #' 
 #'@keywords util
 qqmap <- function(fcst, obs, fcst.out=fcst, 
-                  minprob=0.01, nprob=min((1 - minprob)/minprob, 201),
+                  prob=seq(0.01, 0.99, 0.01),
                   window=min(nrow(fcst), 31), jump=1,
                   multiplicative=FALSE, lower.bound=NULL, 
                   anomalies=FALSE, debias=FALSE,
                   smoothobs=TRUE, smooth=smoothobs,
                   span=min(91/nrow(fcst), 1), ...){
-
+  
   ## check input data
   stopifnot(is.matrix(obs), is.array(fcst), dim(fcst)[1:2] == dim(obs))
   ## number of lead times
   nlead <- nrow(fcst)
-
-  ## check probability inputs
-  stopifnot(minprob < 0.5, minprob > 0, nprob >=1)
-  ## set nodes for quantile correction
-  prob <- seq(minprob, 1 - minprob, length=nprob)
   
+  ## check probability inputs
+  stopifnot(min(prob) >= 0, max(prob) <= 1)
+
   ## check window and jump
   stopifnot(window > 0, jump <= window)
   window <- min(window, nlead)
@@ -176,7 +170,7 @@ qqmap <- function(fcst, obs, fcst.out=fcst,
       fout.anom <- fout.anom - c(fout.ens)
     }    
   }
-
+  
   ## start main quantile mapping algorithm
   
   ## initialize output
@@ -200,36 +194,14 @@ qqmap <- function(fcst, obs, fcst.out=fcst,
     ind <- seq(mini[i], maxi[i])
     ## lead times to be bias corrected
     ind2 <- seq(mino[i], maxo[i])
-
-    ## compute quantiles
-    oq <- quantile(o.anom[ind,], prob=prob, type=8, na.rm=T)
-    fq <- quantile(f.anom[ind,,], prob=prob, type=8, na.rm=T)
-
-    ## find boundaries in between quantiles
-    fqbnds <- sort(fq[-length(fq)] + 0.5*diff(fq))
     
-    ## get the probability of the output fcst given the forecast
-    ## i.e. the reverse quantile function
-    ## assume constant correction by discrete quantiles
-    fout.qi <- findInterval(fout.anom[ind2,,], fqbnds) + 1
-    if (multiplicative){
-      qcorr <- oq/fq
-      qcorr[fq == 0 & oq != 0] <- 1
-      qcorr[fq == 0 & oq == 0] <- 0
-      fcst.debias[ind2,,] <- fout.anom[ind2,,] * qcorr[fout.qi]
-    } else {
-      ## dry day correction
-      ndry <- sum(fq == min(fq, na.rm=T), na.rm=T)
-      if (ndry > 1){
-        ## randomly assign values that fall in identical, 
-        ## lowest n quantiles to quantile bins such that 
-        ## these are equally populated
-        ffi <- !is.na(fout.qi) & fout.qi == ndry
-        ffsample <- rep(1:ndry, ceiling(sum(ffi)/ndry))
-        fout.qi[ffi] <- sample(ffsample, sum(ffi), replace=FALSE)
-      }
-      fcst.debias[ind2,,] <- fout.anom[ind2,,] - (fq - oq)[fout.qi]    
-    }      
+    ## apply elementary quantile mapping function
+    fcst.debias[ind2,,] <- iqqmap(fcst=f.anom[ind,,],
+                                  obs=o.anom[ind,],
+                                  fcst.out=fout.anom[ind2,,],
+                                  prob=prob,
+                                  multiplicative=multiplicative)  
+      
   } ## end of loop on lead times
   
   ## postprocess output
@@ -246,6 +218,7 @@ qqmap <- function(fcst, obs, fcst.out=fcst,
       fcst.debias <- fcst.debias * o.clim
     } else {
       fcst.debias <- fcst.debias + o.clim      
+      
     }
   }
   
@@ -254,6 +227,44 @@ qqmap <- function(fcst, obs, fcst.out=fcst,
   }
   
   return(fcst.debias)
+}
+
+
+#' @rdname qqmap
+#' @export
+iqqmap <- function(fcst, obs, fcst.out = fcst, 
+                   prob=prob, multiplicative=FALSE) {
+  
+  ## compute quantiles
+  oq <- quantile(obs, prob=prob, type=8, na.rm=T)
+  fq <- quantile(fcst, prob=prob, type=8, na.rm=T)
+  
+  ## find boundaries in between quantiles
+  fqbnds <- sort(fq[-length(fq)] + 0.5*diff(fq))
+  
+  ## get the probability of the output fcst given the forecast
+  ## i.e. the reverse quantile function
+  ## assume constant correction by discrete quantiles
+  fout.qi <- findInterval(fcst.out, fqbnds) + 1
+  if (multiplicative){
+    qcorr <- oq/fq
+    qcorr[fq == 0 & oq != 0] <- 1
+    qcorr[fq == 0 & oq == 0] <- 0
+    fout <- fcst.out * qcorr[fout.qi]
+  } else {
+    ## dry day correction
+    ndry <- sum(fq == min(fq, na.rm=T), na.rm=T)
+    if (ndry > 1){
+      ## randomly assign values that fall in identical, 
+      ## lowest n quantiles to quantile bins such that 
+      ## these are equally populated
+      ffi <- !is.na(fout.qi) & fout.qi == ndry
+      ffsample <- rep(1:ndry, ceiling(sum(ffi)/ndry))
+      fout.qi[ffi] <- sample(ffsample, sum(ffi), replace=FALSE)
+    }
+    fout <- fcst.out - (fq - oq)[fout.qi]    
+  }      
+  return(fout) 
 }
 
 #'@rdname qqmap

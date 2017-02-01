@@ -3,16 +3,18 @@
 \name{qqmap}
 \alias{fastqqmap}
 \alias{fastqqmap_mul}
+\alias{iqqmap}
 \alias{qqmap}
 \alias{qqmap_debias}
 \alias{qqmap_mul}
 \title{Quantile Mapping}
 \usage{
-qqmap(fcst, obs, fcst.out = fcst, minprob = 0.01, nprob = min((1 -
-  minprob)/minprob, 201), window = min(nrow(fcst), 31), jump = 1,
-  multiplicative = FALSE, lower.bound = NULL, anomalies = FALSE,
-  debias = FALSE, smoothobs = TRUE, smooth = smoothobs,
-  span = min(91/nrow(fcst), 1), ...)
+qqmap(fcst, obs, fcst.out = fcst, prob = seq(0.01, 0.99, 0.01),
+  window = min(nrow(fcst), 31), jump = 1, multiplicative = FALSE,
+  lower.bound = NULL, anomalies = FALSE, debias = FALSE,
+  smoothobs = TRUE, smooth = smoothobs, span = min(91/nrow(fcst), 1), ...)
+
+iqqmap(fcst, obs, fcst.out = fcst, prob = prob, multiplicative = FALSE)
 
 qqmap_mul(..., multiplicative = TRUE)
 
@@ -32,12 +34,7 @@ members}
 \item{fcst.out}{array of forecast values to which bias correction should be 
 applied (defaults to \code{fcst})}
 
-\item{minprob}{probability boundary for quantiles. Quantiles from 
-\code{minprob} to \code{1 - minprob} are estimated. Defaults to \code{0.01} 
-for percentiles from 1 to 99.}
-
-\item{nprob}{number of quantiles to estimate correction factors. By default 
-\code{min((1 - minprob) / minprob, 201)} quantiles are estimated.}
+\item{prob}{quantiles for which quantile correction is estimated}
 
 \item{window}{width of window to be used for quantile mapping}
 
