@@ -7,10 +7,12 @@
 \usage{
 list_methods()
 
-\method{print}{biascorrection}(df)
+\method{print}{biascorrection}(x, ...)
 }
 \arguments{
-\item{df}{data frame of methods to be used with \code{\link{debias}}}
+\item{x}{data frame of methods to be used with \code{\link{debias}}}
+
+\item{...}{additional parameters for consistency with generic method}
 }
 \description{
 \code{list_methods} lists calibration methods available in \code{biascorrection}

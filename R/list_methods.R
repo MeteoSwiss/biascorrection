@@ -23,10 +23,11 @@ list_methods <- function(){
 }
 
 #' @rdname list_methods
-#' @param df data frame of methods to be used with \code{\link{debias}}
+#' @param x data frame of methods to be used with \code{\link{debias}}
+#' @param ... additional parameters for consistency with generic method
 #' @export
-print.biascorrection <- function(df){
-  df$METHODS <- paste0(df$METHODS, ' ')
-  class(df) <- 'data.frame'
-  print.data.frame(df, right=FALSE, row.names=FALSE)
+print.biascorrection <- function(x, ...){
+  x$METHODS <- paste0(x$METHODS, ' ')
+  class(x) <- 'data.frame'
+  print.data.frame(x, right=FALSE, row.names=FALSE)
 }
