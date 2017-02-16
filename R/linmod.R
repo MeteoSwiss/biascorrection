@@ -142,6 +142,10 @@ linmod <- function(fcst, obs, fcst.out=fcst,
   
   type <- match.arg(type)
   
+  ## change formula environment to fix problem with weights in lm
+  ## http://stackoverflow.com/questions/27261232
+  environment(formula) <- environment()
+  
   ## internal function
   fdate <- function(x,y){
     as.Date(paste0(y,'-01-01')) + x - 1
@@ -196,9 +200,10 @@ linmod <- function(fcst, obs, fcst.out=fcst,
     if (bleach){
       sd.res <- apply(array(in.df2$obs - predict(f.lm, newdata=in.df2), dim(obs[-1,])), 1, sd)
       if (smooth) sd.res <- exp(loess(log(sd.res) ~ log(seq(along=sd.res)))$fit)
-      in.df2[['ww']] <- 1 / sd.res**2
       sd.res <- sd.res[c(seq(along=sd.res), length(sd.res))]
-      f.lm <- lm(formula, in.df2, weights=ww)      
+      f.lm <- lm(formula = formula, 
+                 data = in.df2, 
+                 weights=rep(1/sd.res**2, length.out=nrow(in.df2)))      
     } else {
       sd.res <- 1
     }    
@@ -208,8 +213,10 @@ linmod <- function(fcst, obs, fcst.out=fcst,
       sd.res <- apply(array(f.lm$res, dim(obs)), 1, sd)
       sd.res <- pmax(sd.res, 0.01*max(sd.res, na.rm=T))
       if (smooth) sd.res <- loess(sqrt(sd.res) ~ log(seq(along=sd.res)))$fit**2
-      in.df[['ww']] <- 1 / sd.res**2
-      f.lm <- lm(formula, in.df, weights=ww)
+      ## in.df[['ww']] <- 1 / sd.res**2
+      f.lm <- lm(formula = formula, 
+                 data=in.df, 
+                 weights=rep(1 / sd.res**2, length.out=nrow(in.df)))
     } else {
       sd.res <- rep(1, nrow(obs))
     }

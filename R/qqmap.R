@@ -31,6 +31,8 @@
 #'@param span the smoothing bandwidth (see \code{\link{loess}})
 #'@param anomalies logical, should quantile mapping be applied to forecast and 
 #'  observed anomalies (from forecast ensemble mean) only (see below)?
+#'@param type an integer between 1 and 9 selecting one of the nine quantile
+#'  algorithms detailed below to be used (see \code{\link[stats]{quantile}}).
 #'@param ... additional arguments for compatibility with other bias correction 
 #'  methods
 #'  
@@ -114,7 +116,7 @@ qqmap <- function(fcst, obs, fcst.out=fcst,
                   multiplicative=FALSE, lower.bound=NULL, 
                   anomalies=FALSE, debias=FALSE,
                   smoothobs=TRUE, smooth=smoothobs,
-                  span=min(91/nrow(fcst), 1), ...){
+                  span=min(91/nrow(fcst), 1), type=8, ...){
   
   ## check input data
   stopifnot(is.matrix(obs), is.array(fcst), dim(fcst)[1:2] == dim(obs))
@@ -200,7 +202,8 @@ qqmap <- function(fcst, obs, fcst.out=fcst,
                                   obs=o.anom[ind,],
                                   fcst.out=fout.anom[ind2,,],
                                   prob=prob,
-                                  multiplicative=multiplicative)  
+                                  multiplicative=multiplicative, 
+                                  type=type)  
       
   } ## end of loop on lead times
   
@@ -233,11 +236,12 @@ qqmap <- function(fcst, obs, fcst.out=fcst,
 #' @rdname qqmap
 #' @export
 iqqmap <- function(fcst, obs, fcst.out = fcst, 
-                   prob=prob, multiplicative=FALSE) {
+                   prob=prob, multiplicative=FALSE, 
+                   type=8) {
   
   ## compute quantiles
-  oq <- quantile(obs, prob=prob, type=8, na.rm=T)
-  fq <- quantile(fcst, prob=prob, type=8, na.rm=T)
+  oq <- quantile(obs, prob=prob, type=type, na.rm=T)
+  fq <- quantile(fcst, prob=prob, type=type, na.rm=T)
   
   ## find boundaries in between quantiles
   fqbnds <- sort(fq[-length(fq)] + 0.5*diff(fq))

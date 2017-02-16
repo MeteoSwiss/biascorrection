@@ -12,9 +12,11 @@
 qqmap(fcst, obs, fcst.out = fcst, prob = seq(0.01, 0.99, 0.01),
   window = min(nrow(fcst), 31), jump = 1, multiplicative = FALSE,
   lower.bound = NULL, anomalies = FALSE, debias = FALSE,
-  smoothobs = TRUE, smooth = smoothobs, span = min(91/nrow(fcst), 1), ...)
+  smoothobs = TRUE, smooth = smoothobs, span = min(91/nrow(fcst), 1),
+  type = 8, ...)
 
-iqqmap(fcst, obs, fcst.out = fcst, prob = prob, multiplicative = FALSE)
+iqqmap(fcst, obs, fcst.out = fcst, prob = prob, multiplicative = FALSE,
+  type = 8)
 
 qqmap_mul(..., multiplicative = TRUE)
 
@@ -58,6 +60,9 @@ smoothed climatology (only additive)?}
 \item{smooth}{logical, should forecast climatology be smoothed?}
 
 \item{span}{the smoothing bandwidth (see \code{\link{loess}})}
+
+\item{type}{an integer between 1 and 9 selecting one of the nine quantile
+algorithms detailed below to be used (see \code{\link[stats]{quantile}}).}
 
 \item{...}{additional arguments for compatibility with other bias correction 
 methods}

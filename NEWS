@@ -1,3 +1,8 @@
+## Changes in Version 0.5.11
+
+* Made quantile algorithm choice explicit
+* Fixed bug in documentation of `linmod`
+
 ## Changes in Version 0.5.10
 
 * Isolated quantile mapping algorithm in qqmap
