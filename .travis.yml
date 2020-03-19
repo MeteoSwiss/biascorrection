@@ -1,9 +1,8 @@
-language: r
-warnings_are_errors: true
-sudo: required
+# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
-r_github_packages:
-  - jimhester/covr
+language: R
+cache: packages
 
 after_success:
-  - Rscript -e 'covr::codecov()'
+    - Rscript -e 'covr::codecov()'
+

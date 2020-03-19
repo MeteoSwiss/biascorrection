@@ -1,7 +1,7 @@
 Package: biascorrection
 Title: Bias Correct Ensemble Forecasts
-Date: 2017-02-16
-Version: 0.5.11
+Date: 2020-03-19
+Version: 0.5.12
 Authors@R: c(person("Jonas", "Bhend", email="jonas.bhend@gmx.ch", role = c("aut", "cre")),
     person("MeteoSwiss", role="cph"),
     person("Samuel", "Monhart", role="ctb"))
@@ -22,7 +22,8 @@ Imports:
     parallel
 Suggests:
     testthat,
-    rmarkdown
+    rmarkdown,
+    covr
 License: GPL-3
 LazyData: true
 VignetteBuilder: rmarkdown

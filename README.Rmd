@@ -15,8 +15,11 @@ knitr::opts_chunk$set(
 # biascorrection
 
 
-[![Build Status](https://travis-ci.org/jonasbhend/biascorrection.svg?branch=master)](https://travis-ci.org/jonasbhend/biascorrection)
+<!-- badges: start -->
+[![Travis build status](https://travis-ci.org/jonasbhend/biascorrection.svg?branch=master)](https://travis-ci.org/jonasbhend/biascorrection)
 [![codecov](https://img.shields.io/codecov/c/github/jonasbhend/biascorrection.svg)](https://codecov.io/github/jonasbhend/biascorrection) 
+[![Codecov test coverage](https://codecov.io/gh/jonasbhend/biascorrection/branch/master/graph/badge.svg)](https://codecov.io/gh/jonasbhend/biascorrection?branch=master)
+<!-- badges: end -->
 
 
 
