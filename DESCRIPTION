@@ -22,11 +22,12 @@ Imports:
     parallel
 Suggests:
     testthat,
-    rmarkdown,
-    covr
+    covr,
+    knitr,
+    rmarkdown
 License: GPL-3
 LazyData: true
-VignetteBuilder: rmarkdown
+VignetteBuilder: knitr
 Packaged: 2015-03-09 12:51:54 UTC; bhendj
 URL: http://github.com/jonasbhend/biascorrection
 BugReports: http://github.com/jonasbhend/biascorrection/issues

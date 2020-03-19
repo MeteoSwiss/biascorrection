@@ -262,7 +262,7 @@ fcal[['under']][['raw']] <- array(rnorm(nlead*nfcst*nens, sd=2),
                                   c(nlead, nfcst, nens)) + c(signal)
 
 ## calibrate forecast using different methods
-for (m in c(methods, 'qqmap', 'ccr', 'smoothccr')){
+for (m in c(methods, 'qqmap', 'ccr')){
   for (conf in c('over', 'under')){
     fcal[[conf]][[m]] <- debias(fcal[[conf]][['raw']], obs, 
                                 method=m, fc.time=fc.time, anomalies=TRUE)
