@@ -1,6 +1,3 @@
-library(biascorrection)
-context("CCR")
-
 fcst <- array(1, c(1, 10, 11))
 obs <- t(rnorm(10))
 
