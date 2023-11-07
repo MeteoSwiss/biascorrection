@@ -14,11 +14,11 @@ Description: Collection of functions to calibrate daily ensemble forecasts. This
     applicable in an operational setting. No support is provided so far to apply
     calibration to large datasets.
 Depends:
-    R (>= 3.0.1),
+    R (>= 3.0.1)
+Imports:
     qmap,
     stats,
-    easyVerification (>= 0.3.0)
-Imports:
+    easyVerification (>= 0.3.0),
     parallel
 Suggests:
     testthat,
@@ -29,6 +29,7 @@ License: GPL-3
 LazyData: true
 VignetteBuilder: knitr
 Packaged: 2015-03-09 12:51:54 UTC; bhendj
-URL: http://github.com/jonasbhend/biascorrection
-BugReports: http://github.com/jonasbhend/biascorrection/issues
-RoxygenNote: 5.0.1
+URL: http://github.com/MeteoSwiss/biascorrection
+BugReports: http://github.com/MeteoSwiss/biascorrection/issues
+RoxygenNote: 7.2.3
+Encoding: UTF-8
