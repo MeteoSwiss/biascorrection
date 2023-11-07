@@ -68,4 +68,3 @@ f.sd2 / f.rmse2 ## can be close to one
 
 }
 \keyword{util}
-

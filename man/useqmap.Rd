@@ -71,12 +71,11 @@ minprob <- 0.05
 abline(v=quantile(obs[,1:20], type=8, prob=c(minprob, 1-minprob)), 
   lwd=2, lty=3)
 text(quantile(obs[,1:20], type=8, 1-minprob) + 0.1, par('usr')[3] + 0.5, 
-  'Extrapolated\\ncorrection', adj=c(0,0), cex=0.67)
+  'Extrapolated\ncorrection', adj=c(0,0), cex=0.67)
 text(quantile(obs[,1:20], type=8, 1-minprob) - 0.1, par('usr')[3] + 0.5, 
-  'Explicit quantile\\ncorrection', adj=c(1,0), cex=0.67)
+  'Explicit quantile\ncorrection', adj=c(1,0), cex=0.67)
 legend('topleft', c('No bias correction', 'useqmap (RQUANT)'), 
   lwd=2, col=1:2, inset=0.05)
 
 }
 \keyword{util}
-

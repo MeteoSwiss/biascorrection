@@ -15,4 +15,3 @@ monmean(x, time)
 Compute the Monthly Mean
 }
 \keyword{util}
-

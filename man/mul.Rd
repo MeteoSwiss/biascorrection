@@ -38,4 +38,3 @@ fcst.debias <- biascorrection:::mul(fcst[,1:20,], obs[,1:20], fcst.out=fcst)
 smoothobs_mul smooth_mul unbias
 }
 \keyword{util}
-

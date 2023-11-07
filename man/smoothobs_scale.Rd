@@ -4,8 +4,7 @@
 \alias{smoothobs_scale}
 \title{Mean De-biasing With Variance Scaling}
 \usage{
-smoothobs_scale(fcst, obs, fcst.out = fcst, span = min(1, 31/nrow(fcst)),
-  ...)
+smoothobs_scale(fcst, obs, fcst.out = fcst, span = min(1, 31/nrow(fcst)), ...)
 }
 \arguments{
 \item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble
@@ -42,4 +41,3 @@ fcst.debias <- biascorrection:::smoothobs_scale(fcst[,1:20,], obs[,1:20], fcst.o
 
 }
 \keyword{util}
-

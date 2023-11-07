@@ -22,4 +22,3 @@ and \code{print.biascorrection} is used to nicely format these for display.
 list_methods()
 
 }
-

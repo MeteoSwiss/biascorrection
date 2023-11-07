@@ -3,9 +3,4 @@
 \docType{package}
 \name{biascorrection}
 \alias{biascorrection}
-\alias{biascorrection-package}
 \title{biascorrection}
-\description{
-biascorrection
-}
-

@@ -4,11 +4,22 @@
 \alias{linmod}
 \title{Linear Models for Bias Correction}
 \usage{
-linmod(fcst, obs, fcst.out = fcst, fc.time = NULL, fcout.time = NULL,
-  formula = obs ~ fcst, recal = FALSE, smooth = nrow(fcst) > 1,
-  smoothobs = nrow(fcst) > 1, span = min(1, 91/nrow(fcst)),
-  bleach = nrow(fcst) > 1, differences = FALSE, type = c("calibration",
-  "prediction"), ...)
+linmod(
+  fcst,
+  obs,
+  fcst.out = fcst,
+  fc.time = NULL,
+  fcout.time = NULL,
+  formula = obs ~ fcst,
+  recal = FALSE,
+  smooth = nrow(fcst) > 1,
+  smoothobs = nrow(fcst) > 1,
+  span = min(1, 91/nrow(fcst)),
+  bleach = nrow(fcst) > 1,
+  differences = FALSE,
+  type = c("calibration", "prediction"),
+  ...
+)
 }
 \arguments{
 \item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble 
@@ -154,4 +165,3 @@ mean')
 
 }
 \keyword{util}
-

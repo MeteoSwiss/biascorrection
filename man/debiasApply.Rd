@@ -4,8 +4,7 @@
 \alias{debiasApply}
 \title{Apply Bias Correction to Large Ensemble Forecast Data Sets}
 \usage{
-debiasApply(fcst, obs, method = "unbias", fcst.out = fcst, ...,
-  atomic = FALSE)
+debiasApply(fcst, obs, method = "unbias", fcst.out = fcst, ..., atomic = FALSE)
 }
 \arguments{
 \item{fcst}{array of ensemble forecast data with arbitrary dimensions. The 
@@ -32,4 +31,3 @@ This wrapper allows to apply the bias correction methods
   observation data.
 }
 \keyword{util}
-

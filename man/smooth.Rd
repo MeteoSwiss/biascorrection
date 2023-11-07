@@ -2,11 +2,11 @@
 % Please edit documentation in R/smooth.R
 \name{smooth}
 \alias{smooth}
-\alias{smoothRecal}
-\alias{smoothobs}
-\alias{smoothobsRecal}
 \alias{unbias}
+\alias{smoothobs}
 \alias{unbiasRecal}
+\alias{smoothobsRecal}
+\alias{smoothRecal}
 \title{Mean De-biasing With Smoothing of Daily Climatology}
 \usage{
 unbias(...)
@@ -28,4 +28,3 @@ smoothRecal(...)
 Computes mean de-biasing (with and without loess smoothing)
 }
 \keyword{util}
-

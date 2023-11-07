@@ -4,8 +4,16 @@
 \alias{debias}
 \title{Calibration of Daily Time Series}
 \usage{
-debias(fcst, obs, method = "unbias", fcst.out = fcst, fc.time = NULL,
-  fcout.time = fc.time, strategy = "none", ...)
+debias(
+  fcst,
+  obs,
+  method = "unbias",
+  fcst.out = fcst,
+  fc.time = NULL,
+  fcout.time = fc.time,
+  strategy = "none",
+  ...
+)
 }
 \arguments{
 \item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble
@@ -51,4 +59,3 @@ range(rowMeans(obs, dims=1) - rowMeans(fcst.debias, dims=1))
 
 }
 \keyword{util}
-

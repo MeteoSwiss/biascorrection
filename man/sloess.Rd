@@ -16,4 +16,3 @@ This function computes a loess fit on the given vector if more than 5 non-missin
 values are available. Else, the raw values are returned.
 }
 \keyword{util}
-

@@ -37,4 +37,3 @@ obs[,1:20], fcst.out=fcst, fc.time=fc.time[,1:20], fcout.time=fc.time, span=0.5)
 linmod
 }
 \keyword{util}
-

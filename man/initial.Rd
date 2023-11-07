@@ -43,4 +43,3 @@ obs[,1:20], fcst.out=fcst, fc.time=fc.time, span=0.5)
 
 }
 \keyword{util}
-

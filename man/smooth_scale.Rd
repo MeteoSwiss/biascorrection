@@ -7,8 +7,13 @@
 \usage{
 smooth_scale(fcst, obs, fcst.out = fcst, span = min(1, 31/nrow(fcst)), ...)
 
-smooth_scalespread(fcst, obs, fcst.out = fcst, span = min(1, 31/nrow(fcst)),
-  ...)
+smooth_scalespread(
+  fcst,
+  obs,
+  fcst.out = fcst,
+  span = min(1, 31/nrow(fcst)),
+  ...
+)
 }
 \arguments{
 \item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble members}
@@ -43,4 +48,3 @@ fcst.debias <- biascorrection:::smooth_scale(fcst[,1:20,], obs[,1:20], fcst.out=
 
 }
 \keyword{util}
-

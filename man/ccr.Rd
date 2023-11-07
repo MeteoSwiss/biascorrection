@@ -57,4 +57,3 @@ Weigel, A., M. Liniger and C. Appenzeller (2008). Seasonal
   \emph{Monthly Weather Review}, 137(4), 1460-1479.
 }
 \keyword{util}
-

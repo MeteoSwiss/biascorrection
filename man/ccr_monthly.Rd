@@ -4,8 +4,15 @@
 \alias{ccr_monthly}
 \title{Daily CCR With Monthly Correction Factors}
 \usage{
-ccr_monthly(fcst, obs, fcst.out = fcst, fc.time, fcout.time = fc.time,
-  span = min(1, 31/nrow(fcst)), ...)
+ccr_monthly(
+  fcst,
+  obs,
+  fcst.out = fcst,
+  fc.time,
+  fcout.time = fc.time,
+  span = min(1, 31/nrow(fcst)),
+  ...
+)
 }
 \arguments{
 \item{fcst}{n x m x k array of n lead times, m forecasts, of k ensemble members}
@@ -39,4 +46,3 @@ fcst.mondebias <- monmean(fcst.debias, fc.time)
 
 }
 \keyword{util}
-
