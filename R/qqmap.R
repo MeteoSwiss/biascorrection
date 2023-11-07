@@ -85,10 +85,10 @@
 #'   c(signal) * (runif(length(signal)*nens) > 0.1))
 #' obs <- array(rgamma(length(signal), shape=3, scale=1), dim(signal)) *
 #'   signal * (runif(length(signal)) > 0.3)
-#' fcst$qqmap <- biascorrection:::qqmap(fcst$raw[,1:20,], 
-#'   obs[,1:20], fcst.out=fcst$raw, lower.bound=0)
-#' fcst$qqmap_mul <- biascorrection:::qqmap_mul(fcst$raw[,1:20,], 
-#'   obs[,1:20], fcst.out=fcst$raw, lower.bound=0)
+#' fcst$qqmap <- debias(fcst$raw[,1:20,], obs[,1:20], 
+#'   method = "qqmap", fcst.out=fcst$raw, lower.bound=0)
+#' fcst$qqmap_mul <- debias(fcst$raw[,1:20,], obs[,1:20], 
+#'   method = "qqmap_mul", fcst.out=fcst$raw, lower.bound=0)
 #' oprob <- (seq(obs[,21:30]) - 1/3) / (length(obs[,21:30]) + 1/3)
 #' oldpar <- par(no.readonly=TRUE)
 #' par(mfrow=c(1,2))
